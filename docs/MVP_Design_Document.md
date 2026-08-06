@@ -6,7 +6,7 @@
 * **MVP 核心目标**：
   1. 验证“解析 DOM -> 归一化 JSON -> 重新渲染 UI”技术路径的可行性与稳定性。
   2. 验证“完全隐藏原 DOM，在 Shadow DOM 中接管全局渲染”的交互流畅度与性能开销。
-  3. 以极小的开发成本，在 2 个典型平台（知乎、Twitter/X）上提供一致的极简阅读体验。
+  3. 以极小的开发成本，在 4 个典型平台（知乎、Twitter/X、V2EX、Linux DO）上提供一致的极简阅读体验。
 
 ---
 
@@ -14,9 +14,9 @@
 
 | 功能模块 | MVP 实施范围 | 非 MVP 范围 (暂不实现) |
 | :--- | :--- | :--- |
-| **支持平台** | 知乎（回答/文章流）、Twitter/X（Home Feed） | B站、YouTube、Reddit、小红书等 |
+| **支持平台** | 知乎（回答/文章流）、Twitter/X（Home Feed）、V2EX（主题列表）、Linux DO（话题列表） | B站、YouTube、Reddit、小红书等 |
 | **渲染主题** | **1 款默认主题**：Notion 风格（极简、无框、黑白灰高留白） | 主题市场、自定义 CSS/JS、多主题切换 |
-| **数据解析** | 静态前端选择器适配器 (ZhihuAdapter, TwitterAdapter) | AI 自动解析、云端规则库更新 |
+| **数据解析** | 静态前端选择器适配器 (ZhihuAdapter, TwitterAdapter, V2exAdapter, LinuxDoAdapter) | AI 自动解析、云端规则库更新 |
 | **核心交互** | 基础滚动、图片预览、原网页点赞/评论跳转代理；Popup 开关与统一视图内“查看原页面”入口 | 完全接管评论区输入、复杂富文本编辑、视频内嵌播放 |
 | **数据持久化**| 本地存储 (chrome.storage.local) 记录启用状态与主题偏好 | 云端同步、知识库导出 (Notion/Obsidian) |
 
@@ -31,7 +31,7 @@
                                │ 1. MutationObserver 监听卡片
 ┌──────────────────────────────▼──────────────────────────────┐
 │                     Adapter 转换层                          │
-│     (ZhihuAdapter.ts / TwitterAdapter.ts)                   │
+│  (Zhihu / Twitter / V2EX / Linux DO Adapter)               │
 └──────────────────────────────┬──────────────────────────────┘
                                │ 2. 输出 Normalized FeedItem
 ┌──────────────────────────────▼──────────────────────────────┐
@@ -124,7 +124,9 @@ onefeed-extension/
 │   │   ├── adapters/           # 站点解析适配器
 │   │   │   ├── base.ts         # BaseAdapter 抽象类
 │   │   │   ├── zhihu.ts        # 知乎 DOM 提取
-│   │   │   └── twitter.ts      # Twitter DOM 提取
+│   │   │   ├── twitter.ts      # Twitter DOM 提取
+│   │   │   ├── v2ex.ts         # V2EX DOM 提取
+│   │   │   └── linuxDo.ts      # Linux DO DOM 提取
 │   ├── renderer/               # React 统一渲染组件
 │   │   ├── App.tsx             # 视图 Shell
 │   │   ├── store/              # Zustand 状态管理
@@ -248,7 +250,7 @@ export const zhihuAdapterDefinition: AdapterDefinition = {
 
 ### 0.1 首版交付说明
 
-首版按平台拆分交付：`0.1.0` 先完成知乎回答/文章流，后续迭代已接入 Twitter/X Home Feed。该拆分不改变“多平台归一化”的 MVP 总目标，先用单平台验证完整链路，再复用统一 Adapter 契约扩展第二个平台：
+首版按平台拆分交付：`0.1.0` 先完成知乎回答/文章流，后续迭代已接入 Twitter/X Home Feed、V2EX 主题列表与 Linux DO 话题列表。该拆分不改变“多平台归一化”的 MVP 总目标，先用单平台验证完整链路，再复用统一 Adapter 契约扩展社区类平台：
 
 - WXT + React + TypeScript + Manifest V3 可构建项目；
 - 知乎 DOM 静态适配、字段清洗、稳定 ID 与响应式去重；
@@ -267,8 +269,8 @@ export const zhihuAdapterDefinition: AdapterDefinition = {
   * 完成 Popup 开关、页内退出入口与异常自动恢复原页面逻辑。
   * 定义 `FeedItem` Schema 与 Zustand Store 数据流。
 
-* **Week 2: 适配器编写 (知乎 & Twitter)**
-  * 编写 `ZhihuAdapter` 与 `TwitterAdapter`。
+* **Week 2: 适配器编写 (知乎、Twitter、V2EX 与 Linux DO)**
+  * 编写 `ZhihuAdapter`、`TwitterAdapter`、`V2exAdapter` 与 `LinuxDoAdapter`。
   * 实现基于 `MutationObserver` 的异步卡片提取与去重逻辑。
   * 验证原网页底层 API / 节点的代理点击（如触发点赞）。
 

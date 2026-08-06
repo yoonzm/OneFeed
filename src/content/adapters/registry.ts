@@ -1,11 +1,15 @@
 import type { FeedSource } from '../../types/feed';
 import { type AdapterDefinition, BaseAdapter, type FeedItemsListener } from './base';
+import { linuxDoAdapterDefinition } from './linuxDo';
 import { twitterAdapterDefinition } from './twitter';
+import { v2exAdapterDefinition } from './v2ex';
 import { zhihuAdapterDefinition } from './zhihu';
 
 const adapterDefinitions: AdapterDefinition[] = [
   zhihuAdapterDefinition,
   twitterAdapterDefinition,
+  v2exAdapterDefinition,
+  linuxDoAdapterDefinition,
 ];
 
 export interface ActiveAdapter {

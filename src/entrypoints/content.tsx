@@ -8,6 +8,10 @@ export default defineContentScript({
     'https://*.x.com/*',
     'https://twitter.com/*',
     'https://*.twitter.com/*',
+    'https://v2ex.com/*',
+    'https://*.v2ex.com/*',
+    'https://linux.do/*',
+    'https://*.linux.do/*',
   ],
   runAt: 'document_idle',
   main(ctx) {

@@ -8,7 +8,7 @@ OneFeed 是一个面向 Web 信息流的浏览器扩展项目。它希望将不�
 
 今天的信息流体验由平台决定：界面风格、内容密度、推荐逻辑与注意力分配彼此割裂。OneFeed 希望在保留原平台内容与基础交互能力的同时，将阅读体验的控制权交还给用户。
 
-首个 MVP 分阶段交付，并已覆盖知乎与 Twitter/X，验证以下核心路径：
+首个 MVP 分阶段交付，并已覆盖知乎、Twitter/X、V2EX 与 Linux DO，验证以下核心路径：
 
 - 从网页 DOM 中稳定提取信息流内容；
 - 将不同平台的数据归一化为统一模型；
@@ -39,11 +39,11 @@ npm test
 npm run lint
 ```
 
-`npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页或 X Home Feed 后，扩展会将信息流替换为 Focus Paper 阅读界面；点击扩展图标可随时恢复原始页面。
+`npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页、X Home Feed、V2EX 首页或 Linux DO 话题列表后，扩展会将信息流替换为 Focus Paper 阅读界面；点击扩展图标可随时恢复原始页面。
 
 ## 当前状态
 
-当前版本基于 WXT、React 和 TypeScript，实现了知乎与 Twitter/X 信息流解析、归一化去重、Shadow DOM 隔离渲染、图片预览、原站点赞/评论代理和启用状态持久化。站点差异通过 Adapter 注册层隔离，新增平台无需修改挂载、状态管理与主题渲染核心逻辑。详细方案请参阅：
+当前版本基于 WXT、React 和 TypeScript，实现了知乎、Twitter/X、V2EX 与 Linux DO 信息流解析、归一化去重、Shadow DOM 隔离渲染、图片预览、原站点赞/评论代理和启用状态持久化。站点差异通过 Adapter 注册层隔离，新增平台无需修改挂载、状态管理与主题渲染核心逻辑。详细方案请参阅：
 
 - [MVP 设计文档](docs/MVP_Design_Document.md)
 - [长期产品路线图](docs/Longterm_Roadmap_Document.md)
