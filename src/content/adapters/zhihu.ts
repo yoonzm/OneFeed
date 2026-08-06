@@ -1,0 +1,215 @@
+import DOMPurify from 'dompurify';
+import type { FeedAction, FeedItem, FeedMedia } from '../../types/feed';
+import { BaseAdapter, type AdapterDefinition } from './base';
+
+const CARD_SELECTOR = [
+  '.TopstoryItem',
+  '.AnswerItem',
+  '.ArticleItem',
+  '.ContentItem',
+].join(', ');
+
+const BODY_SELECTOR = [
+  '.RichContent-inner',
+  '.RichText',
+  '.CopyrightRichText-richText',
+  '.ContentItem-content',
+].join(', ');
+
+function firstText(element: Element, selectors: string[]): string {
+  for (const selector of selectors) {
+    const text = element.querySelector(selector)?.textContent?.trim();
+    if (text) return text;
+  }
+  return '';
+}
+
+function firstAttribute(
+  element: Element,
+  selectors: string[],
+  attribute: string,
+): string {
+  for (const selector of selectors) {
+    const value = element.querySelector(selector)?.getAttribute(attribute)?.trim();
+    if (value) return value;
+  }
+  return '';
+}
+
+function absoluteUrl(value: string): string {
+  if (!value) return '';
+  try {
+    return new URL(value, window.location.origin).href;
+  } catch {
+    return '';
+  }
+}
+
+export function parseCount(value: string): number {
+  const normalized = value.replace(/,/g, '').trim();
+  const match = normalized.match(/(\d+(?:\.\d+)?)\s*([万千]?)/);
+  if (!match) return 0;
+
+  const multiplier = match[2] === '万' ? 10000 : match[2] === '千' ? 1000 : 1;
+  return Math.round(Number(match[1]) * multiplier);
+}
+
+function stableHash(value: string): string {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+interface ZhihuMetadata {
+  authorName?: string;
+  itemId?: string;
+  title?: string;
+}
+
+function getMetadata(element: Element): ZhihuMetadata {
+  const value = element.getAttribute('data-zop') ||
+    element.querySelector('[data-zop]')?.getAttribute('data-zop');
+  if (!value) return {};
+
+  try {
+    return JSON.parse(value) as ZhihuMetadata;
+  } catch {
+    return {};
+  }
+}
+
+function getOriginalUrl(element: Element): string {
+  const link = firstAttribute(
+    element,
+    [
+      '.ContentItem-title a',
+      '.QuestionItem-title a',
+      'meta[itemprop="url"]',
+      'a[href*="/question/"]',
+      'a[href*="/p/"]',
+    ],
+    'href',
+  );
+  return absoluteUrl(link) || window.location.href;
+}
+
+function extractMedia(body: Element): FeedMedia[] {
+  const seen = new Set<string>();
+  return Array.from(body.querySelectorAll('img'))
+    .map((image) => {
+      const url = absoluteUrl(
+        image.getAttribute('data-original') ||
+          image.getAttribute('data-actualsrc') ||
+          image.getAttribute('src') ||
+          '',
+      );
+      return { type: 'image' as const, url, alt: image.getAttribute('alt') || '' };
+    })
+    .filter((media) => {
+      if (!media.url || seen.has(media.url)) return false;
+      seen.add(media.url);
+      return true;
+    });
+}
+
+function cleanContent(body: Element): string {
+  const clone = body.cloneNode(true) as Element;
+  clone.querySelectorAll('img, video, button, svg, noscript').forEach((node) => node.remove());
+  clone.querySelectorAll('[style], [class], [id]').forEach((node) => {
+    node.removeAttribute('style');
+    node.removeAttribute('class');
+    node.removeAttribute('id');
+  });
+  return DOMPurify.sanitize(clone.innerHTML, {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'blockquote', 'ol', 'ul', 'li', 'a', 'code', 'pre'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+  });
+}
+
+export function parseZhihuCard(element: Element): FeedItem | null {
+  const body = element.querySelector(BODY_SELECTOR);
+  if (!body) return null;
+
+  const metadata = getMetadata(element);
+  const title = firstText(element, [
+    '.ContentItem-title',
+    '.QuestionItem-title',
+    'h2',
+  ]) || metadata.title || '';
+  const originalUrl = getOriginalUrl(element);
+  const authorName = firstText(element, [
+    '.AuthorInfo-name',
+    '.UserLink-link',
+    '[itemprop="name"]',
+  ]) || metadata.authorName || '';
+  const avatar = absoluteUrl(
+    firstAttribute(element, ['.Avatar', '.AuthorInfo-avatar img'], 'src'),
+  );
+  const contentHtml = cleanContent(body);
+  const contentText = body.textContent?.trim() || '';
+  if (!title && !contentText) return null;
+
+  const originId =
+    element.getAttribute('data-id') ||
+    metadata.itemId ||
+    originalUrl.match(/\/answer\/(\d+)/)?.[1] ||
+    originalUrl.match(/\/p\/(\d+)/)?.[1] ||
+    originalUrl.match(/\/question\/(\d+)/)?.[1] ||
+    stableHash(`${originalUrl}|${title}|${authorName}|${contentText.slice(0, 120)}`);
+
+  return {
+    id: `zhihu_${originId}`,
+    platform: 'zhihu',
+    originalUrl,
+    title: title || undefined,
+    author: {
+      name: authorName || '知乎用户',
+      avatar,
+      link: absoluteUrl(firstAttribute(element, ['.AuthorInfo-name a', '.UserLink-link'], 'href')) || undefined,
+    },
+    contentHtml,
+    media: extractMedia(body),
+    stats: {
+      likes: parseCount(firstText(element, ['.Button--voteUp', '[aria-label*="赞同"]'])),
+      comments: parseCount(firstText(element, ['.ContentItem-action', 'button[aria-label*="评论"]'])),
+    },
+    rawElementRef: element,
+  };
+}
+
+export function triggerZhihuAction(item: FeedItem, action: FeedAction): boolean {
+  const selector = action === 'like'
+    ? '.Button--voteUp, [aria-label*="赞同"]'
+    : '.ContentItem-action, button[aria-label*="评论"]';
+  const button = item.rawElementRef?.querySelector<HTMLElement>(selector);
+  if (!button) return false;
+  button.click();
+  return true;
+}
+
+export class ZhihuAdapter extends BaseAdapter {
+  protected readonly cardSelector = CARD_SELECTOR;
+
+  parseCard(element: Element): FeedItem | null {
+    return parseZhihuCard(element);
+  }
+
+  triggerAction(item: FeedItem, action: FeedAction): boolean {
+    return triggerZhihuAction(item, action);
+  }
+}
+
+export const zhihuAdapterDefinition: AdapterDefinition = {
+  source: {
+    id: 'zhihu',
+    name: '知乎',
+    homeUrl: 'https://www.zhihu.com/',
+    likeLabel: '赞同',
+    commentLabel: '评论',
+  },
+  matches: (hostname) => hostname === 'zhihu.com' || hostname.endsWith('.zhihu.com'),
+  create: (onItems) => new ZhihuAdapter(onItems),
+};

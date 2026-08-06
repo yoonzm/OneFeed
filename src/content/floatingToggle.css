@@ -1,0 +1,187 @@
+:host {
+  position: fixed;
+  top: 50%;
+  right: 16px;
+  z-index: 2147483647;
+  display: block;
+  width: 48px;
+  height: 48px;
+  color: #172033;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  line-height: 1.4;
+  transform: translateY(-50%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.floating-toggle {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.toggle-button {
+  position: relative;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  place-items: center;
+  overflow: hidden;
+  border: 2px solid rgb(255 255 255 / 88%);
+  border-radius: 50%;
+  background: #151922;
+  color: #ffffff;
+  box-shadow: 0 5px 16px rgb(15 23 42 / 26%), 0 1px 3px rgb(15 23 42 / 30%);
+  cursor: pointer;
+  transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.toggle-button:hover {
+  transform: translateX(-2px);
+}
+
+.toggle-button:active {
+  transform: translateX(-2px) scale(.94);
+}
+
+.toggle-button:focus-visible {
+  outline: 3px solid #8fbcff;
+  outline-offset: 3px;
+}
+
+.toggle-button:disabled {
+  cursor: wait;
+  opacity: .65;
+}
+
+.toggle-enabled {
+  box-shadow: 0 5px 16px rgb(15 23 42 / 26%), 0 0 0 2px rgb(23 105 224 / 32%);
+}
+
+.toggle-disabled {
+  background: #4b5361;
+  color: #d5d9e0;
+}
+
+.toggle-icon {
+  width: 25px;
+  height: 25px;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+.card-back,
+.card-front {
+  transition: transform 180ms ease, opacity 180ms ease;
+}
+
+.toggle-enabled .card-back {
+  transform: translate(1px, -1px);
+  opacity: .56;
+}
+
+.toggle-enabled .card-front {
+  transform: translate(-1px, 1px);
+}
+
+.toggle-disabled .card-back {
+  transform: translate(2px, 1px) rotate(5deg);
+  opacity: .42;
+}
+
+.toggle-disabled .card-front {
+  transform: translate(-1px, -1px) rotate(-4deg);
+}
+
+.state-dot {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #151922;
+  border-radius: 50%;
+  background: #62a1ff;
+  transition: background 160ms ease;
+}
+
+.toggle-disabled .state-dot {
+  border-color: #4b5361;
+  background: #a9b0bc;
+}
+
+.toggle-tip {
+  position: absolute;
+  top: 50%;
+  right: 60px;
+  width: max-content;
+  padding: 8px 11px 9px;
+  border: 1px solid #e0e6ef;
+  border-radius: 8px;
+  background: rgb(255 255 255 / 96%);
+  box-shadow: 0 8px 24px rgb(15 23 42 / 14%);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(6px, -50%);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.toggle-tip::after {
+  position: absolute;
+  top: 50%;
+  right: -5px;
+  width: 8px;
+  height: 8px;
+  border-top: 1px solid #e0e6ef;
+  border-right: 1px solid #e0e6ef;
+  background: #ffffff;
+  content: '';
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.toggle-tip strong,
+.toggle-tip small {
+  display: block;
+  white-space: nowrap;
+}
+
+.toggle-tip strong {
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.toggle-tip small {
+  margin-top: 1px;
+  color: #6f7c91;
+  font-size: 10px;
+}
+
+.floating-toggle:hover .toggle-tip,
+.floating-toggle:focus-within .toggle-tip {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+@media (max-width: 720px) {
+  :host {
+    top: auto;
+    right: 10px;
+    bottom: 88px;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: .01ms !important;
+  }
+}
