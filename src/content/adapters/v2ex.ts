@@ -1,8 +1,12 @@
-import DOMPurify from 'dompurify';
-import type { FeedAction, FeedItem } from '../../types/feed';
+import type { FeedItem, FeedSource } from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
 const CARD_SELECTOR = '.cell.item';
+const SOURCE: FeedSource = {
+  id: 'v2ex',
+  name: 'V2EX',
+  homeUrl: 'https://www.v2ex.com/',
+};
 
 function absoluteUrl(value: string): string {
   if (!value) return '';
@@ -38,30 +42,6 @@ export function parseV2exCount(value: string): number {
   return Math.round(Number(match[1]) * (multipliers[unit] || 1));
 }
 
-function cleanMetadata(element: Element | null): string {
-  if (!element) return '';
-
-  const clone = element.cloneNode(true) as Element;
-  clone.querySelectorAll('script, style, svg, .votes').forEach((node) => node.remove());
-  clone.querySelectorAll('a[href]').forEach((link) => {
-    const href = absoluteUrl(link.getAttribute('href') || '');
-    if (href) link.setAttribute('href', href);
-    link.setAttribute('target', '_blank');
-    link.setAttribute('rel', 'noreferrer');
-  });
-  clone.querySelectorAll('[style], [class], [id], [title]').forEach((node) => {
-    node.removeAttribute('style');
-    node.removeAttribute('class');
-    node.removeAttribute('id');
-    node.removeAttribute('title');
-  });
-
-  return DOMPurify.sanitize(clone.innerHTML, {
-    ALLOWED_TAGS: ['a', 'strong', 'span', 'br'],
-    ALLOWED_ATTR: ['href', 'target', 'rel'],
-  });
-}
-
 export function parseV2exCard(element: Element): FeedItem | null {
   const titleLink = element.querySelector<HTMLAnchorElement>(
     '.topic-link, .item_title a[href^="/t/"]',
@@ -79,11 +59,19 @@ export function parseV2exCard(element: Element): FeedItem | null {
     'V2EX 用户';
   const originId = originalUrl.match(/\/t\/(\d+)/)?.[1] ||
     stableHash(`${originalUrl}|${title}|${authorName}`);
+  const communityLink = element.querySelector<HTMLAnchorElement>('.topic_info .node, a.node');
+  const communityName = communityLink?.textContent?.trim();
+  const reactions = parseV2exCount(element.querySelector('.votes')?.textContent || '');
+  const replies = parseV2exCount(
+    element.querySelector('.count_livid, .count_orange, .count_blue')?.textContent || '',
+  );
 
   return {
     id: `v2ex_${originId}`,
     platform: 'v2ex',
+    source: SOURCE,
     originalUrl: originalUrl || window.location.href,
+    kind: 'discussion',
     title,
     author: {
       name: authorName,
@@ -92,24 +80,49 @@ export function parseV2exCard(element: Element): FeedItem | null {
         ? absoluteUrl(authorLink.getAttribute('href') || '') || undefined
         : undefined,
     },
-    createdAt: element.querySelector('.topic_info [title]')?.getAttribute('title') || undefined,
-    contentHtml: cleanMetadata(element.querySelector('.topic_info')),
-    media: [],
-    stats: {
-      likes: parseV2exCount(element.querySelector('.votes')?.textContent || ''),
-      comments: parseV2exCount(
-        element.querySelector('.count_livid, .count_orange, .count_blue')?.textContent || '',
-      ),
-    },
-    rawElementRef: element,
+    context: communityName ? {
+      community: {
+        name: communityName,
+        url: absoluteUrl(communityLink?.getAttribute('href') || '') || undefined,
+      },
+    } : undefined,
+    publishedAt: element.querySelector('.topic_info [title]')?.getAttribute('title') || undefined,
+    blocks: [],
+    metrics: [
+      { kind: 'reactions', value: reactions, label: '赞同' },
+      { kind: 'replies', value: replies, label: '回复' },
+    ],
+    actions: [
+      {
+        id: 'react',
+        kind: 'react',
+        variant: 'agree',
+        label: '赞同',
+        count: reactions,
+        enabled: true,
+        fallback: 'openOriginal',
+      },
+      {
+        id: 'reply',
+        kind: 'reply',
+        label: '回复',
+        count: replies,
+        enabled: true,
+        fallback: 'openOriginal',
+      },
+      { id: 'open', kind: 'open', label: '查看原文', enabled: true },
+    ],
   };
 }
 
-export function triggerV2exAction(item: FeedItem, action: FeedAction): boolean {
-  const selector = action === 'like'
+export function triggerV2exAction(element: Element | undefined, actionId: string): boolean {
+  const selector = actionId === 'react'
     ? '.votes button, button[aria-label*="赞同"], button[title*="赞同"]'
-    : 'button[aria-label*="回复"], button[title*="回复"]';
-  const button = item.rawElementRef?.querySelector<HTMLElement>(selector);
+    : actionId === 'reply'
+      ? 'button[aria-label*="回复"], button[title*="回复"]'
+      : '';
+  if (!selector) return false;
+  const button = element?.querySelector<HTMLElement>(selector);
   if (!button) return false;
   button.click();
   return true;
@@ -122,19 +135,13 @@ export class V2exAdapter extends BaseAdapter {
     return parseV2exCard(element);
   }
 
-  triggerAction(item: FeedItem, action: FeedAction): boolean {
-    return triggerV2exAction(item, action);
+  triggerAction(itemId: string, actionId: string): boolean {
+    return triggerV2exAction(this.getRuntimeElement(itemId), actionId);
   }
 }
 
 export const v2exAdapterDefinition: AdapterDefinition = {
-  source: {
-    id: 'v2ex',
-    name: 'V2EX',
-    homeUrl: 'https://www.v2ex.com/',
-    likeLabel: '赞同',
-    commentLabel: '回复',
-  },
+  source: SOURCE,
   matches: (hostname) => hostname === 'v2ex.com' || hostname.endsWith('.v2ex.com'),
   create: (onItems) => new V2exAdapter(onItems),
 };

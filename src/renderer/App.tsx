@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { FeedAction, FeedItem, FeedSource } from '../types/feed';
+import type { FeedActionDescriptor, FeedItem, FeedSource } from '../types/feed';
 import { useFeedStore } from './store/useFeedStore';
 import { Card } from './themes/FocusPaper/Card';
 import { Header } from './themes/FocusPaper/Header';
@@ -8,7 +8,7 @@ interface AppProps {
   scrollElement: HTMLElement;
   source: FeedSource;
   onDisable: () => void;
-  onAction: (item: FeedItem, action: FeedAction) => boolean;
+  onAction: (itemId: string, actionId: string) => boolean;
 }
 
 export default function App({ scrollElement, source, onDisable, onAction }: AppProps) {
@@ -29,8 +29,8 @@ export default function App({ scrollElement, source, onDisable, onAction }: AppP
     return () => scrollElement.removeEventListener('scroll', handleScroll);
   }, [scrollElement]);
 
-  const handleAction = (item: FeedItem, action: FeedAction) => {
-    if (!onAction(item, action)) {
+  const handleAction = (item: FeedItem, action: FeedActionDescriptor) => {
+    if (!onAction(item.id, action.id) && action.fallback === 'openOriginal') {
       window.open(item.originalUrl, '_blank', 'noopener,noreferrer');
     }
   };
@@ -51,7 +51,6 @@ export default function App({ scrollElement, source, onDisable, onAction }: AppP
               key={item.id}
               item={item}
               index={index}
-              source={source}
               onAction={handleAction}
             />
           ))

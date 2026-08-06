@@ -1,8 +1,12 @@
-import DOMPurify from 'dompurify';
-import type { FeedAction, FeedItem } from '../../types/feed';
+import type { FeedItem, FeedSource } from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
 const CARD_SELECTOR = '.topic-list-item';
+const SOURCE: FeedSource = {
+  id: 'linux-do',
+  name: 'Linux DO',
+  homeUrl: 'https://linux.do/',
+};
 
 function absoluteUrl(value: string): string {
   if (!value) return '';
@@ -38,32 +42,6 @@ export function parseLinuxDoCount(value: string): number {
   return Math.round(Number(match[1]) * (multipliers[unit] || 1));
 }
 
-function cleanSummary(element: Element): string {
-  const summary = element.querySelector('.link-bottom-line')?.cloneNode(true) as Element | undefined;
-  const container = summary || document.createElement('span');
-  const views = element.querySelector('.views .number')?.textContent?.trim();
-  if (views) container.append(document.createTextNode(` · ${views} 次浏览`));
-
-  container.querySelectorAll('script, style, svg').forEach((node) => node.remove());
-  container.querySelectorAll('a[href]').forEach((link) => {
-    const href = absoluteUrl(link.getAttribute('href') || '');
-    if (href) link.setAttribute('href', href);
-    link.setAttribute('target', '_blank');
-    link.setAttribute('rel', 'noreferrer');
-  });
-  container.querySelectorAll('[style], [class], [id], [data-tag-name]').forEach((node) => {
-    node.removeAttribute('style');
-    node.removeAttribute('class');
-    node.removeAttribute('id');
-    node.removeAttribute('data-tag-name');
-  });
-
-  return DOMPurify.sanitize(container.innerHTML, {
-    ALLOWED_TAGS: ['a', 'span', 'ul', 'li', 'br'],
-    ALLOWED_ATTR: ['href', 'target', 'rel'],
-  });
-}
-
 function getAuthor(element: Element): FeedItem['author'] {
   const authorLink = element.querySelector<HTMLAnchorElement>('.posters a[data-user-card]');
   const avatarElement = authorLink?.querySelector<HTMLImageElement>('img.avatar');
@@ -92,31 +70,70 @@ export function parseLinuxDoCard(element: Element): FeedItem | null {
   const originId = element.getAttribute('data-topic-id') ||
     originalUrl.match(/\/t\/[^/]+\/(\d+)/)?.[1] ||
     stableHash(`${originalUrl}|${title}|${author.name}`);
+  const categoryLink = element.querySelector<HTMLAnchorElement>('.badge-category[href]');
+  const categoryName = categoryLink?.textContent?.trim();
+  const tags = Array.from(element.querySelectorAll<HTMLAnchorElement>('.discourse-tag[href]'))
+    .map((tag) => ({
+      name: tag.textContent?.trim() || '',
+      url: absoluteUrl(tag.getAttribute('href') || '') || undefined,
+    }))
+    .filter((tag) => tag.name);
+  const replies = parseLinuxDoCount(
+    element.querySelector('.posts .number, .badge-posts')?.textContent || '',
+  );
+  const views = parseLinuxDoCount(element.querySelector('.views .number')?.textContent || '');
 
   return {
     id: `linux-do_${originId}`,
     platform: 'linux-do',
+    source: SOURCE,
     originalUrl: originalUrl || window.location.href,
+    kind: 'discussion',
     title,
     author,
-    createdAt: Number.isFinite(createdAt) ? createdAt : undefined,
-    contentHtml: cleanSummary(element),
-    media: [],
-    stats: {
-      likes: 0,
-      comments: parseLinuxDoCount(
-        element.querySelector('.posts .number, .badge-posts')?.textContent || '',
-      ),
-    },
-    rawElementRef: element,
+    context: categoryName || tags.length ? {
+      community: categoryName ? {
+        name: categoryName,
+        url: absoluteUrl(categoryLink?.getAttribute('href') || '') || undefined,
+      } : undefined,
+      tags,
+    } : undefined,
+    publishedAt: Number.isFinite(createdAt) ? createdAt : undefined,
+    blocks: [],
+    metrics: [
+      { kind: 'replies', value: replies, label: '回复' },
+      { kind: 'views', value: views, label: '浏览' },
+    ],
+    actions: [
+      {
+        id: 'react',
+        kind: 'react',
+        variant: 'like',
+        label: '点赞',
+        enabled: true,
+        fallback: 'openOriginal',
+      },
+      {
+        id: 'reply',
+        kind: 'reply',
+        label: '回复',
+        count: replies,
+        enabled: true,
+        fallback: 'openOriginal',
+      },
+      { id: 'open', kind: 'open', label: '查看原文', enabled: true },
+    ],
   };
 }
 
-export function triggerLinuxDoAction(item: FeedItem, action: FeedAction): boolean {
-  const selector = action === 'like'
+export function triggerLinuxDoAction(element: Element | undefined, actionId: string): boolean {
+  const selector = actionId === 'react'
     ? '.topic-list-vote-button, button[aria-label*="点赞"], button[title*="点赞"]'
-    : 'button[aria-label*="回复"], button[title*="回复"]';
-  const button = item.rawElementRef?.querySelector<HTMLElement>(selector);
+    : actionId === 'reply'
+      ? 'button[aria-label*="回复"], button[title*="回复"]'
+      : '';
+  if (!selector) return false;
+  const button = element?.querySelector<HTMLElement>(selector);
   if (!button) return false;
   button.click();
   return true;
@@ -129,19 +146,13 @@ export class LinuxDoAdapter extends BaseAdapter {
     return parseLinuxDoCard(element);
   }
 
-  triggerAction(item: FeedItem, action: FeedAction): boolean {
-    return triggerLinuxDoAction(item, action);
+  triggerAction(itemId: string, actionId: string): boolean {
+    return triggerLinuxDoAction(this.getRuntimeElement(itemId), actionId);
   }
 }
 
 export const linuxDoAdapterDefinition: AdapterDefinition = {
-  source: {
-    id: 'linux-do',
-    name: 'Linux DO',
-    homeUrl: 'https://linux.do/',
-    likeLabel: '点赞',
-    commentLabel: '回复',
-  },
+  source: SOURCE,
   matches: (hostname) => hostname === 'linux.do' || hostname.endsWith('.linux.do'),
   create: (onItems) => new LinuxDoAdapter(onItems),
 };

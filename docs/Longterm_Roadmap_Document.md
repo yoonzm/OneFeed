@@ -39,10 +39,58 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 ### Phase 2: 渲染引擎强化与平台大扩张 (0 ~ 6 个月)
 
 #### 1. 目标平台扩展 (Platform Expansion)
-* **社交/社区类**：微博、Reddit、小红书。
-* **视频/长内容类**：B站 (动态/首页推荐)、YouTube (Home Feed)、HackerNews、微信公众号网页版。
 
-#### 2. 主题引擎 (Theme Engine & System Styles)
+平台覆盖分为三个层级：
+
+* **Schema 可表达**：现有标准 `kind + blocks + metrics + actions` 能无损描述 Feed 卡片，但仍需单独开发 Adapter、权限、解析测试和原站操作代理。
+* **需要标准 Block 扩展**：仍属于通用 Feed，但必须先新增可复用 Block 或状态协议。
+* **需要专用 Surface**：核心交互不是卡片式 Feed，不应为了扩大平台数量而强行塞入通用 Card。
+
+##### Schema 可直接表达的平台
+
+| 产品类型 | 可覆盖产品 | 主要映射 |
+| :--- | :--- | :--- |
+| 短动态与开放社交 | Twitter/X、微博、Threads、Bluesky、Mastodon | `post` + `richText/gallery/video/linkPreview/quote/poll` |
+| 论坛与社区 | Reddit、V2EX、Linux DO/Discourse、Hacker News | `discussion` + 社区/标签 Context + `score/replies` |
+| 长文与订阅内容 | 知乎、Medium、Substack、WordPress、RSS/Atom、微信公众号网页版 | `article` + 标题、正文、链接预览和阅读操作 |
+| 视频与图片 Feed | YouTube Home、B站首页/动态、Instagram 基础 Feed、小红书基础 Feed、Pinterest | `post/article` + `gallery/video`；只覆盖 Feed 卡片，不承诺完整播放器体验 |
+| 职业内容 Feed | LinkedIn 基础动态、文章、图片、视频和投票 | `post/article` + Context + 标准 Blocks；文档、职位和活动卡片另行扩展 |
+
+以上平台“可覆盖”仅表示统一数据和 UI 协议足以表达其主要 Feed 内容，不表示已经完成目标站点适配，也不表示其所有操作都可以在 Shadow DOM 中可靠代理。
+
+##### 需要新增标准 Block 的平台
+
+| 标准扩展 | 代表产品 | 新增能力 |
+| :--- | :--- | :--- |
+| `live` | Twitch、YouTube Live、B站直播 | 直播中/预告/结束、实时观看人数、计划时间、直播间入口 |
+| `audio` | Spotify、Apple Podcasts、SoundCloud、Tumblr Audio | 音频源、时长、节目/专辑、播放进度 |
+| `document` | LinkedIn Document、SlideShare、论坛附件 | 文件类型、页数、大小、预览与下载/原文回退 |
+| `verticalVideo` 展示策略 | TikTok、抖音、Reels、Shorts | 竖屏比例、自动播放策略、上下切换和播放状态；底层仍复用 `video` 数据 |
+| `product` | Pinterest Product Pins、Instagram Shopping、小红书商品笔记 | 商品、价格、商家、库存/时效提示和外部购买入口 |
+| `reference` | LinkedIn 职位/活动、社区事件卡片 | 引用对象类型、状态、时间地点和主操作 |
+
+##### 不纳入通用 Card 的产品
+
+* Slack、Discord、Microsoft Teams：核心是频道、连续消息、会话线程和成员状态，应使用 Chat/Thread Surface。
+* Gmail、Outlook：核心是邮件会话、收件人、附件和邮件状态，应使用 Mail Surface。
+* 淘宝、Amazon 等交易首页：核心是价格、库存、规格、购物车和支付，不应由阅读型 Feed Schema 承担交易语义。
+
+#### 2. Adapter 交付顺序
+
+| 迭代 | 目标 | 平台交付 | 验收重点 |
+| :--- | :--- | :--- | :--- |
+| **2.0 统一协议** | 完成 Schema 与 Renderer 解耦 | 迁移知乎、Twitter/X、V2EX、Linux DO | `FeedItem` 可序列化；Block Registry、Action Bar、运行时代理可替换旧固定卡片 |
+| **2.1 讨论型扩展** | 验证 `discussion` 通用性 | Reddit、Hacker News | 社区/标签、分数、回复、投票、剧透/锁定和链接帖降级 |
+| **2.2 开放社交扩展** | 验证复杂 `post` 通用性 | Mastodon、Bluesky | 引用、转发原因、内容警告、可见范围、链接卡片、图片比例和投票 |
+| **2.3 视频扩展** | 验证媒体 Block 与播放器代理 | YouTube、B站 | 封面、时长、字幕/直播状态、播放量、原生播放器 Portal 与回退 |
+| **2.4 视觉内容扩展** | 验证高密度图片/短视频布局 | Instagram、小红书、Pinterest | 多图比例、竖屏视频、收藏/外链、敏感内容和商品信息降级 |
+| **2.5 内容订阅扩展** | 验证文章与开放订阅源 | RSS/Atom、Medium、Substack、WordPress | 摘要/全文、作者与来源、发布时间、已读/稍后读和重复文章处理 |
+
+Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准：优先完成当前 4 个平台和 2.1、2.2 的四个平台。2.3 之后的平台按真实用户需求、目标站点政策和 Adapter 维护成本逐步进入正式支持，不以 Schema 理论覆盖数冒充已交付平台数。
+
+建模依据包括 [ActivityStreams 2.0](https://www.w3.org/TR/activitystreams-core/)、[Mastodon Status](https://docs.joinmastodon.org/entities/Status/)、[Bluesky Posts](https://docs.bsky.app/docs/advanced-guides/posts)、[Reddit Post](https://developers.reddit.com/docs/api/redditapi/models/classes/Post)、[Hacker News API](https://github.com/HackerNews/API)、[LinkedIn Posts API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api)、[YouTube Video](https://developers.google.com/youtube/v3/docs/videos)、[Twitch API](https://dev.twitch.tv/docs/api/reference/) 与 [Atom RFC 4287](https://www.rfc-editor.org/rfc/rfc4287)。
+
+#### 3. 主题引擎 (Theme Engine & System Styles)
 内置 6 款精心调优的高质感视觉主题：
 * **Notion Style**：极简折叠、无框卡片、灰白高留白。
 * **Apple Design Style**：毛玻璃（Backdrop Filter）、大圆角、流畅微交互。
@@ -51,7 +99,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 * **Cyberpunk Style**：高饱和霓虹色调、科幻边框。
 * **Minimal Clean**：极致文本流，去除一切视觉干扰。
 
-#### 3. 架构优化与交互代理
+#### 4. 架构优化与交互代理
 * **视频播放器节点搬运 (Portal)**：对于 B站/YouTube 视频，通过 DOM `appendChild` 将原平台的播放器节点无缝“移驾”到新 UI 卡片中，保留原生播放状态与清晰度选项。
 * **触底加载同步 (Scroll Synchronization)**：当用户在新 UI 滚动到底部时，自动向被隐藏的原 DOM 派发滚动事件，实现无缝无限翻页。
 
@@ -111,6 +159,6 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 | 阶段 | 目标节点 | 关键 KPI 指标 |
 | :--- | :--- | :--- |
 | **Phase 1** | M1 - M2 | 完成 MVP 开发，知乎/Twitter/V2EX/Linux DO 渲染成功率 > 95%，卡片解析延迟 < 100ms。 |
-| **Phase 2** | M3 - M6 | 覆盖 8 个主流平台，内置 6 款主题，获得 10,000+ 活跃用户 (WAU)。 |
+| **Phase 2** | M3 - M6 | 交付至少 8 个稳定 Adapter，Schema 可表达 20 余个主流产品的基础 Feed，内置 6 款主题，获得 10,000+ 活跃用户 (WAU)。 |
 | **Phase 3** | M7 - M10 | 上线 AI 摘要与过滤功能，端到端解析修复成功率 > 90%，留存率 (D30) > 35%。 |
 | **Phase 4** | M11 - M12 | 推出 Pro 订阅，转化率达到 3% - 5%，开放 Theme Marketplace 开发者社区。 |

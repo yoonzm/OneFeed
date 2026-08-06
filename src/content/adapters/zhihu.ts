@@ -1,5 +1,5 @@
 import DOMPurify from 'dompurify';
-import type { FeedAction, FeedItem, FeedMedia } from '../../types/feed';
+import type { FeedImage, FeedItem, FeedSource } from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
 const CARD_SELECTOR = [
@@ -15,6 +15,12 @@ const BODY_SELECTOR = [
   '.CopyrightRichText-richText',
   '.ContentItem-content',
 ].join(', ');
+
+const SOURCE: FeedSource = {
+  id: 'zhihu',
+  name: '知乎',
+  homeUrl: 'https://www.zhihu.com/',
+};
 
 function firstText(element: Element, selectors: string[]): string {
   for (const selector of selectors) {
@@ -96,7 +102,7 @@ function getOriginalUrl(element: Element): string {
   return absoluteUrl(link) || window.location.href;
 }
 
-function extractMedia(body: Element): FeedMedia[] {
+function extractMedia(body: Element): FeedImage[] {
   const seen = new Set<string>();
   return Array.from(body.querySelectorAll('img'))
     .map((image) => {
@@ -106,7 +112,7 @@ function extractMedia(body: Element): FeedMedia[] {
           image.getAttribute('src') ||
           '',
       );
-      return { type: 'image' as const, url, alt: image.getAttribute('alt') || '' };
+      return { url, alt: image.getAttribute('alt') || '' };
     })
     .filter((media) => {
       if (!media.url || seen.has(media.url)) return false;
@@ -159,32 +165,61 @@ export function parseZhihuCard(element: Element): FeedItem | null {
     originalUrl.match(/\/p\/(\d+)/)?.[1] ||
     originalUrl.match(/\/question\/(\d+)/)?.[1] ||
     stableHash(`${originalUrl}|${title}|${authorName}|${contentText.slice(0, 120)}`);
+  const images = extractMedia(body);
+  const agrees = parseCount(firstText(element, ['.Button--voteUp', '[aria-label*="赞同"]']));
+  const comments = parseCount(firstText(element, ['.ContentItem-action', 'button[aria-label*="评论"]']));
 
   return {
     id: `zhihu_${originId}`,
     platform: 'zhihu',
+    source: SOURCE,
     originalUrl,
+    kind: 'article',
     title: title || undefined,
     author: {
       name: authorName || '知乎用户',
       avatar,
       link: absoluteUrl(firstAttribute(element, ['.AuthorInfo-name a', '.UserLink-link'], 'href')) || undefined,
     },
-    contentHtml,
-    media: extractMedia(body),
-    stats: {
-      likes: parseCount(firstText(element, ['.Button--voteUp', '[aria-label*="赞同"]'])),
-      comments: parseCount(firstText(element, ['.ContentItem-action', 'button[aria-label*="评论"]'])),
-    },
-    rawElementRef: element,
+    blocks: [
+      { type: 'richText', html: contentHtml, plainText: contentText },
+      ...(images.length ? [{ type: 'gallery' as const, items: images }] : []),
+    ],
+    metrics: [
+      { kind: 'reactions', value: agrees, label: '赞同' },
+      { kind: 'replies', value: comments, label: '评论' },
+    ],
+    actions: [
+      {
+        id: 'react',
+        kind: 'react',
+        variant: 'agree',
+        label: '赞同',
+        count: agrees,
+        enabled: true,
+        fallback: 'openOriginal',
+      },
+      {
+        id: 'reply',
+        kind: 'reply',
+        label: '评论',
+        count: comments,
+        enabled: true,
+        fallback: 'openOriginal',
+      },
+      { id: 'open', kind: 'open', label: '查看原文', enabled: true },
+    ],
   };
 }
 
-export function triggerZhihuAction(item: FeedItem, action: FeedAction): boolean {
-  const selector = action === 'like'
+export function triggerZhihuAction(element: Element | undefined, actionId: string): boolean {
+  const selector = actionId === 'react'
     ? '.Button--voteUp, [aria-label*="赞同"]'
-    : '.ContentItem-action, button[aria-label*="评论"]';
-  const button = item.rawElementRef?.querySelector<HTMLElement>(selector);
+    : actionId === 'reply'
+      ? '.ContentItem-action, button[aria-label*="评论"]'
+      : '';
+  if (!selector) return false;
+  const button = element?.querySelector<HTMLElement>(selector);
   if (!button) return false;
   button.click();
   return true;
@@ -197,19 +232,13 @@ export class ZhihuAdapter extends BaseAdapter {
     return parseZhihuCard(element);
   }
 
-  triggerAction(item: FeedItem, action: FeedAction): boolean {
-    return triggerZhihuAction(item, action);
+  triggerAction(itemId: string, actionId: string): boolean {
+    return triggerZhihuAction(this.getRuntimeElement(itemId), actionId);
   }
 }
 
 export const zhihuAdapterDefinition: AdapterDefinition = {
-  source: {
-    id: 'zhihu',
-    name: '知乎',
-    homeUrl: 'https://www.zhihu.com/',
-    likeLabel: '赞同',
-    commentLabel: '评论',
-  },
+  source: SOURCE,
   matches: (hostname) => hostname === 'zhihu.com' || hostname.endsWith('.zhihu.com'),
   create: (onItems) => new ZhihuAdapter(onItems),
 };

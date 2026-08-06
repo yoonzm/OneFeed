@@ -28,15 +28,22 @@ describe('parseZhihuCard', () => {
 
     expect(item).toMatchObject({
       id: 'zhihu_answer-42',
+      kind: 'article',
       title: '如何保持专注？',
       author: { name: '林一' },
-      stats: { likes: 12000, comments: 12 },
+      metrics: [
+        { kind: 'reactions', value: 12000, label: '赞同' },
+        { kind: 'replies', value: 12, label: '评论' },
+      ],
     });
     expect(item?.originalUrl).toBe('http://localhost:3000/question/1/answer/42');
-    expect(item?.contentHtml).toContain('先把信息变少。');
-    expect(item?.contentHtml).not.toContain('script');
-    expect(item?.contentHtml).not.toContain('style=');
-    expect(item?.media).toEqual([{ type: 'image', url: 'https://pic.example/answer.jpg', alt: '书桌' }]);
+    const text = item?.blocks.find((block) => block.type === 'richText');
+    const gallery = item?.blocks.find((block) => block.type === 'gallery');
+    expect(text?.html).toContain('先把信息变少。');
+    expect(text?.html).not.toContain('script');
+    expect(text?.html).not.toContain('style=');
+    expect(gallery?.items).toEqual([{ url: 'https://pic.example/answer.jpg', alt: '书桌' }]);
+    expect(item).not.toHaveProperty('rawElementRef');
   });
 
   it('ignores elements without readable content', () => {

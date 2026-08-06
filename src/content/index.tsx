@@ -52,7 +52,7 @@ function mount(): () => void {
         scrollElement={viewport}
         source={activeAdapter.source}
         onDisable={() => chrome.storage.local.set({ enabled: false })}
-        onAction={(item, action) => adapter?.triggerAction(item, action) || false}
+        onAction={(itemId, actionId) => adapter?.triggerAction(itemId, actionId) || false}
       />,
     );
 

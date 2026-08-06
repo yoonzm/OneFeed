@@ -11,15 +11,19 @@ class TestAdapter extends BaseAdapter {
     return {
       id,
       platform: 'test',
+      source: { id: 'test', name: '测试' },
       originalUrl: 'https://example.com/',
+      kind: 'post',
       author: { name: '测试用户', avatar: '' },
-      contentHtml: '<span>测试内容</span>',
-      stats: { likes: 0, comments: 0 },
+      blocks: [{ type: 'richText', html: '<span>测试内容</span>', plainText: '测试内容' }],
+      metrics: [],
+      actions: [],
     };
   }
 
-  triggerAction(): boolean {
-    return false;
+  triggerAction(itemId: string, actionId: string): boolean {
+    void actionId;
+    return Boolean(this.getRuntimeElement(itemId));
   }
 }
 
@@ -33,6 +37,7 @@ describe('BaseAdapter', () => {
     expect(onItems).toHaveBeenLastCalledWith([
       expect.objectContaining({ id: 'first' }),
     ]);
+    expect(adapter.triggerAction('first', 'open')).toBe(true);
 
     document.body.insertAdjacentHTML(
       'beforeend',
@@ -45,5 +50,6 @@ describe('BaseAdapter', () => {
       expect.objectContaining({ id: 'second' }),
     ]);
     adapter.disconnect();
+    expect(adapter.triggerAction('first', 'open')).toBe(false);
   });
 });

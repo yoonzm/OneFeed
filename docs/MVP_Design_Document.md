@@ -51,6 +51,9 @@
 ```
 
 ### 3.1 数据归一化 Schema (`types/feed.ts`)
+
+统一模型按“内容语义 + 内容区块 + 指标/操作描述”拆分。`kind` 只表示内容结构；图片、视频和链接等表现形式由 `blocks` 表达，Renderer 可从 `blocks` 推导主要展示格式，不在数据层重复保存 `primaryFormat`。
+
 ```typescript
 export interface FeedAuthor {
   name: string;
@@ -58,35 +61,67 @@ export interface FeedAuthor {
   link?: string;
 }
 
-export interface FeedMedia {
-  type: 'image' | 'video';
-  url: string;
-}
+export type FeedItemKind = 'post' | 'article' | 'discussion';
 
-export interface FeedStats {
-  likes: number;
-  comments: number;
-}
+export type FeedBlock =
+  | { type: 'richText'; html: string; plainText: string }
+  | { type: 'gallery'; items: FeedImage[] }
+  | { type: 'video'; media: FeedVideo }
+  | { type: 'linkPreview'; preview: FeedLinkPreview }
+  | { type: 'quote'; item: FeedItemSummary }
+  | { type: 'poll'; poll: FeedPoll };
+
+export type FeedMetricKind =
+  | 'reactions'
+  | 'replies'
+  | 'reposts'
+  | 'views'
+  | 'score';
+
+export type FeedActionKind =
+  | 'react'
+  | 'reply'
+  | 'repost'
+  | 'bookmark'
+  | 'share'
+  | 'open';
 
 export interface FeedItem {
   id: string;               // 格式: ${platform}_${originId}
   platform: string;         // 与当前 Adapter 注册的 source.id 一致
+  source: FeedSourceRef;
   originalUrl: string;
+  kind: FeedItemKind;
   author: FeedAuthor;
-  createdAt?: string | number;
+  context?: FeedContext;    // 社区、标签、推荐/转发/置顶原因
+  publishedAt?: string | number;
+  updatedAt?: string | number;
   title?: string;
-  contentHtml: string;      // 过滤清洗后的富文本/纯文本
-  media?: FeedMedia[];
-  stats: FeedStats;
-  rawElementRef?: Element;  // 用于触发原网页点击代理
+  blocks: FeedBlock[];
+  metrics: Array<{ kind: FeedMetricKind; value: number; label?: string }>;
+  actions: Array<{
+    id: string;
+    kind: FeedActionKind;
+    variant?: 'like' | 'agree' | 'upvote' | 'downvote';
+    label: string;
+    count?: number;
+    active?: boolean;
+    enabled: boolean;
+    fallback?: 'openOriginal';
+  }>;
+  flags?: FeedFlags;        // 敏感内容、剧透、锁定、置顶等状态
 }
 ```
+
+MVP 首先实现 `post`、`article`、`discussion` 三种结构，以及 `richText`、`gallery` 两类 Block；其余 Block 是后续平台扩展的稳定协议，不要求在首版一次完成。知乎映射为 `article`，Twitter/X 映射为 `post`，V2EX 与 Linux DO 映射为 `discussion`。
+
+`FeedItem` 必须保持可序列化。原站 `Element`、按钮节点和点击代理不得写入 Schema；Adapter 应在独立的运行时 Registry 中维护 `item.id -> 原始节点/动作句柄` 映射。这样才能支持缓存、跨平台去重、Theme SDK 和未来的 Worker/持久化边界。
 
 ### 3.2 Adapter 扩展契约
 
 站点差异统一限制在 `src/content/adapters/` 内，内容脚本和渲染层不包含站点分支：
 
-* `BaseAdapter` 统一负责初次扫描、`MutationObserver` 防抖监听和断开清理；站点 Adapter 只实现卡片选择、`FeedItem` 解析与原站操作代理。
+* `BaseAdapter` 统一负责初次扫描、`MutationObserver` 防抖监听和断开清理；站点 Adapter 只实现卡片选择、`FeedItem` 解析、能力声明与原站操作代理。
 * 每个站点导出一个 `AdapterDefinition`，声明站点展示信息、域名匹配规则和 Adapter 工厂。
 * `registry.ts` 是唯一注册入口。内容脚本通过 `createAdapter(hostname, onItems)` 获取当前 Adapter，并把统一回调交给 Zustand 和 React。
 * DOM 选择器、计数格式和站点回退逻辑不得进入内容脚本、状态库或主题组件。
@@ -200,7 +235,7 @@ function initExtension() {
       scrollElement={renderContainer}
       source={activeAdapter.source}
       onDisable={() => chrome.storage.local.set({ enabled: false })}
-      onAction={(item, action) => activeAdapter.adapter.triggerAction(item, action)}
+      onAction={(itemId, actionId) => activeAdapter.adapter.triggerAction(itemId, actionId)}
     />,
   );
 }
@@ -214,7 +249,7 @@ if (document.readyState === 'loading') {
 
 ### 5.2 知乎 Adapter 提取逻辑 (`src/content/adapters/zhihu.ts`)
 ```typescript
-import type { FeedAction, FeedItem } from '../../types/feed';
+import type { FeedItem } from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
 const CARD_SELECTOR = '.TopstoryItem, .AnswerItem, .ArticleItem, .ContentItem';
@@ -226,8 +261,8 @@ export class ZhihuAdapter extends BaseAdapter {
     return parseZhihuCard(element);
   }
 
-  triggerAction(item: FeedItem, action: FeedAction): boolean {
-    return triggerZhihuAction(item, action);
+  triggerAction(itemId: string, actionId: string): boolean {
+    return triggerZhihuAction(this.getRuntimeElement(itemId), actionId);
   }
 }
 
@@ -236,8 +271,6 @@ export const zhihuAdapterDefinition: AdapterDefinition = {
     id: 'zhihu',
     name: '知乎',
     homeUrl: 'https://www.zhihu.com/',
-    likeLabel: '赞同',
-    commentLabel: '评论',
   },
   matches: (hostname) => hostname === 'zhihu.com' || hostname.endsWith('.zhihu.com'),
   create: (onItems) => new ZhihuAdapter(onItems),

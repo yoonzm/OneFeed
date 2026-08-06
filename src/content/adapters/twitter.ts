@@ -1,8 +1,13 @@
 import DOMPurify from 'dompurify';
-import type { FeedAction, FeedItem, FeedMedia } from '../../types/feed';
+import type { FeedImage, FeedItem, FeedSource } from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
 const CARD_SELECTOR = 'article[data-testid="tweet"]';
+const SOURCE: FeedSource = {
+  id: 'twitter',
+  name: 'X',
+  homeUrl: 'https://x.com/home',
+};
 
 function absoluteUrl(value: string): string {
   if (!value) return '';
@@ -72,11 +77,10 @@ function cleanTweetText(body: Element | null): string {
   });
 }
 
-function extractMedia(element: Element): FeedMedia[] {
+function extractMedia(element: Element): FeedImage[] {
   const seen = new Set<string>();
   return Array.from(element.querySelectorAll('[data-testid="tweetPhoto"] img'))
     .map((image) => ({
-      type: 'image' as const,
       url: absoluteUrl(image.getAttribute('src') || ''),
       alt: image.getAttribute('alt') || '',
     }))
@@ -113,38 +117,66 @@ function getAuthor(element: Element): FeedItem['author'] {
 
 export function parseTwitterCard(element: Element): FeedItem | null {
   const body = element.querySelector('[data-testid="tweetText"]');
-  const media = extractMedia(element);
+  const images = extractMedia(element);
   const contentText = body?.textContent?.trim() || '';
-  if (!contentText && !media.length) return null;
+  if (!contentText && !images.length) return null;
 
   const time = element.querySelector('time');
   const statusLink = time?.closest('a[href*="/status/"]') ||
     element.querySelector('a[href*="/status/"]');
   const originalUrl = absoluteUrl(statusLink?.getAttribute('href') || '') || window.location.href;
   const author = getAuthor(element);
-  const createdAt = time?.getAttribute('datetime') || undefined;
+  const publishedAt = time?.getAttribute('datetime') || undefined;
   const originId = originalUrl.match(/\/status\/(\d+)/)?.[1] ||
-    stableHash(`${originalUrl}|${author.name}|${createdAt || ''}|${contentText}|${media[0]?.url || ''}`);
+    stableHash(`${originalUrl}|${author.name}|${publishedAt || ''}|${contentText}|${images[0]?.url || ''}`);
+  const likes = actionCount(element, 'like') || actionCount(element, 'unlike');
+  const replies = actionCount(element, 'reply');
 
   return {
     id: `twitter_${originId}`,
     platform: 'twitter',
+    source: SOURCE,
     originalUrl,
+    kind: 'post',
     author,
-    createdAt,
-    contentHtml: cleanTweetText(body),
-    media,
-    stats: {
-      likes: actionCount(element, 'like') || actionCount(element, 'unlike'),
-      comments: actionCount(element, 'reply'),
-    },
-    rawElementRef: element,
+    publishedAt,
+    blocks: [
+      ...(contentText
+        ? [{ type: 'richText' as const, html: cleanTweetText(body), plainText: contentText }]
+        : []),
+      ...(images.length ? [{ type: 'gallery' as const, items: images }] : []),
+    ],
+    metrics: [
+      { kind: 'reactions', value: likes, label: '喜欢' },
+      { kind: 'replies', value: replies, label: '回复' },
+    ],
+    actions: [
+      {
+        id: 'react',
+        kind: 'react',
+        variant: 'like',
+        label: '喜欢',
+        count: likes,
+        enabled: true,
+        fallback: 'openOriginal',
+      },
+      {
+        id: 'reply',
+        kind: 'reply',
+        label: '回复',
+        count: replies,
+        enabled: true,
+        fallback: 'openOriginal',
+      },
+      { id: 'open', kind: 'open', label: '查看原文', enabled: true },
+    ],
   };
 }
 
-export function triggerTwitterAction(item: FeedItem, action: FeedAction): boolean {
-  const testId = action === 'like' ? 'like' : 'reply';
-  const button = item.rawElementRef?.querySelector<HTMLElement>(`[data-testid="${testId}"]`);
+export function triggerTwitterAction(element: Element | undefined, actionId: string): boolean {
+  const testId = actionId === 'react' ? 'like' : actionId === 'reply' ? 'reply' : '';
+  if (!testId) return false;
+  const button = element?.querySelector<HTMLElement>(`[data-testid="${testId}"]`);
   if (!button) return false;
   button.click();
   return true;
@@ -157,8 +189,8 @@ export class TwitterAdapter extends BaseAdapter {
     return parseTwitterCard(element);
   }
 
-  triggerAction(item: FeedItem, action: FeedAction): boolean {
-    return triggerTwitterAction(item, action);
+  triggerAction(itemId: string, actionId: string): boolean {
+    return triggerTwitterAction(this.getRuntimeElement(itemId), actionId);
   }
 
   protected override getCards(): Element[] {
@@ -168,13 +200,7 @@ export class TwitterAdapter extends BaseAdapter {
 }
 
 export const twitterAdapterDefinition: AdapterDefinition = {
-  source: {
-    id: 'twitter',
-    name: 'X',
-    homeUrl: 'https://x.com/home',
-    likeLabel: '喜欢',
-    commentLabel: '回复',
-  },
+  source: SOURCE,
   matches: (hostname) => [
     'x.com',
     'twitter.com',

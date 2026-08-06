@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { FeedItem } from '../../types/feed';
 import {
   parseV2exCard,
   parseV2exCount,
@@ -39,18 +38,22 @@ describe('parseV2exCard', () => {
     expect(item).toMatchObject({
       id: 'v2ex_123456',
       platform: 'v2ex',
+      kind: 'discussion',
       title: '如何保持专注？',
       author: {
         name: 'Alice',
         avatar: 'https://cdn.v2ex.com/avatar/alice.png',
       },
-      createdAt: '2026-08-06 11:42:50 +08:00',
-      stats: { likes: 3, comments: 12 },
+      context: { community: { name: '程序员' } },
+      publishedAt: '2026-08-06 11:42:50 +08:00',
+      metrics: [
+        { kind: 'reactions', value: 3, label: '赞同' },
+        { kind: 'replies', value: 12, label: '回复' },
+      ],
     });
     expect(item?.originalUrl).toBe('http://localhost:3000/t/123456#reply12');
-    expect(item?.contentHtml).toContain('程序员');
-    expect(item?.contentHtml).not.toContain('script');
-    expect(item?.contentHtml).not.toContain('class=');
+    expect(item?.blocks).toEqual([]);
+    expect(item).not.toHaveProperty('rawElementRef');
   });
 
   it('ignores non-topic cells', () => {
@@ -67,10 +70,10 @@ describe('triggerV2exAction', () => {
       </div>`;
     const vote = document.querySelector('button')!;
     const click = vi.spyOn(vote, 'click');
-    const item = { rawElementRef: document.querySelector('.cell.item')! } as FeedItem;
+    const element = document.querySelector('.cell.item')!;
 
-    expect(triggerV2exAction(item, 'like')).toBe(true);
+    expect(triggerV2exAction(element, 'react')).toBe(true);
     expect(click).toHaveBeenCalledOnce();
-    expect(triggerV2exAction(item, 'comment')).toBe(false);
+    expect(triggerV2exAction(element, 'reply')).toBe(false);
   });
 });

@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { FeedItem } from '../../types/feed';
 import {
   parseTwitterCard,
   parseTwitterCount,
@@ -51,17 +50,27 @@ describe('parseTwitterCard', () => {
         name: '林一',
         avatar: 'https://pbs.twimg.com/profile_images/avatar.jpg',
       },
-      createdAt: '2026-08-06T01:02:03.000Z',
-      stats: { likes: 1200, comments: 34 },
+      kind: 'post',
+      publishedAt: '2026-08-06T01:02:03.000Z',
+      metrics: [
+        { kind: 'reactions', value: 1200, label: '喜欢' },
+        { kind: 'replies', value: 34, label: '回复' },
+      ],
     });
-    expect(item?.contentHtml).toContain('保持专注');
-    expect(item?.contentHtml).not.toContain('script');
-    expect(item?.contentHtml).not.toContain('style=');
-    expect(item?.media).toEqual([{
-      type: 'image',
+    const text = item?.blocks.find((block) => block.type === 'richText');
+    const gallery = item?.blocks.find((block) => block.type === 'gallery');
+    expect(text?.html).toContain('保持专注');
+    expect(text?.html).not.toContain('script');
+    expect(text?.html).not.toContain('style=');
+    expect(gallery?.items).toEqual([{
       url: 'https://pbs.twimg.com/media/example.jpg',
       alt: '示例图片',
     }]);
+    expect(item?.actions).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'react', variant: 'like', count: 1200 }),
+      expect.objectContaining({ id: 'reply', count: 34 }),
+    ]));
+    expect(item).not.toHaveProperty('rawElementRef');
   });
 
   it('keeps image-only posts and rejects empty cards', () => {
@@ -81,18 +90,10 @@ describe('triggerTwitterAction', () => {
     document.body.innerHTML = '<article><button data-testid="like"></button></article>';
     const button = document.querySelector('button') as HTMLButtonElement;
     const click = vi.spyOn(button, 'click');
-    const item: FeedItem = {
-      id: 'twitter_1',
-      platform: 'twitter',
-      originalUrl: 'https://x.com/reader/status/1',
-      author: { name: '林一', avatar: '' },
-      contentHtml: '<span>测试</span>',
-      stats: { likes: 0, comments: 0 },
-      rawElementRef: document.querySelector('article')!,
-    };
+    const element = document.querySelector('article')!;
 
-    expect(triggerTwitterAction(item, 'like')).toBe(true);
+    expect(triggerTwitterAction(element, 'react')).toBe(true);
     expect(click).toHaveBeenCalledOnce();
-    expect(triggerTwitterAction(item, 'comment')).toBe(false);
+    expect(triggerTwitterAction(element, 'reply')).toBe(false);
   });
 });

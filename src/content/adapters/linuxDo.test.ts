@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { FeedItem } from '../../types/feed';
 import {
   parseLinuxDoCard,
   parseLinuxDoCount,
@@ -49,19 +48,25 @@ describe('parseLinuxDoCard', () => {
     expect(item).toMatchObject({
       id: 'linux-do_2703711',
       platform: 'linux-do',
+      kind: 'discussion',
       title: '这个冷饭是必须得炒一下了',
       author: {
         name: 'Neo',
         avatar: 'https://cdn.ldstatic.com/avatar.png',
       },
-      createdAt: 1785985633365,
-      stats: { likes: 0, comments: 1200 },
+      context: {
+        community: { name: '运营反馈' },
+        tags: [{ name: '公告' }],
+      },
+      publishedAt: 1785985633365,
+      metrics: [
+        { kind: 'replies', value: 1200, label: '回复' },
+        { kind: 'views', value: 19600, label: '浏览' },
+      ],
     });
     expect(item?.originalUrl).toBe('http://localhost:3000/t/topic/2703711');
-    expect(item?.contentHtml).toContain('运营反馈');
-    expect(item?.contentHtml).toContain('19.6k 次浏览');
-    expect(item?.contentHtml).not.toContain('script');
-    expect(item?.contentHtml).not.toContain('class=');
+    expect(item?.blocks).toEqual([]);
+    expect(item).not.toHaveProperty('rawElementRef');
   });
 
   it('ignores rows without a topic title', () => {
@@ -79,10 +84,10 @@ describe('triggerLinuxDoAction', () => {
       </div>`;
     const button = document.querySelector('button')!;
     const click = vi.spyOn(button, 'click');
-    const item = { rawElementRef: document.querySelector('.topic-list-item')! } as FeedItem;
+    const element = document.querySelector('.topic-list-item')!;
 
-    expect(triggerLinuxDoAction(item, 'like')).toBe(true);
+    expect(triggerLinuxDoAction(element, 'react')).toBe(true);
     expect(click).toHaveBeenCalledOnce();
-    expect(triggerLinuxDoAction(item, 'comment')).toBe(false);
+    expect(triggerLinuxDoAction(element, 'reply')).toBe(false);
   });
 });
