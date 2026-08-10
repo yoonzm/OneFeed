@@ -1,10 +1,13 @@
 import { defineConfig } from 'wxt';
 
+const extensionVersion = process.env.EXTENSION_VERSION?.trim();
+
 export default defineConfig({
   srcDir: 'src',
   manifestVersion: 3,
   modules: ['@wxt-dev/module-react'],
   manifest: {
+    ...(extensionVersion ? { version: extensionVersion } : {}),
     name: 'OneFeed',
     description: '将受支持网站的信息流重新排版为专注、统一、可控的阅读体验。',
     permissions: ['storage'],

@@ -1,18 +1,15 @@
 # Chrome Web Store 发布与自动化指南
 
-> 更新日期：2026 年 8 月 6 日
+> 更新日期：2026 年 8 月 10 日
 > 适用项目：OneFeed
 
 ## 1. 结论
 
-OneFeed 已具备 Manifest V3、WXT 生产构建与 ZIP、测试和 Lint 命令，可以直接生成 Chrome Web Store 上传包。产品面向多平台信息流，当前版本申请知乎与 Twitter/X 站点权限并支持两类信息流。
+OneFeed 已具备 Manifest V3、WXT 生产构建与 ZIP、测试和 Lint 命令，可以直接生成 Chrome Web Store 上传包。产品面向多平台信息流，当前版本申请知乎、Twitter/X、V2EX 与 Linux DO 站点权限并支持四类信息流。
 
 首次发布仍建议在 Chrome Web Store Developer Dashboard 中手动完成，因为首次上架需要注册开发者、填写商店资料、完成隐私声明并创建扩展条目。取得 `EXTENSION_ID` 后，后续版本可以通过 GitHub Actions 自动构建、上传并提交审核。
 
-Google 提供官方 Chrome Web Store API v2，但目前没有 Google 官方维护的一键发布 GitHub Action。可以选择：
-
-- 直接在 GitHub Actions 中调用官方 API v2，获得更好的长期可控性；
-- 使用第三方 Action 快速完成 OAuth Token 刷新、上传和提交审核。
+仓库使用 Google 官方认证 Action 获取短期凭据，并由仓库内脚本直接调用官方 Chrome Web Store API v2，不依赖第三方商店发布 Action。
 
 ## 2. 当前仓库的发布准备情况
 
@@ -25,7 +22,7 @@ Google 提供官方 Chrome Web Store API v2，但目前没有 Google 官方维�
 - `npm test` 自动化测试；
 - `npm run lint` 静态检查；
 - 最小化的 `storage` 权限；
-- 仅针对知乎与 Twitter/X 域名的 Content Script 匹配范围。
+- 仅针对知乎、Twitter/X、V2EX 与 Linux DO 域名的 Content Script 匹配范围。
 
 ### 2.2 发布前仍需补齐
 
@@ -87,7 +84,7 @@ Chrome Web Store 使用 `128×128` 图标展示安装信息和商店条目，`48
 
 #### 隐私政策与数据披露
 
-OneFeed 当前版本会读取并解析用户访问的知乎页面内容。即使内容仅在本地处理、没有上传服务器，Chrome Web Store 仍将网站内容读取和本地处理视为用户数据处理，因此需要如实披露。未来增加其他平台时，应同步更新权限、商店披露和隐私政策。
+OneFeed 当前版本会读取并解析用户访问的知乎、Twitter/X、V2EX 与 Linux DO 页面内容。即使内容仅在本地处理、没有上传服务器，Chrome Web Store 仍将网站内容读取和本地处理视为用户数据处理，因此需要如实披露。未来增加其他平台时，应同步更新权限、商店披露和隐私政策。
 
 隐私政策至少应说明：
 
@@ -179,116 +176,113 @@ GitHub Actions 只能自动上传和送审，不能跳过 Chrome Web Store 审�
 
 首次创建商店条目并取得扩展 ID 后，可以配置自动发布。
 
-### 4.1 OAuth 方式
+### 4.1 Service Account 与 Workload Identity Federation
 
-1. 在 Google Cloud Console 创建或选择项目；
-2. 启用 **Chrome Web Store API**；
-3. 配置 OAuth consent screen；
-4. 创建 Web application 类型的 OAuth Client；
-5. 将 `https://developers.google.com/oauthplayground` 添加为 Redirect URI；
-6. 在 OAuth Playground 使用以下 Scope 授权：
+Chrome Web Store API v2 支持 Service Account，适合 CI/CD：
+
+1. 在 Google Cloud 项目中创建 Service Account；
+2. 启用 Chrome Web Store API、IAM API、Cloud Resource Manager API、IAM Service Account Credentials API 和 Security Token Service API；
+3. 在 Chrome Web Store Developer Dashboard 的 Account 设置中添加 Service Account 邮箱；
+4. 创建信任 GitHub Actions 的 Workload Identity Pool 与 OIDC Provider；
+5. 将 OIDC Provider 限制到 `yoonzm/OneFeed` 仓库的 `master` 分支和 `v*` Tag；
+6. 授予该 GitHub 身份对 Service Account 的 `roles/iam.workloadIdentityUser`；
+7. GitHub Actions 通过 OIDC 换取带有 Chrome Web Store Scope 的短期 Access Token。
+
+OIDC Provider 使用以下约束：
+
+```text
+Issuer: https://token.actions.githubusercontent.com
+
+Attribute mapping:
+google.subject=assertion.sub
+attribute.repository=assertion.repository
+attribute.repository_owner=assertion.repository_owner
+attribute.ref=assertion.ref
+
+Attribute condition:
+assertion.repository_owner == 'yoonzm'
+```
+
+授予 Service Account 访问权时，Principal 应限制为该仓库：
+
+```text
+principalSet://iam.googleapis.com/projects/PROJECT_NUMBER/locations/global/workloadIdentityPools/POOL_ID/attribute.repository/yoonzm/OneFeed
+```
+
+Provider 条件先限制 GitHub 仓库所有者；Service Account 的 Principal 再通过 `attribute.repository` 限制到 `yoonzm/OneFeed`。GitHub Environment 的 Deployment branches 负责限制 `master` 与 `v*` Tag。
+
+Service Account 与 Workload Identity Federation 能避免将个人 OAuth Refresh Token 或长期 JSON Key 放在 CI 中。当前一个 Publisher 只能添加一个 Service Account。
+
+参考：
+
+- [Chrome Web Store API Service Account](https://developer.chrome.com/docs/webstore/service-accounts)
+- [Google Cloud Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation-with-deployment-pipelines)
+
+### 4.2 OAuth 备用方式
+
+如果无法使用 Workload Identity Federation，可以创建 OAuth Client，通过 OAuth Playground 获取包含以下 Scope 的 Refresh Token：
 
 ```text
 https://www.googleapis.com/auth/chromewebstore
 ```
 
-7. 换取 Refresh Token；
-8. 将 Client ID、Client Secret 和 Refresh Token 保存为 GitHub Actions Secrets。
+OAuth Client ID、Client Secret 和 Refresh Token 必须存放在 GitHub Environment Secrets 中。该方式包含长期凭据，只作为兼容性备用方案。
 
 参考：[Chrome Web Store API 使用指南](https://developer.chrome.com/docs/webstore/using-api)
-
-### 4.2 Service Account 方式
-
-Chrome Web Store API v2 支持 Service Account，适合 CI/CD：
-
-1. 在 Google Cloud 项目中创建 Service Account；
-2. 启用 Chrome Web Store API；
-3. 在 Chrome Web Store Developer Dashboard 的 Account 设置中添加 Service Account 邮箱；
-4. 通过短期 Token、Workload Identity Federation 或 Service Account Key 获取 Access Token；
-5. 使用 Token 调用 API v2。
-
-Service Account 能避免将个人 OAuth Refresh Token 长期放在 CI 中。当前一个 Publisher 只能添加一个 Service Account。
-
-参考：[Chrome Web Store API Service Account](https://developer.chrome.com/docs/webstore/service-accounts)
 
 ## 5. GitHub Actions 自动发布
 
 ### 5.1 推荐的触发方式
 
-首期建议使用 `workflow_dispatch` 手动触发，而不是每次推送 `main` 都自动提交商店审核。稳定后可以改为推送 `v*` Git Tag 时发布。
+仓库使用两条工作流：
 
-### 5.2 使用第三方 Action
+- `.github/workflows/ci.yml`：每次 Pull Request 和推送 `master` 时运行 Lint、类型检查、测试和构建；
+- `.github/workflows/publish-chrome.yml`：`master` 中的 `package.json` 发生变化、推送 `v*` Tag 或手动触发时执行发布；每 6 小时还会检查一次是否有因商店正在审核而暂缓的更新。
 
-[`puzzlers-labs/chrome-webstore-publish`](https://github.com/puzzlers-labs/chrome-webstore-publish) 可以自动刷新 OAuth Token、上传 ZIP 并向 Chrome Web Store 提交发布请求。
+发布版本以 `package.json` 中的 `version` 为准。代码准备发布时，必须在同一个提交中递增该版本。普通代码提交不会重复打扰商店审核队列。
 
-在 `.github/workflows/publish-chrome.yml` 中添加：
+### 5.2 发布流程
+
+发布工作流使用固定 Commit SHA 的 `actions/checkout`、`actions/setup-node` 和 `google-github-actions/auth`，然后调用仓库内的 `scripts/publish-chrome.mjs`。不使用第三方 Chrome Web Store 发布 Action。
+
+工作流需要以下最小权限：
 
 ```yaml
-name: Publish Chrome Extension
-
-on:
-  workflow_dispatch:
-
 permissions:
   contents: read
-
-jobs:
-  publish:
-    runs-on: ubuntu-latest
-    environment: chrome-web-store
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Verify
-        run: |
-          npm run lint
-          npm test
-          npm run compile
-
-      - name: Package
-        run: npm run zip
-
-      - name: Upload and submit
-        uses: puzzlers-labs/chrome-webstore-publish@v1
-        with:
-          mode: publish
-          extension_id: ${{ vars.CHROME_EXTENSION_ID }}
-          zip_file_path: ./.output/onefeed-0.1.0-chrome.zip
-          client_id: ${{ secrets.GOOGLE_CLIENT_ID }}
-          client_secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-          refresh_token: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-          publish_target: testers
+  id-token: write
 ```
 
-`publish_target: testers` 适合首次自动化验证。准备公开发布后再改为 `public`。
+发布 Job 使用 `chrome-web-store` Environment，并通过官方 `google-github-actions/auth` 获取短期 Access Token：
 
-该 Action 不是 Google 或 GitHub 官方 Action。生产使用时应检查其源代码，并将 `@v1` 固定到经过审查的完整 Commit SHA，避免上游 Tag 被替换后改变执行内容。
+```yaml
+- id: google-auth
+  uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
+  with:
+    token_format: access_token
+    workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+    service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
+    access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+```
 
-### 5.3 GitHub Variables 与 Secrets
+如果希望完全自动发布，不要为该 Environment 配置 Required reviewers；应使用 Deployment branches 限制只允许 `master` 和 `v*` Tag。若启用 Required reviewers，发布 Job 会等待人工批准。
 
-进入 GitHub Repository → Settings → Secrets and variables → Actions，配置：
+### 5.3 GitHub Environment Variables
+
+进入 GitHub Repository → Settings → Environments，新建 `chrome-web-store`，然后配置：
 
 | 名称 | 类型 | 内容 |
 | :--- | :--- | :--- |
-| `CHROME_EXTENSION_ID` | Variable | 首次创建商店条目后获得的 32 位扩展 ID |
-| `GOOGLE_CLIENT_ID` | Secret | Google Cloud OAuth Client ID |
-| `GOOGLE_CLIENT_SECRET` | Secret | OAuth Client Secret |
-| `GOOGLE_REFRESH_TOKEN` | Secret | 拥有 Chrome Web Store Scope 的 Refresh Token |
+| `CWS_PUBLISHER_ID` | Variable | Developer Dashboard Account 页面中的 Publisher ID |
+| `CWS_EXTENSION_ID` | Variable | 首次创建商店条目后获得的 32 位扩展 ID |
+| `GCP_WIF_PROVIDER` | Variable | `projects/.../locations/global/workloadIdentityPools/.../providers/...` |
+| `GCP_SERVICE_ACCOUNT` | Variable | 被添加到 Developer Dashboard 的 Service Account 邮箱 |
 
-建议创建名为 `chrome-web-store` 的 GitHub Environment，并为正式发布配置人工审批规则。
+这些标识不属于密码。使用推荐的 WIF 方式时，不需要 GitHub Actions Secret。
 
 ## 6. 直接调用官方 API v2
 
-如果不希望依赖第三方 Action，可以在 Workflow 中直接调用官方 API。主要端点为：
+仓库中的 `scripts/publish-chrome.mjs` 直接调用官方 API v2。主要端点为：
 
 ```text
 POST /upload/v2/publishers/{publisherId}/items/{extensionId}:upload
@@ -309,7 +303,9 @@ POST /v2/publishers/{publisherId}/items/{extensionId}:publish
   → 等待商店审核
 ```
 
-官方 API 不会自动修改商店页面、隐私声明或发布范围。使用 API 前仍需在 Dashboard 中完成这些配置。如果手动改变了可见性，需要先使用新可见性手动发布一次，之后 API 才能继续按该设置发布。
+脚本会比较 `.output/chrome-mv3/manifest.json` 与商店现有版本。如果商店状态为 `PENDING_REVIEW` 或 `STAGED`，不会自动取消现有提交，而是暂缓本次发布；定时工作流会继续重试 `master` 上的最新版本。上传请求返回 `IN_PROGRESS` 时，脚本最多轮询两分钟。
+
+送审请求使用 `DEFAULT_PUBLISH` 和 `blockOnWarnings: true`。审核通过后立即按 Developer Dashboard 中已有的可见性发布；存在 API 校验警告时流水线失败。官方 API 不会自动修改商店页面、隐私声明或发布范围。如果手动改变了可见性，需要先使用新可见性手动发布一次，之后 API 才能继续按该设置发布。
 
 参考：[Chrome Web Store API v2](https://developer.chrome.com/docs/webstore/api/reference/rest)
 
@@ -332,8 +328,8 @@ POST /v2/publishers/{publisherId}/items/{extensionId}:publish
   → 更新变更说明
   → 本地测试
   → 提交代码
-  → 创建 Git Tag
-  → 运行 GitHub Action
+  → 推送 master 或创建同版本 v* Tag
+  → GitHub Action 自动运行
   → 上传并送审
 ```
 
@@ -379,7 +375,8 @@ POST /v2/publishers/{publisherId}/items/{extensionId}:publish
 - [ ] 商店中已创建初始条目；
 - [ ] 已取得 `EXTENSION_ID`；
 - [ ] 已启用 Chrome Web Store API；
-- [ ] GitHub Secrets 与 Variables 已配置；
+- [ ] Workload Identity Federation 仅信任 `yoonzm/OneFeed`；
+- [ ] `chrome-web-store` Environment Variables 已配置；
 - [ ] 正式发布使用受保护的 GitHub Environment；
-- [ ] 第三方 Action 固定到已审查的 Commit SHA；
+- [ ] GitHub Actions 均固定到已审查的 Commit SHA；
 - [ ] 首次自动化发布先使用 Trusted Testers 验证。
