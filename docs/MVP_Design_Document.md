@@ -14,10 +14,10 @@
 
 | 功能模块 | MVP 实施范围 | 非 MVP 范围 (暂不实现) |
 | :--- | :--- | :--- |
-| **支持平台** | 知乎（回答/文章流、回答详情、专栏文章详情）、Twitter/X（Home Feed）、V2EX（主题列表）、Linux DO（话题列表） | X、V2EX、Linux DO 详情页；B站、YouTube、Reddit、小红书等 |
+| **支持平台** | 知乎（回答/文章流、问题详情、回答详情、专栏文章详情）、Twitter/X（Home Feed）、V2EX（主题列表、主题详情）、Linux DO（话题列表） | X、Linux DO 详情页；B站、YouTube、Reddit、小红书等 |
 | **渲染主题** | **1 款默认主题**：Notion 风格（极简、无框、黑白灰高留白） | 主题市场、自定义 CSS/JS、多主题切换 |
-| **数据解析** | 独立的 Feed/Detail 静态选择器适配器（首个 Detail Adapter 为 ZhihuDetailAdapter） | AI 自动解析、云端规则库更新 |
-| **核心交互** | 基础滚动、图片预览、Feed 卡片原网页点赞/评论代理、知乎详情赞同代理；Popup 开关与统一视图内“查看原页面”入口 | Detail 评论区接管、复杂富文本编辑、视频内嵌播放 |
+| **数据解析** | 独立的 Feed、Article Detail 与 Thread Detail 静态选择器适配器 | AI 自动解析、云端规则库更新 |
+| **核心交互** | 基础滚动、图片预览、回答折叠、Thread 无限加载/分页、原网页点赞代理；Popup 开关与统一视图内“查看原页面”入口 | 知乎回答评论区接管、复杂富文本编辑、视频内嵌播放 |
 | **数据持久化**| 本地存储 (chrome.storage.local) 记录启用状态与主题偏好 | 云端同步、知识库导出 (Notion/Obsidian) |
 
 ---
@@ -31,7 +31,7 @@
                                │ 1. URL 级 Surface 识别
                   ┌────────────┴────────────┐
                   ▼                         ▼
-        Feed Adapter / FeedItem   Detail Adapter / ArticleDetail
+        Feed Adapter / FeedItem   Detail Adapter / ArticleDetail | ThreadDetail
                   │                         │
         useFeedStore / FeedApp    useDetailStore / DetailApp
                   └────────────┬────────────┘
@@ -39,14 +39,14 @@
 ┌──────────────────────────────▼──────────────────────────────┐
 │                    Shadow DOM 隔离层                        │
 │ ┌─────────────────────────────────────────────────────────┐ │
-│ │            Feed Renderer 或 Detail Renderer             │ │
+│ │       Feed、Article Detail 或 Thread Detail Renderer     │ │
 │ └─────────────────────────────────────────────────────────┘ │
 └─────────────────────────────────────────────────────────────┘
 ```
 
 ### 3.1 数据归一化 Schema (`types/feed.ts`)
 
-共享协议按“内容语义 + 内容区块 + 指标/操作描述”拆分。`kind` 只表示内容结构，不表示页面层级。Feed 与 Detail 使用独立顶层模型：`FeedItem` 是原信息流卡片快照，其区块命名为 `previewBlocks`；`ArticleDetail` 是独立详情页正文，其区块命名为 `body`。两者共享 `FeedBlock`、作者、指标和操作描述，但不进行列表到详情的数据升级或合并。
+共享协议按“页面 Surface + 内容角色 + 内容结构 + 区块/指标/操作”拆分。`kind` 表示内容结构，`role` 表示内容在产品中的语义角色。`FeedItem` 是原信息流卡片快照，`ArticleDetail` 是单篇回答或专栏文章正文，`ThreadDetail` 是固定主题头加回答/回复集合。三者共享 `FeedBlock`、作者、指标和操作描述，但不把问题、回答和评论压扁成同一篇文章。
 
 ```typescript
 export interface FeedAuthor {
@@ -56,6 +56,14 @@ export interface FeedAuthor {
 }
 
 export type ContentKind = 'post' | 'article' | 'discussion';
+
+export type ContentRole =
+  | 'post'
+  | 'article'
+  | 'question'
+  | 'topic'
+  | 'answer'
+  | 'reply';
 
 export type FeedBlock =
   | { type: 'richText'; html: string; plainText: string }
@@ -86,7 +94,9 @@ export interface FeedItem {
   source: FeedSourceRef;
   originalUrl: string;
   kind: ContentKind;
+  role: ContentRole;
   author: FeedAuthor;
+  sequence?: number;        // 论坛分页中的真实楼层号
   context?: FeedContext;    // 社区、标签、推荐/转发/置顶原因
   publishedAt?: string | number;
   updatedAt?: string | number;
@@ -112,6 +122,7 @@ export interface ArticleDetail {
   source: FeedSourceRef;
   originalUrl: string;
   kind: 'article';
+  role: 'article' | 'answer';
   author: FeedAuthor;
   publishedAt?: string | number;
   updatedAt?: string | number;
@@ -121,11 +132,24 @@ export interface ArticleDetail {
   actions: FeedActionDescriptor[];
   flags?: FeedFlags;
 }
+
+export interface ThreadDetail {
+  id: string;
+  platform: string;
+  source: FeedSourceRef;
+  originalUrl: string;
+  kind: 'thread';
+  header: ThreadHeader;     // question 或 topic
+  entries: FeedItem[];      // answer 或 reply
+  entryLabel: '回答' | '回复';
+  loadingMode: 'infinite' | 'paged';
+  pagination?: ThreadPagination;
+}
 ```
 
-MVP 首先实现 `post`、`article`、`discussion` 三种结构，以及 `richText`、`gallery` 两类 Block；其余 Block 是后续平台扩展的稳定协议，不要求在首版一次完成。知乎映射为 `article`，Twitter/X 映射为 `post`，V2EX 与 Linux DO 映射为 `discussion`。
+MVP 首先实现 `post`、`article`、`discussion` 三种内容结构，以及 `richText`、`gallery` 两类 Block。平台不再整体映射成单一类型：知乎专栏是 `article`，知乎问题/回答是 `question -> answer` Thread；V2EX 主题/回复是 `topic -> reply` Thread；Twitter/X 是 `post`，Linux DO 列表项是 `topic`。
 
-`FeedItem` 与 `ArticleDetail` 必须保持可序列化。原站 `Element`、按钮节点和点击代理不得写入 Schema；各 Surface Adapter 在独立运行时 Registry 中维护 `item.id -> 原始节点/动作句柄` 映射。详情页需要完整内容时只解析当前详情 DOM，不依赖或合并此前列表状态。
+`FeedItem`、`ArticleDetail` 与 `ThreadDetail` 必须保持可序列化。原站 `Element`、按钮节点和点击代理不得写入 Schema；各 Surface Adapter 在独立运行时 Registry 中维护 `item.id -> 原始节点/动作句柄` 映射。详情页只解析当前详情 DOM，不依赖或合并此前列表状态。
 
 ### 3.2 Adapter 扩展契约
 
@@ -133,7 +157,7 @@ MVP 首先实现 `post`、`article`、`discussion` 三种结构，以及 `richTe
 
 * `BaseAdapter` 只负责 Feed 卡片的初次扫描、`MutationObserver` 防抖监听和断开清理；详情页使用独立 `DetailAdapter` 契约，不能把详情 DOM 强行兼容进 Feed Adapter。
 * 每个 Adapter Definition 使用完整 `URL` 匹配页面，而不是只按域名匹配。详情规则优先于 Feed 规则，设置页等未支持路由不得挂载统一视图。
-* `registry.ts` 是唯一注册入口。`createAdapter(url, listeners)` 返回带 `surface: 'feed' | 'detail'` 的判别联合，分别写入 `useFeedStore` 或 `useDetailStore`。
+* `registry.ts` 是唯一注册入口。`createAdapter(url, listeners)` 返回带 `surface: 'feed' | 'article' | 'thread'` 的判别联合；Feed 写入 `useFeedStore`，两类详情写入可判别联合的 `useDetailStore`。
 * DOM 选择器、计数格式和站点回退逻辑不得进入内容脚本、状态库或主题组件。
 
 增加新网站时，只需新增对应 Adapter 文件及解析测试、在 `registry.ts` 注册定义，并在 WXT 内容脚本入口 `src/entrypoints/content.tsx` 声明明确的站点匹配权限；无需修改挂载、状态管理或渲染核心逻辑。
@@ -174,8 +198,10 @@ onefeed-extension/
 │   │   │   ├── detail.ts       # DetailAdapter 契约
 │   │   │   ├── zhihu.ts        # 知乎 DOM 提取
 │   │   │   ├── zhihuDetail.ts  # 知乎回答/专栏详情提取
+│   │   │   ├── zhihuThread.ts  # 知乎问题/回答集合提取
 │   │   │   ├── twitter.ts      # Twitter DOM 提取
 │   │   │   ├── v2ex.ts         # V2EX DOM 提取
+│   │   │   ├── v2exThread.ts   # V2EX 主题/回复集合提取
 │   │   │   └── linuxDo.ts      # Linux DO DOM 提取
 │   ├── renderer/               # React 统一渲染组件
 │   │   ├── FeedApp.tsx         # Feed Surface Shell
@@ -187,6 +213,7 @@ onefeed-extension/
 │   │       └── FocusPaper/      # MVP 默认主题
 │   │           ├── Card.tsx
 │   │           ├── DetailArticle.tsx
+│   │           ├── ThreadDetail.tsx
 │   │           └── Header.tsx
 │   └── types/                  # 共享积木与独立 Surface 模型
 │       ├── feed.ts
@@ -275,7 +302,7 @@ export const zhihuAdapterDefinition: AdapterDefinition = {
 };
 ```
 
-知乎详情由 `zhihuDetail.ts` 独立处理。回答路由 `/question/:questionId/answer/:answerId` 必须按 URL 中的 `answerId` 从同页多个 `.AnswerItem` 中精确选择主回答；专栏路由 `/p/:articleId` 只解析匹配的 `.Post-content`。两者输出 `ArticleDetail.body`，不调用 Feed Store，也不将详情正文回写到 `FeedItem.previewBlocks`。
+知乎问题路由 `/question/:questionId` 由 `zhihuThread.ts` 输出 `ThreadDetail`：问题标题/补充进入 `header`，回答进入带 `role: 'answer'` 的 `entries`，每条回答独立折叠，并在触底时驱动隐藏原页继续加载。回答路由 `/question/:questionId/answer/:answerId` 仍由 `zhihuDetail.ts` 精确选择 URL 指定回答；专栏路由 `/p/:articleId` 只解析匹配的 `.Post-content`，两者输出带不同 `role` 的 `ArticleDetail`。V2EX `/t/:topicId` 由 `v2exThread.ts` 输出主题头、真实楼层回复和分页链接。知乎回答评论内容仍不进入 Thread Schema，统一视图显示评论数量并保留回答原页入口。
 
 ---
 
@@ -283,16 +310,16 @@ export const zhihuAdapterDefinition: AdapterDefinition = {
 
 ### 0.1 首版交付说明
 
-首版按平台拆分交付：`0.1.0` 先完成知乎回答/文章流，后续迭代已接入 Twitter/X Home Feed、V2EX 主题列表与 Linux DO 话题列表。该拆分不改变“多平台归一化”的 MVP 总目标，先用单平台验证完整链路，再复用统一 Adapter 契约扩展社区类平台：
+首版按平台拆分交付：`0.1.0` 先完成知乎回答/文章流，后续迭代接入 Twitter/X Home Feed、V2EX 主题列表、Linux DO 话题列表，以及知乎/V2EX Thread Detail。该拆分不改变“多平台归一化”的 MVP 总目标：
 
 - WXT + React + TypeScript + Manifest V3 可构建项目；
 - 知乎 DOM 静态适配、字段清洗、稳定 ID 与响应式去重；
-- 知乎回答/专栏详情使用独立 `ArticleDetail`、Detail Store 与 Detail Renderer；
+- 知乎回答/专栏使用 `ArticleDetail`，知乎问题和 V2EX 主题使用 `ThreadDetail`；
 - Shadow DOM 全屏接管与 Focus Paper 默认主题；
-- 图片预览、Feed 原站点赞/评论代理、知乎详情赞同代理、接近底部时同步原信息流加载；
+- 图片预览、原站点赞代理、回答独立折叠、知乎触底加载同步和 V2EX 分页；
 - `chrome.storage.local` 保存启用状态，Popup 支持即时开关；
 - 适配器解析、数量转换与去重逻辑的自动化测试；
-- Feed → Detail、Detail → Feed 与支持路由 → 未支持路由的 SPA 生命周期测试。
+- Feed、Article、Thread 与未支持路由之间的 SPA 生命周期测试。
 
 生产构建产物位于 `.output/chrome-mv3/`，可作为已解压扩展加载到 Chrome；`wxt zip` 生成 Chrome Web Store 上传包。
 
@@ -302,11 +329,11 @@ export const zhihuAdapterDefinition: AdapterDefinition = {
   * 搭建 WXT + React + TypeScript + Chrome Extension Manifest V3 脚手架。
   * 完成 Shadow DOM 挂载与原生 DOM 隐藏防闪烁逻辑。
   * 完成 Popup 开关、页内退出入口与异常自动恢复原页面逻辑。
-  * 定义独立 `FeedItem`、`ArticleDetail` Schema 与两套 Zustand Store 数据流。
+  * 定义 `FeedItem`、`ArticleDetail`、`ThreadDetail` Schema 与两套 Zustand Store 数据流。
 
 * **Week 2: 适配器编写 (知乎、Twitter、V2EX 与 Linux DO)**
   * 编写 `ZhihuAdapter`、`TwitterAdapter`、`V2exAdapter` 与 `LinuxDoAdapter`。
-  * 编写 `ZhihuDetailAdapter`，验证回答和专栏详情的独立解析与渲染。
+  * 编写 `ZhihuDetailAdapter`、`ZhihuThreadAdapter` 与 `V2exThreadAdapter`，验证文章和讨论串详情。
   * 实现基于 `MutationObserver` 的异步卡片提取与去重逻辑。
   * 验证原网页底层 API / 节点的代理点击（如触发点赞）。
 

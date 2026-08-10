@@ -89,6 +89,7 @@ export function parseLinuxDoCard(element: Element): FeedItem | null {
     source: SOURCE,
     originalUrl: originalUrl || window.location.href,
     kind: 'discussion',
+    role: 'topic',
     title,
     author,
     context: categoryName || tags.length ? {

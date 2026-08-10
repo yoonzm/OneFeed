@@ -138,6 +138,7 @@ export function parseTwitterCard(element: Element): FeedItem | null {
     source: SOURCE,
     originalUrl,
     kind: 'post',
+    role: 'post',
     author,
     publishedAt,
     previewBlocks: [

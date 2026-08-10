@@ -12,9 +12,19 @@ interface ActionBarProps {
 }
 
 const passiveMetricKinds = new Set<FeedMetricKind>(['reposts', 'views', 'score']);
+const actionMetricKinds: Partial<Record<FeedActionDescriptor['kind'], FeedMetricKind>> = {
+  react: 'reactions',
+  reply: 'replies',
+  repost: 'reposts',
+};
 
 export function ActionBar({ originalUrl, metrics, actions, onAction }: ActionBarProps) {
-  const passiveMetrics = metrics.filter((metric) => passiveMetricKinds.has(metric.kind));
+  const coveredMetricKinds = new Set(
+    actions.map((action) => actionMetricKinds[action.kind]).filter(Boolean),
+  );
+  const passiveMetrics = metrics.filter((metric) => (
+    passiveMetricKinds.has(metric.kind) || !coveredMetricKinds.has(metric.kind)
+  ));
 
   return (
     <footer className="card-actions">

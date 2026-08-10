@@ -5,8 +5,10 @@ import type { DetailAdapter, DetailAdapterDefinition } from './detail';
 import { linuxDoAdapterDefinition } from './linuxDo';
 import { twitterAdapterDefinition } from './twitter';
 import { v2exAdapterDefinition } from './v2ex';
+import { v2exThreadAdapterDefinition } from './v2exThread';
 import { zhihuAdapterDefinition } from './zhihu';
 import { zhihuDetailAdapterDefinition } from './zhihuDetail';
+import { zhihuThreadAdapterDefinition } from './zhihuThread';
 
 const feedAdapterDefinitions: AdapterDefinition[] = [
   zhihuAdapterDefinition,
@@ -16,6 +18,8 @@ const feedAdapterDefinitions: AdapterDefinition[] = [
 ];
 
 const detailAdapterDefinitions: DetailAdapterDefinition[] = [
+  zhihuThreadAdapterDefinition,
+  v2exThreadAdapterDefinition,
   zhihuDetailAdapterDefinition,
 ];
 
@@ -31,7 +35,7 @@ export type ActiveAdapter =
       source: FeedSource;
     }
   | {
-      surface: 'detail';
+      surface: 'article' | 'thread';
       adapter: DetailAdapter;
       source: FeedSource;
     };
@@ -40,7 +44,7 @@ export function createAdapter(url: URL, listeners: AdapterListeners): ActiveAdap
   const detailDefinition = detailAdapterDefinitions.find((candidate) => candidate.matches(url));
   if (detailDefinition) {
     return {
-      surface: 'detail',
+      surface: detailDefinition.surface,
       adapter: detailDefinition.create(listeners.onDetail),
       source: detailDefinition.source,
     };

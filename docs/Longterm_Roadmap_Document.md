@@ -28,11 +28,11 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 ### Phase 1: MVP 验证与技术打通 (已规划)
 * **核心目标**：验证“完全隐藏原 DOM，在 Shadow DOM 中接管全局渲染”的工程可行性。
 * **覆盖平台**：知乎、Twitter/X、V2EX、Linux DO。
-* **核心交付**：1 款 Notion 风格基础主题，打通 Feed Surface，并以知乎回答/专栏完成首个独立 Detail Surface。
+* **核心交付**：1 款 Notion 风格基础主题，打通 Feed Surface，并以知乎回答/专栏验证 Article Detail，以知乎问题和 V2EX 主题验证 Thread Detail。
 * **安全回退**：Popup、页面右侧常驻悬浮开关与统一视图内均提供关闭入口；关闭后立即卸载接管层并恢复原页面，初始化异常时自动回退，用户可随时重新开启。
 * **交付顺序**：`0.1.0` 先交付知乎完整链路，后续迭代已通过统一 Adapter 注册契约接入 Twitter/X、V2EX 与 Linux DO；单平台首发用于降低同时调试多个动态 DOM 的风险，社区列表适配继续验证该契约的扩展能力。
 * **工程基础**：使用 WXT 的文件式入口、Manifest 生成、开发加载和发布打包能力承载扩展工程，为后续按浏览器生成独立构建保留统一入口。
-* **扩展边界**：Feed 与 Detail 共享 Block、作者、指标和操作描述，但使用独立顶层模型、Store、Adapter 与 Renderer。新增路由通过完整 URL 注册到对应 Surface；未支持路由不得被域名级兜底接管。
+* **扩展边界**：Feed、Article Detail 与 Thread Detail 共享 Block、内容角色、作者、指标和操作描述，但使用独立顶层模型与 Renderer。新增路由通过完整 URL 注册到对应 Surface；未支持路由不得被域名级兜底接管。
 
 ---
 
@@ -42,7 +42,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 平台覆盖分为三个层级：
 
-* **Schema 可表达**：现有 Feed 标准 `kind + previewBlocks + metrics + actions` 能无损描述列表卡片；详情正文使用独立 Detail 模型的 `body`，仍需单独开发 Adapter、权限、解析测试和原站操作代理。
+* **Schema 可表达**：Feed 使用 `kind + role + previewBlocks + metrics + actions` 描述列表卡片；单篇详情使用 `ArticleDetail.body`，问题/主题详情使用 `ThreadDetail.header + entries`，仍需单独开发 Adapter、解析测试和原站操作代理。
 * **需要标准 Block 扩展**：仍属于通用 Feed，但必须先新增可复用 Block 或状态协议。
 * **需要专用 Surface**：核心交互不是卡片式 Feed，不应为了扩大平台数量而强行塞入通用 Card。
 
@@ -51,8 +51,8 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 | 产品类型 | 可覆盖产品 | 主要映射 |
 | :--- | :--- | :--- |
 | 短动态与开放社交 | Twitter/X、微博、Threads、Bluesky、Mastodon | `post` + `richText/gallery/video/linkPreview/quote/poll` |
-| 论坛与社区 | Reddit、V2EX、Linux DO/Discourse、Hacker News | `discussion` + 社区/标签 Context + `score/replies` |
-| 长文与订阅内容 | 知乎、Medium、Substack、WordPress、RSS/Atom、微信公众号网页版 | Feed 使用 `article + previewBlocks`；受支持详情使用 `ArticleDetail.body` |
+| 论坛与社区 | Reddit、V2EX、Linux DO/Discourse、Hacker News、知乎问题 | Feed 使用 `discussion`；详情使用 `ThreadDetail` 的 `topic/question -> reply/answer` 角色关系 |
+| 长文与订阅内容 | 知乎专栏、Medium、Substack、WordPress、RSS/Atom、微信公众号网页版 | Feed 使用 `article + previewBlocks`；受支持详情使用 `ArticleDetail.body` |
 | 视频与图片 Feed | YouTube Home、B站首页/动态、Instagram 基础 Feed、小红书基础 Feed、Pinterest | `post/article` + `gallery/video`；只覆盖 Feed 卡片，不承诺完整播放器体验 |
 | 职业内容 Feed | LinkedIn 基础动态、文章、图片、视频和投票 | `post/article` + Context + 标准 Blocks；文档、职位和活动卡片另行扩展 |
 
@@ -79,7 +79,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 | 迭代 | 目标 | 平台交付 | 验收重点 |
 | :--- | :--- | :--- | :--- |
-| **2.0 统一协议** | 完成 Schema、Surface 与 Renderer 解耦 | 迁移知乎、Twitter/X、V2EX、Linux DO | `FeedItem`/`ArticleDetail` 可序列化；URL 路由互斥；SPA 切换清理旧 Surface；Block Registry 与 Action Bar 跨 Surface 复用 |
+| **2.0 统一协议** | 完成 Schema、Surface 与 Renderer 解耦 | 迁移知乎、Twitter/X、V2EX、Linux DO | `FeedItem`/`ArticleDetail`/`ThreadDetail` 可序列化；URL 路由互斥；SPA 切换清理旧 Surface；Block Registry 与 Action Bar 跨 Surface 复用 |
 | **2.1 讨论型扩展** | 验证 `discussion` 通用性 | Reddit、Hacker News | 社区/标签、分数、回复、投票、剧透/锁定和链接帖降级 |
 | **2.2 开放社交扩展** | 验证复杂 `post` 通用性 | Mastodon、Bluesky | 引用、转发原因、内容警告、可见范围、链接卡片、图片比例和投票 |
 | **2.3 视频扩展** | 验证媒体 Block 与播放器代理 | YouTube、B站 | 封面、时长、字幕/直播状态、播放量、原生播放器 Portal 与回退 |
@@ -91,7 +91,7 @@ Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准：优先完成当�
 建模依据包括 [ActivityStreams 2.0](https://www.w3.org/TR/activitystreams-core/)、[Mastodon Status](https://docs.joinmastodon.org/entities/Status/)、[Bluesky Posts](https://docs.bsky.app/docs/advanced-guides/posts)、[Reddit Post](https://developers.reddit.com/docs/api/redditapi/models/classes/Post)、[Hacker News API](https://github.com/HackerNews/API)、[LinkedIn Posts API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api)、[YouTube Video](https://developers.google.com/youtube/v3/docs/videos)、[Twitch API](https://dev.twitch.tv/docs/api/reference/) 与 [Atom RFC 4287](https://www.rfc-editor.org/rfc/rfc4287)。
 
 #### 3. 主题引擎 (Theme Engine & System Styles)
-主题包必须分别声明支持的 Surface。Feed 主题负责卡片密度、排序展示和预览截断；Detail 主题负责正文排版与阅读进度。共享视觉 Token 和 Block Renderer，不要求两个 Surface 使用相同顶层布局。
+主题包必须分别声明支持的 Surface。Feed 主题负责卡片密度和预览截断；Article Detail 负责单篇正文排版；Thread Detail 负责固定主题头、回答/回复列表和分页。三者共享视觉 Token 和 Block Renderer，不要求使用相同顶层布局。
 
 内置 6 款精心调优的高质感视觉主题：
 * **Notion Style**：极简折叠、无框卡片、灰白高留白。
@@ -102,7 +102,7 @@ Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准：优先完成当�
 * **Minimal Clean**：极致文本流，去除一切视觉干扰。
 
 #### 4. 架构优化与交互代理
-* **SPA Surface 生命周期**：使用 WXT 路由事件按完整 URL 识别页面，依次销毁旧 Adapter/Store/Renderer、恢复原 DOM，再挂载新 Surface；hash-only 跳转不重建页面。Detail 只有在 URL 对应的目标节点解析成功后才遮罩原页，避免 DOM 延迟或规则失效造成空白详情。
+* **SPA Surface 生命周期**：使用 WXT 路由事件按完整 URL 识别页面，依次销毁旧 Adapter/Store/Renderer、恢复原 DOM，再挂载新 Surface；hash-only 跳转不重建页面。Article/Thread Detail 只有在 URL 对应的目标节点解析成功后才遮罩原页，避免 DOM 延迟或规则失效造成空白详情。
 * **视频播放器节点搬运 (Portal)**：对于 B站/YouTube 视频，通过 DOM `appendChild` 将原平台的播放器节点无缝“移驾”到新 UI 卡片中，保留原生播放状态与清晰度选项。
 * **触底加载同步 (Scroll Synchronization)**：当用户在新 UI 滚动到底部时，自动向被隐藏的原 DOM 派发滚动事件，实现无缝无限翻页。
 

@@ -168,7 +168,8 @@ h2 a { text-decoration: none; text-decoration-thickness: 1px; text-underline-off
 h2 a:hover { color: var(--blue); text-decoration: underline; }
 
 .detail-article { padding: 56px 0 24px; }
-.detail-article h1 {
+.detail-article h1,
+.thread-header h1 {
   margin: 0 0 28px;
   font-family: "Songti SC", SimSun, Georgia, serif;
   font-size: clamp(30px, 4.5vw, 46px);
@@ -188,6 +189,42 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .detail-body .content h2 { font-size: 1.45em; }
 .detail-body .content h3 { font-size: 1.25em; }
 .detail-body .content h4 { font-size: 1.1em; }
+
+.thread-header {
+  padding: 56px 0 42px;
+  border-bottom: 1px solid var(--line);
+}
+.thread-header .context-row { margin-bottom: 18px; }
+.thread-header h1 { margin-bottom: 24px; }
+.thread-header h1 + .author-row { margin-top: -8px; }
+.thread-body { margin-top: 24px; }
+.thread-entries { margin-top: 12px; }
+.thread-list-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 30px 0 6px;
+  color: var(--muted);
+}
+.thread-list-header h2 {
+  margin: 0;
+  color: var(--ink);
+  font: 700 20px/1.4 "Songti SC", SimSun, Georgia, serif;
+}
+.thread-list-header span { font-size: 12px; }
+.thread-empty { padding: 64px 0; color: var(--muted); text-align: center; }
+.feed-card-reply { padding-top: 34px; padding-bottom: 38px; }
+.thread-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 36px 0 10px;
+  font-size: 12px;
+}
+.thread-pagination a { color: var(--blue); text-decoration: none; }
+.thread-pagination span { color: #a7b1c1; }
+.thread-pagination strong { color: var(--muted); font-weight: 500; }
 
 .content {
   position: relative;

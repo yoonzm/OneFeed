@@ -39,6 +39,7 @@ describe('parseV2exCard', () => {
       id: 'v2ex_123456',
       platform: 'v2ex',
       kind: 'discussion',
+      role: 'topic',
       title: '如何保持专注？',
       author: {
         name: 'Alice',

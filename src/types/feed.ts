@@ -61,6 +61,14 @@ export type FeedBlock =
 
 export type ContentKind = 'post' | 'article' | 'discussion';
 
+export type ContentRole =
+  | 'post'
+  | 'article'
+  | 'question'
+  | 'topic'
+  | 'answer'
+  | 'reply';
+
 export interface FeedContext {
   community?: {
     id?: string;
@@ -133,7 +141,9 @@ export interface FeedItem {
   source: FeedSourceRef;
   originalUrl: string;
   kind: ContentKind;
+  role: ContentRole;
   author: FeedAuthor;
+  sequence?: number;
   context?: FeedContext;
   publishedAt?: string | number;
   updatedAt?: string | number;

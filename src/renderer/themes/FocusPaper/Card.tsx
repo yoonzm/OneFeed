@@ -29,8 +29,10 @@ export function Card({ item, index, onAction }: CardProps) {
   );
 
   return (
-    <article className={`feed-card feed-card-${item.kind}`}>
-      <div className="card-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div>
+    <article className={`feed-card feed-card-${item.kind} feed-card-${item.role}`}>
+      <div className="card-index" aria-hidden="true">
+        {String(item.sequence || index + 1).padStart(2, '0')}
+      </div>
       <div className="card-main">
         {(item.context?.reason || item.context?.community || item.context?.tags?.length) && (
           <div className="context-row">

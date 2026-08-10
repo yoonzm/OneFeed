@@ -3,8 +3,10 @@ import { createAdapter } from './registry';
 import { LinuxDoAdapter } from './linuxDo';
 import { TwitterAdapter } from './twitter';
 import { V2exAdapter } from './v2ex';
+import { V2exThreadAdapter } from './v2exThread';
 import { ZhihuAdapter } from './zhihu';
 import { ZhihuDetailAdapter } from './zhihuDetail';
+import { ZhihuThreadAdapter } from './zhihuThread';
 
 function listeners() {
   return {
@@ -42,7 +44,7 @@ describe('createAdapter', () => {
       new URL('https://www.zhihu.com/question/1/answer/42?utm_source=test#comment-1'),
       listeners(),
     )).toMatchObject({
-      surface: 'detail',
+      surface: 'article',
       adapter: expect.any(ZhihuDetailAdapter),
       source: { id: 'zhihu', name: '知乎' },
     });
@@ -50,15 +52,30 @@ describe('createAdapter', () => {
       new URL('https://zhuanlan.zhihu.com/p/123/'),
       listeners(),
     )).toMatchObject({
-      surface: 'detail',
+      surface: 'article',
       adapter: expect.any(ZhihuDetailAdapter),
     });
   });
 
+  it('selects thread adapters for question and topic detail routes', () => {
+    expect(createAdapter(
+      new URL('https://www.zhihu.com/question/1'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'thread',
+      adapter: expect.any(ZhihuThreadAdapter),
+    });
+    expect(createAdapter(
+      new URL('https://www.v2ex.com/t/123?p=2'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'thread',
+      adapter: expect.any(V2exThreadAdapter),
+    });
+  });
+
   it('leaves unsupported site pages untouched', () => {
-    expect(createAdapter(new URL('https://www.zhihu.com/question/1'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://x.com/reader/status/123'), listeners())).toBeNull();
-    expect(createAdapter(new URL('https://www.v2ex.com/t/123'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do/t/topic/123'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://www.zhihu.com/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();

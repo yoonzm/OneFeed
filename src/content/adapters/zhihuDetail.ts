@@ -92,6 +92,7 @@ export function parseZhihuDetail(
     source: ZHIHU_SOURCE,
     originalUrl: url.href,
     kind: 'article',
+    role: parsed.role,
     author: parsed.author,
     publishedAt: metadata.dateCreated ?? metadata.datePublished,
     updatedAt: metadata.dateModified,
@@ -167,6 +168,7 @@ export class ZhihuDetailAdapter {
 
 export const zhihuDetailAdapterDefinition: DetailAdapterDefinition = {
   source: ZHIHU_SOURCE,
+  surface: 'article',
   matches: isZhihuDetailUrl,
   create: (onDetail) => new ZhihuDetailAdapter(onDetail),
 };

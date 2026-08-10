@@ -3,6 +3,7 @@ import type { FeedActionDescriptor, FeedSource } from '../types/feed';
 import { useDetailStore } from './store/useDetailStore';
 import { DetailArticle } from './themes/FocusPaper/DetailArticle';
 import { Header } from './themes/FocusPaper/Header';
+import { ThreadDetail } from './themes/FocusPaper/ThreadDetail';
 
 interface DetailAppProps {
   scrollElement: HTMLElement;
@@ -25,15 +26,26 @@ export default function DetailApp({
       const available = scrollElement.scrollHeight - scrollElement.clientHeight;
       const nextProgress = available > 0 ? scrollElement.scrollTop / available : 0;
       setProgress(Math.min(1, Math.max(0, nextProgress)));
+
+      if (
+        content?.kind === 'thread' &&
+        content.loadingMode === 'infinite' &&
+        available - scrollElement.scrollTop < 800
+      ) {
+        window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
+      }
     };
     scrollElement.addEventListener('scroll', handleScroll, { passive: true });
     return () => scrollElement.removeEventListener('scroll', handleScroll);
-  }, [scrollElement]);
+  }, [content, scrollElement]);
 
-  const handleAction = (action: FeedActionDescriptor) => {
-    if (!content) return;
-    if (!onAction(content.id, action.id) && action.fallback === 'openOriginal') {
-      window.open(content.originalUrl, '_blank', 'noopener,noreferrer');
+  const handleAction = (
+    itemId: string,
+    originalUrl: string,
+    action: FeedActionDescriptor,
+  ) => {
+    if (!onAction(itemId, action.id) && action.fallback === 'openOriginal') {
+      window.open(originalUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
@@ -45,10 +57,19 @@ export default function DetailApp({
         <span className="rail-percent">{Math.round(progress * 100)}%</span>
       </div>
 
-      <Header source={source} status="文章详情" onDisable={onDisable} />
+      <Header
+        source={source}
+        status={content?.kind === 'thread' ? '讨论详情' : '文章详情'}
+        onDisable={onDisable}
+      />
       <main>
-        {content ? (
-          <DetailArticle content={content} onAction={handleAction} />
+        {content?.kind === 'article' ? (
+          <DetailArticle
+            content={content}
+            onAction={(action) => handleAction(content.id, content.originalUrl, action)}
+          />
+        ) : content?.kind === 'thread' ? (
+          <ThreadDetail content={content} onAction={handleAction} />
         ) : (
           <section className="empty-state" aria-live="polite">
             <span className="scan-mark" aria-hidden="true" />
@@ -57,7 +78,9 @@ export default function DetailApp({
           </section>
         )}
       </main>
-      <footer className="reader-footer">已读完本文</footer>
+      <footer className="reader-footer">
+        {content?.kind === 'thread' ? `已读完本页${content.entryLabel}` : '已读完本文'}
+      </footer>
     </div>
   );
 }

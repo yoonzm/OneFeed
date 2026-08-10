@@ -51,6 +51,7 @@ describe('parseTwitterCard', () => {
         avatar: 'https://pbs.twimg.com/profile_images/avatar.jpg',
       },
       kind: 'post',
+      role: 'post',
       publishedAt: '2026-08-06T01:02:03.000Z',
       metrics: [
         { kind: 'reactions', value: 1200, label: '喜欢' },

@@ -82,6 +82,10 @@ interface ZhihuMetadata {
   authorName?: string;
   itemId?: string;
   title?: string;
+  type?: string;
+  dateCreated?: string | number;
+  datePublished?: string | number;
+  dateModified?: string | number;
 }
 
 function getMetadata(element: Element): ZhihuMetadata {
@@ -144,11 +148,30 @@ function cleanContent(body: Element): string {
   });
 }
 
+export function parseZhihuBlocks(body: Element): FeedBlock[] {
+  const html = cleanContent(body);
+  const textContainer = document.createElement('div');
+  textContainer.innerHTML = html;
+  const contentText = textContainer.textContent?.trim() || '';
+  const images = extractMedia(body);
+  return [
+    ...(contentText ? [{
+      type: 'richText' as const,
+      html,
+      plainText: contentText,
+    }] : []),
+    ...(images.length ? [{ type: 'gallery' as const, items: images }] : []),
+  ];
+}
+
 export interface ParsedZhihuContent {
   originId: string;
   originalUrl: string;
   title?: string;
+  role: 'answer' | 'article';
   author: FeedAuthor;
+  publishedAt?: string | number;
+  updatedAt?: string | number;
   blocks: FeedBlock[];
   metrics: FeedMetric[];
   actions: FeedActionDescriptor[];
@@ -173,8 +196,8 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
   const avatar = absoluteUrl(
     firstAttribute(element, ['.Avatar', '.AuthorInfo-avatar img'], 'src'),
   );
-  const contentHtml = cleanContent(body);
-  const contentText = body.textContent?.trim() || '';
+  const blocks = parseZhihuBlocks(body);
+  const contentText = blocks.find((block) => block.type === 'richText')?.plainText || '';
   if (!title && !contentText) return null;
 
   const originId =
@@ -184,23 +207,27 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
     originalUrl.match(/\/p\/(\d+)/)?.[1] ||
     originalUrl.match(/\/question\/(\d+)/)?.[1] ||
     stableHash(`${originalUrl}|${title}|${authorName}|${contentText.slice(0, 120)}`);
-  const images = extractMedia(body);
   const agrees = parseCount(firstText(element, ['.Button--voteUp', '[aria-label*="赞同"]']));
   const comments = parseCount(firstText(element, ['.ContentItem-action', 'button[aria-label*="评论"]']));
+  const role = metadata.type === 'article' ||
+    element.matches('.ArticleItem, .Post-content, .Post-Main') ||
+    /\/p\/\d+/.test(originalUrl)
+    ? 'article'
+    : 'answer';
 
   return {
     originId,
     originalUrl,
     title: title || undefined,
+    role,
     author: {
       name: authorName || '知乎用户',
       avatar,
       link: absoluteUrl(firstAttribute(element, ['.AuthorInfo-name a', '.UserLink-link'], 'href')) || undefined,
     },
-    blocks: [
-      { type: 'richText', html: contentHtml, plainText: contentText },
-      ...(images.length ? [{ type: 'gallery' as const, items: images }] : []),
-    ],
+    publishedAt: metadata.dateCreated ?? metadata.datePublished,
+    updatedAt: metadata.dateModified,
+    blocks,
     metrics: [
       { kind: 'reactions', value: agrees, label: '赞同' },
       { kind: 'replies', value: comments, label: '评论' },
@@ -238,8 +265,11 @@ export function parseZhihuCard(element: Element): FeedItem | null {
     source: ZHIHU_SOURCE,
     originalUrl: content.originalUrl,
     kind: 'article',
+    role: content.role,
     title: content.title,
     author: content.author,
+    publishedAt: content.publishedAt,
+    updatedAt: content.updatedAt,
     previewBlocks: content.blocks,
     metrics: content.metrics,
     actions: content.actions,

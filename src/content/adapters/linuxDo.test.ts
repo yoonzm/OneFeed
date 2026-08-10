@@ -49,6 +49,7 @@ describe('parseLinuxDoCard', () => {
       id: 'linux-do_2703711',
       platform: 'linux-do',
       kind: 'discussion',
+      role: 'topic',
       title: '这个冷饭是必须得炒一下了',
       author: {
         name: 'Neo',

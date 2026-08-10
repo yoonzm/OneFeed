@@ -46,6 +46,7 @@ describe('Zhihu answer detail', () => {
     expect(detail).toMatchObject({
       id: 'zhihu_42',
       kind: 'article',
+      role: 'answer',
       title: '如何保持专注？',
       author: { name: '林一' },
       publishedAt: '2026-08-01T10:00:00Z',
@@ -100,6 +101,7 @@ describe('Zhihu article detail', () => {
 
     expect(detail).toMatchObject({
       id: 'zhihu_123',
+      role: 'article',
       title: '长期维护一个浏览器扩展',
       author: { name: '维护者' },
       publishedAt: '2026-08-03T08:00:00Z',

@@ -29,6 +29,7 @@ describe('parseZhihuCard', () => {
     expect(item).toMatchObject({
       id: 'zhihu_answer-42',
       kind: 'article',
+      role: 'answer',
       title: '如何保持专注？',
       author: { name: '林一' },
       metrics: [

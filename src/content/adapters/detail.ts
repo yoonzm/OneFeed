@@ -11,6 +11,7 @@ export interface DetailAdapter {
 
 export interface DetailAdapterDefinition {
   source: FeedSource;
+  surface: DetailContent['kind'];
   matches: (url: URL) => boolean;
   create: (onDetail: DetailListener) => DetailAdapter;
 }

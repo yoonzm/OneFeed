@@ -2,7 +2,7 @@ import type { FeedItem, FeedSource } from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
 const CARD_SELECTOR = '.cell.item';
-const SOURCE: FeedSource = {
+export const V2EX_SOURCE: FeedSource = {
   id: 'v2ex',
   name: 'V2EX',
   homeUrl: 'https://www.v2ex.com/',
@@ -69,9 +69,10 @@ export function parseV2exCard(element: Element): FeedItem | null {
   return {
     id: `v2ex_${originId}`,
     platform: 'v2ex',
-    source: SOURCE,
+    source: V2EX_SOURCE,
     originalUrl: originalUrl || window.location.href,
     kind: 'discussion',
+    role: 'topic',
     title,
     author: {
       name: authorName,
@@ -141,7 +142,7 @@ export class V2exAdapter extends BaseAdapter {
 }
 
 export const v2exAdapterDefinition: AdapterDefinition = {
-  source: SOURCE,
+  source: V2EX_SOURCE,
   matches: (url) => (
     url.hostname === 'v2ex.com' || url.hostname.endsWith('.v2ex.com')
   ) && ['/', '/recent'].includes(url.pathname),

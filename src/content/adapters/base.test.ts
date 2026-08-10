@@ -14,6 +14,7 @@ class TestAdapter extends BaseAdapter {
       source: { id: 'test', name: '测试' },
       originalUrl: 'https://example.com/',
       kind: 'post',
+      role: 'post',
       author: { name: '测试用户', avatar: '' },
       previewBlocks: [{ type: 'richText', html: '<span>测试内容</span>', plainText: '测试内容' }],
       metrics: [],

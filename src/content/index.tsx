@@ -36,7 +36,7 @@ function mount(): (() => void) | undefined {
 
   const host = document.createElement('div');
   host.id = READER_HOST_ID;
-  if (activeAdapter.surface === 'detail') host.style.display = 'none';
+  if (activeAdapter.surface !== 'feed') host.style.display = 'none';
   document.body.appendChild(host);
 
   let root: ReturnType<typeof createRoot> | undefined;

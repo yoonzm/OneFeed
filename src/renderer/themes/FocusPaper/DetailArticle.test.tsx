@@ -9,6 +9,7 @@ const content: ArticleDetail = {
   source: { id: 'zhihu', name: '知乎' },
   originalUrl: 'https://www.zhihu.com/question/1/answer/42',
   kind: 'article',
+  role: 'answer',
   author: { name: '林一', avatar: '' },
   title: '如何保持专注？',
   body: [{

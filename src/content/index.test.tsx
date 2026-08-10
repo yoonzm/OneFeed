@@ -19,7 +19,7 @@ vi.mock('./adapters/registry', () => ({
 
 import { startContentScript } from './index';
 
-function activeSurface(surface: 'feed' | 'detail') {
+function activeSurface(surface: 'feed' | 'article' | 'thread') {
   return {
     surface,
     source: { id: 'test', name: '测试站点', homeUrl: 'https://example.com/' },
@@ -58,7 +58,7 @@ describe('content surface lifecycle', () => {
 
   it('disconnects and replaces surfaces on SPA route changes', () => {
     const feed = activeSurface('feed');
-    const detail = activeSurface('detail');
+    const detail = activeSurface('article');
     mocks.createAdapter.mockImplementation((url: URL) => {
       if (url.pathname === '/feed') return feed;
       if (url.pathname === '/detail') return detail;
@@ -88,7 +88,7 @@ describe('content surface lifecycle', () => {
 
   it('reveals a detail surface only after the adapter produces content', () => {
     window.history.replaceState({}, '', '/detail');
-    const detail = activeSurface('detail');
+    const detail = activeSurface('article');
     mocks.createAdapter.mockImplementation((_url: URL, listeners) => {
       detail.adapter.init.mockImplementation(() => {
         listeners.onDetail({
@@ -97,6 +97,7 @@ describe('content surface lifecycle', () => {
           source: { id: 'test', name: '测试站点' },
           originalUrl: 'https://example.com/detail',
           kind: 'article',
+          role: 'article',
           author: { name: '测试作者', avatar: '' },
           body: [],
           metrics: [],
@@ -104,6 +105,41 @@ describe('content surface lifecycle', () => {
         });
       });
       return detail;
+    });
+
+    const controller = startContentScript();
+
+    expect(document.getElementById('__universal_feed_root__')?.style.display).toBe('');
+    expect(document.getElementById('__universal_feed_hide_original__')).not.toBeNull();
+    controller.cleanup();
+  });
+
+  it('reveals a thread surface after its header is parsed', () => {
+    window.history.replaceState({}, '', '/thread');
+    const thread = activeSurface('thread');
+    mocks.createAdapter.mockImplementation((_url: URL, listeners) => {
+      thread.adapter.init.mockImplementation(() => {
+        listeners.onDetail({
+          id: 'thread-1',
+          platform: 'test',
+          source: { id: 'test', name: '测试站点' },
+          originalUrl: 'https://example.com/thread',
+          kind: 'thread',
+          header: {
+            id: 'thread-1',
+            role: 'topic',
+            originalUrl: 'https://example.com/thread',
+            title: '测试主题',
+            body: [],
+            metrics: [],
+            actions: [],
+          },
+          entries: [],
+          entryLabel: '回复',
+          loadingMode: 'paged',
+        });
+      });
+      return thread;
     });
 
     const controller = startContentScript();
