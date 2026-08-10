@@ -23,6 +23,10 @@ WXT 入口位于 `src/entrypoints/`：`background.ts` 是 Service Worker，`cont
 
 遵循 MVP 设计中的 TypeScript 示例：使用两个空格缩进、分号、单引号，并为共享数据定义明确的接口。React 组件、类和类型使用 `PascalCase`，例如 `FeedItem`、`ZhihuAdapter`；函数和变量使用 `camelCase`。适配器文件按平台命名，如 `zhihu.ts`、`twitter.ts`，并将 DOM 选择器限制在对应适配器内。中英文文档统一保持 UTF-8 编码。
 
+## 代码注释规范
+
+核心模块、复杂逻辑、关键 DOM 假设及不直观的实现必须添加简洁注释，重点说明设计意图、约束和原因，避免逐行复述代码。修改实现时应同步更新或删除相关注释，确保注释始终准确。
+
 ## 测试规范
 
 项目使用 Vitest 和 jsdom，但未设置覆盖率门槛。新增实现时，应为信息流归一化、去重和适配器解析编写针对性单元测试，并为 Shadow DOM 挂载及无限信息流更新添加浏览器级测试。测试文件统一命名为 `*.test.ts` 或 `*.test.tsx`。DOM 测试夹具应具有代表性，且不得包含真实用户数据。
