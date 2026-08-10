@@ -167,6 +167,28 @@ h2 { margin: 0 0 16px; font-family: "Songti SC", SimSun, Georgia, serif; font-si
 h2 a { text-decoration: none; text-decoration-thickness: 1px; text-underline-offset: 5px; }
 h2 a:hover { color: var(--blue); text-decoration: underline; }
 
+.detail-article { padding: 56px 0 24px; }
+.detail-article h1 {
+  margin: 0 0 28px;
+  font-family: "Songti SC", SimSun, Georgia, serif;
+  font-size: clamp(30px, 4.5vw, 46px);
+  line-height: 1.28;
+  letter-spacing: -.025em;
+}
+.detail-body .content { max-height: none; font-size: 17px; line-height: 2; }
+.detail-body .content::after { display: none; }
+.detail-body .content h2,
+.detail-body .content h3,
+.detail-body .content h4 {
+  margin: 1.8em 0 .7em;
+  color: var(--ink);
+  font-family: "Songti SC", SimSun, Georgia, serif;
+  line-height: 1.45;
+}
+.detail-body .content h2 { font-size: 1.45em; }
+.detail-body .content h3 { font-size: 1.25em; }
+.detail-body .content h4 { font-size: 1.1em; }
+
 .content {
   position: relative;
   max-height: 9.8em;
@@ -272,6 +294,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #9fc6ff; outline-offs
   .reader-header { min-height: 82px; }
   .reading-rail, .header-status { display: none; }
   .feed-card { grid-template-columns: 28px minmax(0, 1fr); gap: 8px; padding: 36px 0 40px; }
+  .detail-article { padding-top: 38px; }
   .card-index { transform: translateX(-2px); }
   .media-button { height: 110px; }
   .card-actions { gap: 18px; }

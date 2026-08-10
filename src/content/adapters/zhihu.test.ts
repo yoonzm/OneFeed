@@ -37,8 +37,8 @@ describe('parseZhihuCard', () => {
       ],
     });
     expect(item?.originalUrl).toBe('http://localhost:3000/question/1/answer/42');
-    const text = item?.blocks.find((block) => block.type === 'richText');
-    const gallery = item?.blocks.find((block) => block.type === 'gallery');
+    const text = item?.previewBlocks.find((block) => block.type === 'richText');
+    const gallery = item?.previewBlocks.find((block) => block.type === 'gallery');
     expect(text?.html).toContain('先把信息变少。');
     expect(text?.html).not.toContain('script');
     expect(text?.html).not.toContain('style=');

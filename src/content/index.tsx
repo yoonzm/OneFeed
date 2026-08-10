@@ -1,8 +1,9 @@
 import { createRoot } from 'react-dom/client';
-import App from '../renderer/App';
+import DetailApp from '../renderer/DetailApp';
+import FeedApp from '../renderer/FeedApp';
 import readerStyles from '../renderer/styles.css?inline';
+import { useDetailStore } from '../renderer/store/useDetailStore';
 import { useFeedStore } from '../renderer/store/useFeedStore';
-import type { BaseAdapter } from './adapters/base';
 import { createAdapter } from './adapters/registry';
 import { FloatingToggle } from './FloatingToggle';
 import toggleStyles from './floatingToggle.css?inline';
@@ -11,26 +12,46 @@ const READER_HOST_ID = '__universal_feed_root__';
 const TOGGLE_HOST_ID = '__universal_feed_toggle__';
 const HIDE_STYLE_ID = '__universal_feed_hide_original__';
 
-function mount(): () => void {
-  if (document.getElementById(READER_HOST_ID)) return () => undefined;
+function routeKey(url: URL): string {
+  return `${url.origin}${url.pathname}${url.search}`;
+}
+
+function clearSurfaceStores(): void {
+  useFeedStore.getState().clear();
+  useDetailStore.getState().clear();
+}
+
+function mount(): (() => void) | undefined {
+  if (document.getElementById(READER_HOST_ID)) return undefined;
+
+  let revealSurface = () => undefined;
+  const activeAdapter = createAdapter(new URL(window.location.href), {
+    onFeedItems: (items) => useFeedStore.getState().addFeedItems(items),
+    onDetail: (content) => {
+      useDetailStore.getState().setContent(content);
+      revealSurface();
+    },
+  });
+  if (!activeAdapter) return undefined;
 
   const host = document.createElement('div');
   host.id = READER_HOST_ID;
+  if (activeAdapter.surface === 'detail') host.style.display = 'none';
   document.body.appendChild(host);
 
-  let adapter: BaseAdapter | undefined;
   let root: ReturnType<typeof createRoot> | undefined;
   let hideOriginal: HTMLStyleElement | undefined;
 
   const cleanup = () => {
-    adapter?.disconnect();
+    activeAdapter.adapter.disconnect();
     root?.unmount();
     hideOriginal?.remove();
     host.remove();
-    useFeedStore.getState().clear();
+    clearSurfaceStores();
   };
 
   try {
+    clearSurfaceStores();
     const shadow = host.attachShadow({ mode: 'open' });
     const style = document.createElement('style');
     style.textContent = readerStyles;
@@ -39,46 +60,57 @@ function mount(): () => void {
     viewport.className = 'reader-viewport';
     shadow.appendChild(viewport);
 
-    const activeAdapter = createAdapter(window.location.hostname, (items) => {
-      useFeedStore.getState().addFeedItems(items);
-    });
-    if (!activeAdapter) throw new Error(`Unsupported host: ${window.location.hostname}`);
-    adapter = activeAdapter.adapter;
-    adapter.init();
-
     root = createRoot(viewport);
+    const sharedProps = {
+      scrollElement: viewport,
+      source: activeAdapter.source,
+      onDisable: () => chrome.storage.local.set({ enabled: false }),
+      onAction: (itemId: string, actionId: string) => (
+        activeAdapter.adapter.triggerAction(itemId, actionId)
+      ),
+    };
     root.render(
-      <App
-        scrollElement={viewport}
-        source={activeAdapter.source}
-        onDisable={() => chrome.storage.local.set({ enabled: false })}
-        onAction={(itemId, actionId) => adapter?.triggerAction(itemId, actionId) || false}
-      />,
+      activeAdapter.surface === 'feed'
+        ? <FeedApp {...sharedProps} />
+        : <DetailApp {...sharedProps} />,
     );
 
-    hideOriginal = document.createElement('style');
-    hideOriginal.id = HIDE_STYLE_ID;
-    hideOriginal.textContent = `
-      body > *:not(#${READER_HOST_ID}):not(#${TOGGLE_HOST_ID}) {
-        visibility: hidden !important;
-        pointer-events: none !important;
-      }
-      html, body { scrollbar-width: none !important; }
-      body::-webkit-scrollbar { display: none !important; }
-    `;
-    document.head.appendChild(hideOriginal);
+    revealSurface = () => {
+      host.style.removeProperty('display');
+      if (hideOriginal) return;
+      hideOriginal = document.createElement('style');
+      hideOriginal.id = HIDE_STYLE_ID;
+      hideOriginal.textContent = `
+        body > *:not(#${READER_HOST_ID}):not(#${TOGGLE_HOST_ID}) {
+          visibility: hidden !important;
+          pointer-events: none !important;
+        }
+        html, body { scrollbar-width: none !important; }
+        body::-webkit-scrollbar { display: none !important; }
+      `;
+      document.head.appendChild(hideOriginal);
+    };
+    if (activeAdapter.surface === 'feed') revealSurface();
+    activeAdapter.adapter.init();
 
     return cleanup;
   } catch (error) {
     cleanup();
     chrome.storage.local.set({ enabled: false });
     console.error('OneFeed failed to start; restored the original page.', error);
-    return () => undefined;
+    return undefined;
   }
 }
 
-export function startContentScript(): () => void {
+export interface ContentScriptController {
+  refresh: () => void;
+  cleanup: () => void;
+}
+
+export function startContentScript(): ContentScriptController {
   let active = true;
+  let enabled = false;
+  let currentRouteKey = routeKey(new URL(window.location.href));
   let unmount: (() => void) | undefined;
   const toggleHost = document.createElement('div');
   toggleHost.id = TOGGLE_HOST_ID;
@@ -91,7 +123,7 @@ export function startContentScript(): () => void {
   toggleShadow.appendChild(toggleContainer);
   const toggleRoot = createRoot(toggleContainer);
 
-  const renderToggle = (enabled: boolean, ready: boolean) => {
+  const renderToggle = (ready: boolean) => {
     toggleRoot.render(
       <FloatingToggle
         enabled={enabled}
@@ -101,13 +133,7 @@ export function startContentScript(): () => void {
     );
   };
 
-  const handleStorageChange = (
-    changes: Record<string, chrome.storage.StorageChange>,
-    areaName: string,
-  ) => {
-    if (areaName !== 'local' || !changes.enabled) return;
-    const enabled = changes.enabled.newValue !== false;
-    renderToggle(enabled, true);
+  const applyEnabledState = () => {
     if (enabled && !unmount) {
       unmount = mount();
     } else if (!enabled && unmount) {
@@ -116,20 +142,43 @@ export function startContentScript(): () => void {
     }
   };
 
-  renderToggle(false, false);
-  chrome.storage.local.get({ enabled: true }, ({ enabled }) => {
+  const handleStorageChange = (
+    changes: Record<string, chrome.storage.StorageChange>,
+    areaName: string,
+  ) => {
+    if (areaName !== 'local' || !changes.enabled) return;
+    enabled = changes.enabled.newValue !== false;
+    renderToggle(true);
+    applyEnabledState();
+  };
+
+  const refresh = () => {
     if (!active) return;
-    const isEnabled = enabled !== false;
-    renderToggle(isEnabled, true);
-    if (isEnabled) unmount = mount();
+    const nextRouteKey = routeKey(new URL(window.location.href));
+    if (nextRouteKey === currentRouteKey) return;
+    currentRouteKey = nextRouteKey;
+    unmount?.();
+    unmount = enabled ? mount() : undefined;
+  };
+
+  renderToggle(false);
+  chrome.storage.local.get({ enabled: true }, ({ enabled: storedEnabled }) => {
+    if (!active) return;
+    enabled = storedEnabled !== false;
+    renderToggle(true);
+    applyEnabledState();
   });
   chrome.storage.onChanged.addListener(handleStorageChange);
 
-  return () => {
-    active = false;
-    chrome.storage.onChanged.removeListener(handleStorageChange);
-    unmount?.();
-    toggleRoot.unmount();
-    toggleHost.remove();
+  return {
+    refresh,
+    cleanup: () => {
+      active = false;
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+      unmount?.();
+      clearSurfaceStores();
+      toggleRoot.unmount();
+      toggleHost.remove();
+    },
   };
 }

@@ -99,7 +99,7 @@ export function parseLinuxDoCard(element: Element): FeedItem | null {
       tags,
     } : undefined,
     publishedAt: Number.isFinite(createdAt) ? createdAt : undefined,
-    blocks: [],
+    previewBlocks: [],
     metrics: [
       { kind: 'replies', value: replies, label: '回复' },
       { kind: 'views', value: views, label: '浏览' },
@@ -153,6 +153,11 @@ export class LinuxDoAdapter extends BaseAdapter {
 
 export const linuxDoAdapterDefinition: AdapterDefinition = {
   source: SOURCE,
-  matches: (hostname) => hostname === 'linux.do' || hostname.endsWith('.linux.do'),
+  matches: (url) => (
+    url.hostname === 'linux.do' || url.hostname.endsWith('.linux.do')
+  ) && (
+    ['/', '/latest', '/top', '/new', '/unread', '/categories'].includes(url.pathname) ||
+    /^\/(?:c|tag)\//.test(url.pathname)
+  ),
   create: (onItems) => new LinuxDoAdapter(onItems),
 };

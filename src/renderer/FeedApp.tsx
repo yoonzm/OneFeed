@@ -4,14 +4,19 @@ import { useFeedStore } from './store/useFeedStore';
 import { Card } from './themes/FocusPaper/Card';
 import { Header } from './themes/FocusPaper/Header';
 
-interface AppProps {
+interface FeedAppProps {
   scrollElement: HTMLElement;
   source: FeedSource;
   onDisable: () => void;
   onAction: (itemId: string, actionId: string) => boolean;
 }
 
-export default function App({ scrollElement, source, onDisable, onAction }: AppProps) {
+export default function FeedApp({
+  scrollElement,
+  source,
+  onDisable,
+  onAction,
+}: FeedAppProps) {
   const items = useFeedStore((state) => state.items);
   const [progress, setProgress] = useState(0);
 
@@ -43,7 +48,11 @@ export default function App({ scrollElement, source, onDisable, onAction }: AppP
         <span className="rail-percent">{Math.round(progress * 100)}%</span>
       </div>
 
-      <Header count={items.length} source={source} onDisable={onDisable} />
+      <Header
+        source={source}
+        status={`已整理 ${items.length} 条内容`}
+        onDisable={onDisable}
+      />
       <main>
         {items.length ? (
           items.map((item, index) => (

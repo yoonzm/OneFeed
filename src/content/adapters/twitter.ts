@@ -140,7 +140,7 @@ export function parseTwitterCard(element: Element): FeedItem | null {
     kind: 'post',
     author,
     publishedAt,
-    blocks: [
+    previewBlocks: [
       ...(contentText
         ? [{ type: 'richText' as const, html: cleanTweetText(body), plainText: contentText }]
         : []),
@@ -201,9 +201,10 @@ export class TwitterAdapter extends BaseAdapter {
 
 export const twitterAdapterDefinition: AdapterDefinition = {
   source: SOURCE,
-  matches: (hostname) => [
+  matches: (url) => [
     'x.com',
     'twitter.com',
-  ].some((domain) => hostname === domain || hostname.endsWith(`.${domain}`)),
+  ].some((domain) => url.hostname === domain || url.hostname.endsWith(`.${domain}`)) &&
+    url.pathname === '/home',
   create: (onItems) => new TwitterAdapter(onItems),
 };

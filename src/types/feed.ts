@@ -59,7 +59,7 @@ export type FeedBlock =
   | { type: 'quote'; item: FeedItemSummary }
   | { type: 'poll'; poll: FeedPoll };
 
-export type FeedItemKind = 'post' | 'article' | 'discussion';
+export type ContentKind = 'post' | 'article' | 'discussion';
 
 export interface FeedContext {
   community?: {
@@ -132,13 +132,13 @@ export interface FeedItem {
   platform: string;
   source: FeedSourceRef;
   originalUrl: string;
-  kind: FeedItemKind;
+  kind: ContentKind;
   author: FeedAuthor;
   context?: FeedContext;
   publishedAt?: string | number;
   updatedAt?: string | number;
   title?: string;
-  blocks: FeedBlock[];
+  previewBlocks: FeedBlock[];
   metrics: FeedMetric[];
   actions: FeedActionDescriptor[];
   flags?: FeedFlags;

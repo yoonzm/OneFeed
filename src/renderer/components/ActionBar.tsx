@@ -1,14 +1,20 @@
-import type { FeedActionDescriptor, FeedItem, FeedMetricKind } from '../../types/feed';
+import type {
+  FeedActionDescriptor,
+  FeedMetric,
+  FeedMetricKind,
+} from '../../types/feed';
 
 interface ActionBarProps {
-  item: FeedItem;
-  onAction: (item: FeedItem, action: FeedActionDescriptor) => void;
+  originalUrl: string;
+  metrics: FeedMetric[];
+  actions: FeedActionDescriptor[];
+  onAction: (action: FeedActionDescriptor) => void;
 }
 
 const passiveMetricKinds = new Set<FeedMetricKind>(['reposts', 'views', 'score']);
 
-export function ActionBar({ item, onAction }: ActionBarProps) {
-  const passiveMetrics = item.metrics.filter((metric) => passiveMetricKinds.has(metric.kind));
+export function ActionBar({ originalUrl, metrics, actions, onAction }: ActionBarProps) {
+  const passiveMetrics = metrics.filter((metric) => passiveMetricKinds.has(metric.kind));
 
   return (
     <footer className="card-actions">
@@ -17,10 +23,10 @@ export function ActionBar({ item, onAction }: ActionBarProps) {
           {metric.label || metric.kind} {metric.value.toLocaleString('zh-CN')}
         </span>
       ))}
-      {item.actions.map((action) => action.kind === 'open' ? (
+      {actions.map((action) => action.kind === 'open' ? (
         <a
           className="open-action"
-          href={item.originalUrl}
+          href={originalUrl}
           target="_blank"
           rel="noreferrer"
           key={action.id}
@@ -33,7 +39,7 @@ export function ActionBar({ item, onAction }: ActionBarProps) {
           key={action.id}
           disabled={!action.enabled}
           aria-pressed={action.active}
-          onClick={() => onAction(item, action)}
+          onClick={() => onAction(action)}
         >
           {action.label}{action.count ? ` ${action.count.toLocaleString('zh-CN')}` : ''}
         </button>

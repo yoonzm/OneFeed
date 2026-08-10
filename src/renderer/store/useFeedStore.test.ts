@@ -10,7 +10,7 @@ function item(id: string, likes = 1): FeedItem {
     originalUrl: 'https://www.zhihu.com/',
     kind: 'article',
     author: { name: '测试用户', avatar: '' },
-    blocks: [{ type: 'richText', html: '<p>内容</p>', plainText: '内容' }],
+    previewBlocks: [{ type: 'richText', html: '<p>内容</p>', plainText: '内容' }],
     metrics: [{ kind: 'reactions', value: likes, label: '赞同' }],
     actions: [{
       id: 'react',

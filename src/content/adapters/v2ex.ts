@@ -87,7 +87,7 @@ export function parseV2exCard(element: Element): FeedItem | null {
       },
     } : undefined,
     publishedAt: element.querySelector('.topic_info [title]')?.getAttribute('title') || undefined,
-    blocks: [],
+    previewBlocks: [],
     metrics: [
       { kind: 'reactions', value: reactions, label: '赞同' },
       { kind: 'replies', value: replies, label: '回复' },
@@ -142,6 +142,8 @@ export class V2exAdapter extends BaseAdapter {
 
 export const v2exAdapterDefinition: AdapterDefinition = {
   source: SOURCE,
-  matches: (hostname) => hostname === 'v2ex.com' || hostname.endsWith('.v2ex.com'),
+  matches: (url) => (
+    url.hostname === 'v2ex.com' || url.hostname.endsWith('.v2ex.com')
+  ) && ['/', '/recent'].includes(url.pathname),
   create: (onItems) => new V2exAdapter(onItems),
 };

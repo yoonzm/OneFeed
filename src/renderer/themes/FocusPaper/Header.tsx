@@ -1,12 +1,12 @@
 import type { FeedSource } from '../../../types/feed';
 
 interface HeaderProps {
-  count: number;
   source: FeedSource;
+  status: string;
   onDisable: () => void;
 }
 
-export function Header({ count, source, onDisable }: HeaderProps) {
+export function Header({ source, status, onDisable }: HeaderProps) {
   return (
     <header className="reader-header">
       <a className="brand" href={source.homeUrl} target="_self">
@@ -19,7 +19,7 @@ export function Header({ count, source, onDisable }: HeaderProps) {
       <div className="header-actions">
         <div className="header-status" aria-live="polite">
           <span className="status-dot" aria-hidden="true" />
-          已整理 {count} 条内容
+          {status}
         </div>
         <button className="disable-reader" type="button" onClick={onDisable}>
           查看原页面

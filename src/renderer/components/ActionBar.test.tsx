@@ -10,7 +10,7 @@ const item: FeedItem = {
   originalUrl: 'https://example.com/post-1',
   kind: 'post',
   author: { name: '测试作者', avatar: '' },
-  blocks: [],
+  previewBlocks: [],
   metrics: [{ kind: 'views', value: 1200, label: '浏览' }],
   actions: [
     { id: 'react', kind: 'react', variant: 'like', label: '喜欢', count: 9, enabled: true },
@@ -20,7 +20,14 @@ const item: FeedItem = {
 
 describe('ActionBar', () => {
   it('renders declared actions, passive metrics and the original link', () => {
-    const markup = renderToStaticMarkup(<ActionBar item={item} onAction={vi.fn()} />);
+    const markup = renderToStaticMarkup(
+      <ActionBar
+        originalUrl={item.originalUrl}
+        metrics={item.metrics}
+        actions={item.actions}
+        onAction={vi.fn()}
+      />,
+    );
 
     expect(markup).toContain('喜欢 9');
     expect(markup).toContain('浏览 1,200');

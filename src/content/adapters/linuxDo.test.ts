@@ -65,7 +65,7 @@ describe('parseLinuxDoCard', () => {
       ],
     });
     expect(item?.originalUrl).toBe('http://localhost:3000/t/topic/2703711');
-    expect(item?.blocks).toEqual([]);
+    expect(item?.previewBlocks).toEqual([]);
     expect(item).not.toHaveProperty('rawElementRef');
   });
 

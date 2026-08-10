@@ -52,7 +52,7 @@ describe('parseV2exCard', () => {
       ],
     });
     expect(item?.originalUrl).toBe('http://localhost:3000/t/123456#reply12');
-    expect(item?.blocks).toEqual([]);
+    expect(item?.previewBlocks).toEqual([]);
     expect(item).not.toHaveProperty('rawElementRef');
   });
 

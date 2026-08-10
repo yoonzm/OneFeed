@@ -24,7 +24,7 @@ function formatPublishedAt(value: string | number): string {
 export function Card({ item, index, onAction }: CardProps) {
   const [expanded, setExpanded] = useState(false);
   const [preview, setPreview] = useState<FeedImage>();
-  const expandable = item.blocks.some(
+  const expandable = item.previewBlocks.some(
     (block) => block.type === 'richText' && block.plainText.length > 260,
   );
 
@@ -85,9 +85,9 @@ export function Card({ item, index, onAction }: CardProps) {
           </h2>
         )}
 
-        {!!item.blocks.length && (
+        {!!item.previewBlocks.length && (
           <div className="block-stack">
-            {item.blocks.map((block, blockIndex) => (
+            {item.previewBlocks.map((block, blockIndex) => (
               <BlockRenderer
                 block={block}
                 expanded={expanded}
@@ -104,7 +104,12 @@ export function Card({ item, index, onAction }: CardProps) {
           </button>
         )}
 
-        <ActionBar item={item} onAction={onAction} />
+        <ActionBar
+          originalUrl={item.originalUrl}
+          metrics={item.metrics}
+          actions={item.actions}
+          onAction={(action) => onAction(item, action)}
+        />
       </div>
 
       {preview && (
