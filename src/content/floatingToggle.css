@@ -1,7 +1,7 @@
 :host {
   position: fixed;
   top: 50%;
-  right: 16px;
+  right: 0;
   z-index: 2147483647;
   display: block;
   width: 48px;
@@ -20,6 +20,16 @@
   position: relative;
   width: 48px;
   height: 48px;
+  /* Keep the control unobtrusive at the viewport edge until it is needed. */
+  opacity: .6;
+  transform: translateX(50%);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.floating-toggle:hover,
+.floating-toggle:focus-within {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .toggle-button {
@@ -172,7 +182,6 @@
 @media (max-width: 720px) {
   :host {
     top: auto;
-    right: 10px;
     bottom: 88px;
     transform: none;
   }
