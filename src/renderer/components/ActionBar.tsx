@@ -26,6 +26,8 @@ export function ActionBar({ originalUrl, metrics, actions, onAction }: ActionBar
     passiveMetricKinds.has(metric.kind) || !coveredMetricKinds.has(metric.kind)
   ));
 
+  if (!passiveMetrics.length && !actions.length) return null;
+
   return (
     <footer className="card-actions">
       {passiveMetrics.map((metric) => (

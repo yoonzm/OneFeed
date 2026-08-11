@@ -49,4 +49,17 @@ describe('ActionBar', () => {
     expect(markup).toContain('喜欢 4');
     expect(markup).toContain('查看回复');
   });
+
+  it('omits an empty action row', () => {
+    const markup = renderToStaticMarkup(
+      <ActionBar
+        originalUrl={item.originalUrl}
+        metrics={[]}
+        actions={[]}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).toBe('');
+  });
 });
