@@ -27,6 +27,7 @@ export function Card({ item, index, onAction }: CardProps) {
   const expandable = item.previewBlocks.some(
     (block) => block.type === 'richText' && block.plainText.length > 260,
   );
+  const contentExpanded = expanded || !expandable;
 
   return (
     <article className={`feed-card feed-card-${item.kind} feed-card-${item.role}`}>
@@ -92,7 +93,7 @@ export function Card({ item, index, onAction }: CardProps) {
             {item.previewBlocks.map((block, blockIndex) => (
               <BlockRenderer
                 block={block}
-                expanded={expanded}
+                expanded={contentExpanded}
                 onPreview={setPreview}
                 key={`${block.type}-${blockIndex}`}
               />

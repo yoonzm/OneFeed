@@ -113,6 +113,7 @@ describe('V2EX topic thread', () => {
         author: { name: 'Carol' },
       },
     ]);
+    expect(thread?.entries.every((entry) => entry.actions.length === 0)).toBe(true);
   });
 
   it('proxies the topic vote from the thread header', () => {

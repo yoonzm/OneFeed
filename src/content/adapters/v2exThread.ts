@@ -109,7 +109,7 @@ export function parseV2exReply(element: Element, url: URL): FeedItem | null {
     publishedAt: element.querySelector('.ago')?.getAttribute('title') || undefined,
     previewBlocks: parseBlocks(body),
     metrics: reactions ? [{ kind: 'reactions', value: reactions, label: '喜欢' }] : [],
-    actions: [{ id: 'open', kind: 'open', label: '查看回复', enabled: true }],
+    actions: [],
   };
 }
 
