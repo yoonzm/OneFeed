@@ -61,7 +61,6 @@ export function parseV2exCard(element: Element): FeedItem | null {
     stableHash(`${originalUrl}|${title}|${authorName}`);
   const communityLink = element.querySelector<HTMLAnchorElement>('.topic_info .node, a.node');
   const communityName = communityLink?.textContent?.trim();
-  const reactions = parseV2exCount(element.querySelector('.votes')?.textContent || '');
   const replies = parseV2exCount(
     element.querySelector('.count_livid, .count_orange, .count_blue')?.textContent || '',
   );
@@ -89,20 +88,8 @@ export function parseV2exCard(element: Element): FeedItem | null {
     } : undefined,
     publishedAt: element.querySelector('.topic_info [title]')?.getAttribute('title') || undefined,
     previewBlocks: [],
-    metrics: [
-      { kind: 'reactions', value: reactions, label: '赞同' },
-      { kind: 'replies', value: replies, label: '回复' },
-    ],
+    metrics: [{ kind: 'replies', value: replies, label: '回复' }],
     actions: [
-      {
-        id: 'react',
-        kind: 'react',
-        variant: 'agree',
-        label: '赞同',
-        count: reactions,
-        enabled: true,
-        fallback: 'openOriginal',
-      },
       {
         id: 'reply',
         kind: 'reply',
@@ -117,13 +104,10 @@ export function parseV2exCard(element: Element): FeedItem | null {
 }
 
 export function triggerV2exAction(element: Element | undefined, actionId: string): boolean {
-  const selector = actionId === 'react'
-    ? '.votes button, button[aria-label*="赞同"], button[title*="赞同"]'
-    : actionId === 'reply'
-      ? 'button[aria-label*="回复"], button[title*="回复"]'
-      : '';
-  if (!selector) return false;
-  const button = element?.querySelector<HTMLElement>(selector);
+  if (actionId !== 'reply') return false;
+  const button = element?.querySelector<HTMLElement>(
+    'button[aria-label*="回复"], button[title*="回复"]',
+  );
   if (!button) return false;
   button.click();
   return true;
