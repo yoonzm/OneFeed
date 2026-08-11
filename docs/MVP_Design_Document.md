@@ -14,7 +14,7 @@
 
 | 功能模块 | MVP 实施范围 | 非 MVP 范围 (暂不实现) |
 | :--- | :--- | :--- |
-| **支持平台** | 知乎（回答/文章流、问题详情、回答详情、专栏文章详情）、Twitter/X（Home Feed）、V2EX（主题列表、主题详情）、Linux DO（话题列表） | X、Linux DO 详情页；B站、YouTube、Reddit、小红书等 |
+| **支持平台** | 知乎（回答/文章流、问题详情、回答详情、专栏文章详情）、Twitter/X（Home Feed）、V2EX（主题列表、主题详情）、Linux DO（话题列表、话题详情） | X 详情页；B站、YouTube、Reddit、小红书等 |
 | **渲染主题** | **1 款默认主题**：Notion 风格（极简、无框、黑白灰高留白） | 主题市场、自定义 CSS/JS、多主题切换 |
 | **数据解析** | 独立的 Feed、Article Detail 与 Thread Detail 静态选择器适配器 | AI 自动解析、云端规则库更新 |
 | **核心交互** | 基础滚动、图片预览、回答折叠、Thread 无限加载/分页、原网页点赞代理；Popup 开关与统一视图内“查看原页面”入口 | 知乎回答评论区接管、复杂富文本编辑、视频内嵌播放 |
@@ -147,7 +147,7 @@ export interface ThreadDetail {
 }
 ```
 
-MVP 首先实现 `post`、`article`、`discussion` 三种内容结构，以及 `richText`、`gallery` 两类 Block。平台不再整体映射成单一类型：知乎专栏是 `article`，知乎问题/回答是 `question -> answer` Thread；V2EX 主题/回复是 `topic -> reply` Thread；Twitter/X 是 `post`，Linux DO 列表项是 `topic`。
+MVP 首先实现 `post`、`article`、`discussion` 三种内容结构，以及 `richText`、`gallery` 两类 Block。平台不再整体映射成单一类型：知乎专栏是 `article`，知乎问题/回答是 `question -> answer` Thread；V2EX 与 Linux DO 主题/回复是 `topic -> reply` Thread；Twitter/X 是 `post`，Linux DO 列表项是 `topic`。
 
 `FeedItem`、`ArticleDetail` 与 `ThreadDetail` 必须保持可序列化。原站 `Element`、按钮节点和点击代理不得写入 Schema；各 Surface Adapter 在独立运行时 Registry 中维护 `item.id -> 原始节点/动作句柄` 映射。详情页只解析当前详情 DOM，不依赖或合并此前列表状态。
 
@@ -202,7 +202,8 @@ onefeed-extension/
 │   │   │   ├── twitter.ts      # Twitter DOM 提取
 │   │   │   ├── v2ex.ts         # V2EX DOM 提取
 │   │   │   ├── v2exThread.ts   # V2EX 主题/回复集合提取
-│   │   │   └── linuxDo.ts      # Linux DO DOM 提取
+│   │   │   ├── linuxDo.ts      # Linux DO 话题列表提取
+│   │   │   └── linuxDoThread.ts # Linux DO 主题/回复集合提取
 │   ├── renderer/               # React 统一渲染组件
 │   │   ├── FeedApp.tsx         # Feed Surface Shell
 │   │   ├── DetailApp.tsx       # Detail Surface Shell
@@ -310,11 +311,11 @@ export const zhihuAdapterDefinition: AdapterDefinition = {
 
 ### 0.1 首版交付说明
 
-首版按平台拆分交付：`0.1.0` 先完成知乎回答/文章流，后续迭代接入 Twitter/X Home Feed、V2EX 主题列表、Linux DO 话题列表，以及知乎/V2EX Thread Detail。该拆分不改变“多平台归一化”的 MVP 总目标：
+首版按平台拆分交付：`0.1.0` 先完成知乎回答/文章流，后续迭代接入 Twitter/X Home Feed、V2EX 主题列表、Linux DO 话题列表，以及知乎/V2EX/Linux DO Thread Detail。该拆分不改变“多平台归一化”的 MVP 总目标：
 
 - WXT + React + TypeScript + Manifest V3 可构建项目；
 - 知乎 DOM 静态适配、字段清洗、稳定 ID 与响应式去重；
-- 知乎回答/专栏使用 `ArticleDetail`，知乎问题和 V2EX 主题使用 `ThreadDetail`；
+- 知乎回答/专栏使用 `ArticleDetail`，知乎问题、V2EX 主题和 Linux DO 话题使用 `ThreadDetail`；
 - Shadow DOM 全屏接管与 Focus Paper 默认主题；
 - 图片预览、原站点赞代理、回答独立折叠、知乎触底加载同步和 V2EX 分页；
 - `chrome.storage.local` 保存启用状态，Popup 支持即时开关；
@@ -333,7 +334,7 @@ export const zhihuAdapterDefinition: AdapterDefinition = {
 
 * **Week 2: 适配器编写 (知乎、Twitter、V2EX 与 Linux DO)**
   * 编写 `ZhihuAdapter`、`TwitterAdapter`、`V2exAdapter` 与 `LinuxDoAdapter`。
-  * 编写 `ZhihuDetailAdapter`、`ZhihuThreadAdapter` 与 `V2exThreadAdapter`，验证文章和讨论串详情。
+  * 编写 `ZhihuDetailAdapter`、`ZhihuThreadAdapter`、`V2exThreadAdapter` 与 `LinuxDoThreadAdapter`，验证文章和讨论串详情。
   * 实现基于 `MutationObserver` 的异步卡片提取与去重逻辑。
   * 验证原网页底层 API / 节点的代理点击（如触发点赞）。
 

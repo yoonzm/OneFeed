@@ -39,11 +39,11 @@ npm test
 npm run lint
 ```
 
-`npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页、X Home Feed、V2EX 首页或 Linux DO 话题列表后，扩展会将信息流替换为 Focus Paper 阅读界面；知乎问题与 V2EX 主题使用 Thread Detail，知乎独立回答与专栏文章使用 Article Detail。点击扩展图标可随时恢复原始页面。
+`npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页、X Home Feed、V2EX 首页或 Linux DO 话题列表后，扩展会将信息流替换为 Focus Paper 阅读界面；知乎问题、V2EX 主题与 Linux DO 话题使用 Thread Detail，知乎独立回答与专栏文章使用 Article Detail。点击扩展图标可随时恢复原始页面。
 
 ## 当前状态
 
-当前版本基于 WXT、React 和 TypeScript，实现了知乎、Twitter/X、V2EX 与 Linux DO 信息流解析，知乎问题/回答/专栏及 V2EX 主题详情解析，归一化去重、Shadow DOM 隔离渲染、图片预览、原站点赞代理和启用状态持久化。Feed、Article Detail 与 Thread Detail 通过共享 Block、内容角色和 Action 协议复用内容积木；SPA 路由变化时会清理旧 Surface 并重新识别页面。详细方案请参阅：
+当前版本基于 WXT、React 和 TypeScript，实现了知乎、Twitter/X、V2EX 与 Linux DO 信息流解析，知乎问题/回答/专栏及 V2EX、Linux DO 主题详情解析，归一化去重、Shadow DOM 隔离渲染、图片预览、原站点赞代理和启用状态持久化。Feed、Article Detail 与 Thread Detail 通过共享 Block、内容角色和 Action 协议复用内容积木；SPA 路由变化时会清理旧 Surface 并重新识别页面。详细方案请参阅：
 
 - [MVP 设计文档](docs/MVP_Design_Document.md)
 - [长期产品路线图](docs/Longterm_Roadmap_Document.md)

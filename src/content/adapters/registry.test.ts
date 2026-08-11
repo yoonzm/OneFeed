@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createAdapter } from './registry';
 import { LinuxDoAdapter } from './linuxDo';
+import { LinuxDoThreadAdapter } from './linuxDoThread';
 import { TwitterAdapter } from './twitter';
 import { V2exAdapter } from './v2ex';
 import { V2exThreadAdapter } from './v2exThread';
@@ -72,11 +73,19 @@ describe('createAdapter', () => {
       surface: 'thread',
       adapter: expect.any(V2exThreadAdapter),
     });
+    expect(createAdapter(
+      new URL('https://linux.do/t/topic/2735915/18'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'thread',
+      adapter: expect.any(LinuxDoThreadAdapter),
+      source: { id: 'linux-do', name: 'Linux DO' },
+    });
   });
 
   it('leaves unsupported site pages untouched', () => {
     expect(createAdapter(new URL('https://x.com/reader/status/123'), listeners())).toBeNull();
-    expect(createAdapter(new URL('https://linux.do/t/topic/123'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://linux.do/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://www.zhihu.com/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do.example.com/latest'), listeners())).toBeNull();

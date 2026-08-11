@@ -2,7 +2,7 @@ import type { FeedItem, FeedSource } from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
 const CARD_SELECTOR = '.topic-list-item';
-const SOURCE: FeedSource = {
+export const LINUX_DO_SOURCE: FeedSource = {
   id: 'linux-do',
   name: 'Linux DO',
   homeUrl: 'https://linux.do/',
@@ -86,7 +86,7 @@ export function parseLinuxDoCard(element: Element): FeedItem | null {
   return {
     id: `linux-do_${originId}`,
     platform: 'linux-do',
-    source: SOURCE,
+    source: LINUX_DO_SOURCE,
     originalUrl: originalUrl || window.location.href,
     kind: 'discussion',
     role: 'topic',
@@ -129,7 +129,7 @@ export function parseLinuxDoCard(element: Element): FeedItem | null {
 
 export function triggerLinuxDoAction(element: Element | undefined, actionId: string): boolean {
   const selector = actionId === 'react'
-    ? '.topic-list-vote-button, button[aria-label*="点赞"], button[title*="点赞"]'
+    ? '.topic-list-vote-button, .btn-toggle-reaction-like, button[aria-label*="点赞"], button[title*="点赞"]'
     : actionId === 'reply'
       ? 'button[aria-label*="回复"], button[title*="回复"]'
       : '';
@@ -153,7 +153,7 @@ export class LinuxDoAdapter extends BaseAdapter {
 }
 
 export const linuxDoAdapterDefinition: AdapterDefinition = {
-  source: SOURCE,
+  source: LINUX_DO_SOURCE,
   matches: (url) => (
     url.hostname === 'linux.do' || url.hostname.endsWith('.linux.do')
   ) && (

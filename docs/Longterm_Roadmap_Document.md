@@ -28,9 +28,9 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 ### Phase 1: MVP 验证与技术打通 (已规划)
 * **核心目标**：验证“完全隐藏原 DOM，在 Shadow DOM 中接管全局渲染”的工程可行性。
 * **覆盖平台**：知乎、Twitter/X、V2EX、Linux DO。
-* **核心交付**：1 款 Notion 风格基础主题，打通 Feed Surface，并以知乎回答/专栏验证 Article Detail，以知乎问题和 V2EX 主题验证 Thread Detail。
+* **核心交付**：1 款 Notion 风格基础主题，打通 Feed Surface，并以知乎回答/专栏验证 Article Detail，以知乎问题、V2EX 主题和 Linux DO 话题验证 Thread Detail。
 * **安全回退**：Popup、页面右侧常驻悬浮开关与统一视图内均提供关闭入口；关闭后立即卸载接管层并恢复原页面，初始化异常时自动回退，用户可随时重新开启。
-* **交付顺序**：`0.1.0` 先交付知乎完整链路，后续迭代已通过统一 Adapter 注册契约接入 Twitter/X、V2EX 与 Linux DO；单平台首发用于降低同时调试多个动态 DOM 的风险，社区列表适配继续验证该契约的扩展能力。
+* **交付顺序**：`0.1.0` 先交付知乎完整链路，后续迭代已通过统一 Adapter 注册契约接入 Twitter/X、V2EX 与 Linux DO，并将 V2EX、Linux DO 社区主题纳入 Thread Detail；单平台首发用于降低同时调试多个动态 DOM 的风险，社区列表与详情适配继续验证该契约的扩展能力。
 * **工程基础**：使用 WXT 的文件式入口、Manifest 生成、开发加载和发布打包能力承载扩展工程，为后续按浏览器生成独立构建保留统一入口。
 * **扩展边界**：Feed、Article Detail 与 Thread Detail 共享 Block、内容角色、作者、指标和操作描述，但使用独立顶层模型与 Renderer。新增路由通过完整 URL 注册到对应 Surface；未支持路由不得被域名级兜底接管。
 

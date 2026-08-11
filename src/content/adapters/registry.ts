@@ -3,6 +3,7 @@ import type { FeedSource } from '../../types/feed';
 import { type AdapterDefinition, BaseAdapter, type FeedItemsListener } from './base';
 import type { DetailAdapter, DetailAdapterDefinition } from './detail';
 import { linuxDoAdapterDefinition } from './linuxDo';
+import { linuxDoThreadAdapterDefinition } from './linuxDoThread';
 import { twitterAdapterDefinition } from './twitter';
 import { v2exAdapterDefinition } from './v2ex';
 import { v2exThreadAdapterDefinition } from './v2exThread';
@@ -20,6 +21,7 @@ const feedAdapterDefinitions: AdapterDefinition[] = [
 const detailAdapterDefinitions: DetailAdapterDefinition[] = [
   zhihuThreadAdapterDefinition,
   v2exThreadAdapterDefinition,
+  linuxDoThreadAdapterDefinition,
   zhihuDetailAdapterDefinition,
 ];
 
