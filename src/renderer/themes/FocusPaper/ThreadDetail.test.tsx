@@ -48,6 +48,6 @@ describe('ThreadDetail', () => {
     expect(markup).toContain('问题补充。');
     expect(markup).toContain('12 条');
     expect(markup).toContain('展开全文');
-    expect(markup).toContain('查看回答');
+    expect(markup).not.toContain('查看回答');
   });
 });

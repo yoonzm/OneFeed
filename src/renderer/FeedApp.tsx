@@ -2,19 +2,16 @@ import { useEffect, useState } from 'react';
 import type { FeedActionDescriptor, FeedItem, FeedSource } from '../types/feed';
 import { useFeedStore } from './store/useFeedStore';
 import { Card } from './themes/FocusPaper/Card';
-import { Header } from './themes/FocusPaper/Header';
 
 interface FeedAppProps {
   scrollElement: HTMLElement;
   source: FeedSource;
-  onDisable: () => void;
   onAction: (itemId: string, actionId: string) => boolean;
 }
 
 export default function FeedApp({
   scrollElement,
   source,
-  onDisable,
   onAction,
 }: FeedAppProps) {
   const items = useFeedStore((state) => state.items);
@@ -48,11 +45,6 @@ export default function FeedApp({
         <span className="rail-percent">{Math.round(progress * 100)}%</span>
       </div>
 
-      <Header
-        source={source}
-        status={`已整理 ${items.length} 条内容`}
-        onDisable={onDisable}
-      />
       <main>
         {items.length ? (
           items.map((item, index) => (

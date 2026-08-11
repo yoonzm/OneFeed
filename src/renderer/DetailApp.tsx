@@ -2,20 +2,17 @@ import { useEffect, useState } from 'react';
 import type { FeedActionDescriptor, FeedSource } from '../types/feed';
 import { useDetailStore } from './store/useDetailStore';
 import { DetailArticle } from './themes/FocusPaper/DetailArticle';
-import { Header } from './themes/FocusPaper/Header';
 import { ThreadDetail } from './themes/FocusPaper/ThreadDetail';
 
 interface DetailAppProps {
   scrollElement: HTMLElement;
   source: FeedSource;
-  onDisable: () => void;
   onAction: (itemId: string, actionId: string) => boolean;
 }
 
 export default function DetailApp({
   scrollElement,
   source,
-  onDisable,
   onAction,
 }: DetailAppProps) {
   const content = useDetailStore((state) => state.content);
@@ -57,11 +54,6 @@ export default function DetailApp({
         <span className="rail-percent">{Math.round(progress * 100)}%</span>
       </div>
 
-      <Header
-        source={source}
-        status={content?.kind === 'thread' ? '讨论详情' : '文章详情'}
-        onDisable={onDisable}
-      />
       <main>
         {content?.kind === 'article' ? (
           <DetailArticle

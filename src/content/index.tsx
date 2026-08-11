@@ -64,7 +64,6 @@ function mount(): (() => void) | undefined {
     const sharedProps = {
       scrollElement: viewport,
       source: activeAdapter.source,
-      onDisable: () => chrome.storage.local.set({ enabled: false }),
       onAction: (itemId: string, actionId: string) => (
         activeAdapter.adapter.triggerAction(itemId, actionId)
       ),

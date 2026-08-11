@@ -15,9 +15,9 @@
 | 功能模块 | MVP 实施范围 | 非 MVP 范围 (暂不实现) |
 | :--- | :--- | :--- |
 | **支持平台** | 知乎（回答/文章流、问题详情、回答详情、专栏文章详情）、Twitter/X（Home Feed）、V2EX（主题列表、主题详情）、Linux DO（话题列表、话题详情） | X 详情页；B站、YouTube、Reddit、小红书等 |
-| **渲染主题** | **1 款默认主题**：Notion 风格（极简、无框、黑白灰高留白） | 主题市场、自定义 CSS/JS、多主题切换 |
+| **渲染主题** | **1 款默认主题**：Notion 风格（极简、无框、克制留白；列表卡片省略作者头像行，短纯文本使用紧凑密度，长内容保留阅读留白） | 主题市场、自定义 CSS/JS、多主题切换 |
 | **数据解析** | 独立的 Feed、Article Detail 与 Thread Detail 静态选择器适配器 | AI 自动解析、云端规则库更新 |
-| **核心交互** | 基础滚动、图片预览、回答折叠、Thread 无限加载/分页、原网页点赞代理；Popup 开关与统一视图内“查看原页面”入口 | 知乎回答评论区接管、复杂富文本编辑、视频内嵌播放 |
+| **核心交互** | 基础滚动、图片预览、回答折叠、Thread 无限加载/分页、原网页点赞代理；Popup 与页面右侧悬浮开关 | 知乎回答评论区接管、复杂富文本编辑、视频内嵌播放 |
 | **数据持久化**| 本地存储 (chrome.storage.local) 记录启用状态与主题偏好 | 云端同步、知识库导出 (Notion/Obsidian) |
 
 ---
@@ -168,7 +168,7 @@ MVP 首先实现 `post`、`article`、`discussion` 三种内容结构，以及 `
 
 * 扩展 Popup 提供持久化开关，用户可以在原页面和 OneFeed 统一视图之间切换。
 * 受支持页面右侧常驻一个悬浮开关，显示当前启用状态，并允许用户无需打开 Popup 即时切换；开关默认在视口边缘半隐藏，鼠标悬浮或键盘聚焦时完整展开，并使用独立 Shadow DOM，不随 Feed 或 Detail 视图卸载。
-* 统一视图顶部提供“查看原页面”按钮，即使解析结果为空或布局异常，用户也能立即退出。
+* 统一视图不渲染产品 Header 或重复的退出按钮；恢复原网页统一由右侧悬浮开关和 Popup 承担。
 * 关闭时停止 Adapter 与 `MutationObserver`、卸载 React Root、移除 Shadow DOM Host 和原页面隐藏样式，并清空当前 Surface 状态。
 * 重新开启时重新执行挂载与解析流程，无需刷新页面。
 * WXT `wxt:locationchange` 触发时，内容脚本按 `origin + pathname + search` 销毁旧 Surface 并重新识别页面；hash-only 跳转不重挂载。
@@ -214,8 +214,7 @@ onefeed-extension/
 │   │       └── FocusPaper/      # MVP 默认主题
 │   │           ├── Card.tsx
 │   │           ├── DetailArticle.tsx
-│   │           ├── ThreadDetail.tsx
-│   │           └── Header.tsx
+│   │           └── ThreadDetail.tsx
 │   └── types/                  # 共享积木与独立 Surface 模型
 │       ├── feed.ts
 │       └── detail.ts
@@ -252,7 +251,6 @@ function mountCurrentSurface() {
   const props = {
     scrollElement: viewport,
     source: activeAdapter.source,
-    onDisable: () => chrome.storage.local.set({ enabled: false }),
     onAction: (itemId: string, actionId: string) => (
       activeAdapter.adapter.triggerAction(itemId, actionId)
     ),
@@ -340,6 +338,8 @@ export const zhihuAdapterDefinition: AdapterDefinition = {
 
 * **Week 3: Notion 极简主题渲染**
   * 实现基于 Shadow DOM 的 Notion 风格 UI（卡片、标题、作者、图片网格）。
+  * 列表 Card 省略作者头像行，并根据标准化内容长度与结构选择紧凑或舒适卡片密度，避免短回复沿用长文留白。
+  * 列表 Card 不重复显示“查看原文”操作；带标题内容由标题链接承担原文跳转。
   * 引入虚拟列表，优化滚动性能与卡片加载体验。
 
 * **Week 4: 端到端测试与体验调优**

@@ -9,16 +9,24 @@ interface CardProps {
   onAction: (item: FeedItem, action: FeedActionDescriptor) => void;
 }
 
-function formatPublishedAt(value: string | number): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
+const COMPACT_TEXT_LENGTH = 40;
+const COMPACT_TITLE_LENGTH = 32;
 
-  return new Intl.DateTimeFormat('zh-CN', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
+function getDensityClassName(item: FeedItem): string {
+  const titleLength = Array.from(item.title?.trim() || '').length;
+  if (titleLength && titleLength <= COMPACT_TITLE_LENGTH && !item.previewBlocks.length) {
+    return 'feed-card-compact';
+  }
+
+  if (item.title || item.previewBlocks.length !== 1) return '';
+
+  const block = item.previewBlocks[0];
+  if (!block || block.type !== 'richText') return '';
+
+  const textLength = Array.from(block.plainText.trim()).length;
+  if (!textLength || textLength > COMPACT_TEXT_LENGTH) return '';
+
+  return 'feed-card-compact';
 }
 
 export function Card({ item, index, onAction }: CardProps) {
@@ -28,9 +36,12 @@ export function Card({ item, index, onAction }: CardProps) {
     (block) => block.type === 'richText' && block.plainText.length > 260,
   );
   const contentExpanded = expanded || !expandable;
+  const densityClassName = getDensityClassName(item);
 
   return (
-    <article className={`feed-card feed-card-${item.kind} feed-card-${item.role}`}>
+    <article
+      className={`feed-card feed-card-${item.kind} feed-card-${item.role} ${densityClassName}`.trim()}
+    >
       <div className="card-index" aria-hidden="true">
         {String(item.sequence || index + 1).padStart(2, '0')}
       </div>
@@ -62,26 +73,6 @@ export function Card({ item, index, onAction }: CardProps) {
           </div>
         )}
 
-        <div className="author-row">
-          {item.author.avatar ? (
-            <img className="avatar" src={item.author.avatar} alt="" />
-          ) : (
-            <span className="avatar avatar-fallback" aria-hidden="true">
-              {item.source.name.slice(0, 1)}
-            </span>
-          )}
-          <div>
-            <strong>{item.author.name}</strong>
-            <span>
-              来自{item.source.name}
-              {item.publishedAt !== undefined && (
-                <> · <time>{formatPublishedAt(item.publishedAt)}</time></>
-              )}
-              {item.updatedAt !== undefined && ' · 已编辑'}
-            </span>
-          </div>
-        </div>
-
         {item.title && (
           <h2>
             <a href={item.originalUrl} target="_blank" rel="noreferrer">{item.title}</a>
@@ -110,7 +101,7 @@ export function Card({ item, index, onAction }: CardProps) {
         <ActionBar
           originalUrl={item.originalUrl}
           metrics={item.metrics}
-          actions={item.actions}
+          actions={item.actions.filter((action) => action.kind !== 'open')}
           onAction={(action) => onAction(item, action)}
         />
       </div>
