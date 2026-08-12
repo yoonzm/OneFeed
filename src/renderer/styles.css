@@ -1,3 +1,4 @@
+/* Shadow DOM 根级视觉 Token，同时隔离原站继承样式。 */
 :host {
   --paper: #f7f8fa;
   --surface: #ffffff;
@@ -38,6 +39,7 @@ a { color: inherit; }
   padding: 0 48px 56px 88px;
 }
 
+/* 阅读进度是辅助信息，窄屏下隐藏以让内容获得完整宽度。 */
 .reading-rail {
   position: fixed;
   top: 32px;
@@ -60,6 +62,7 @@ a { color: inherit; }
 .rail-track i { display: block; width: 100%; background: var(--blue); transition: height 100ms linear; }
 .rail-percent { display: block; letter-spacing: 0; transform: rotate(-90deg); }
 
+/* Feed Card 使用无框纸张流；编号列只表达原信息流顺序。 */
 .feed-card {
   position: relative;
   display: grid;
@@ -102,6 +105,7 @@ h2 { margin: 0 0 10px; font-family: "Songti SC", STSong, "Noto Serif CJK SC", Ge
 h2 a { text-decoration: none; text-decoration-thickness: 1px; text-underline-offset: 5px; }
 h2 a:hover { color: var(--blue); text-decoration: underline; }
 
+/* Detail Surface 保留更窄的正文行宽和更舒展的行距。 */
 .detail-article { max-width: 760px; margin: 0 auto; padding: 44px 0 20px; }
 .detail-article h1,
 .thread-header h1 {
@@ -161,6 +165,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .thread-pagination span { color: #a7b1c1; }
 .thread-pagination strong { color: var(--muted); font-weight: 500; }
 
+/* 列表富文本通过高度而非行数截断；展开状态会移除高度和渐隐层。 */
 .content {
   position: relative;
   max-height: 9.8em;
@@ -180,6 +185,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 
 .block-stack { display: grid; gap: 14px; }
 
+/* 只有结构简单的短标题或短纯文本会由 Card 选择紧凑密度。 */
 .feed-card-compact { padding-top: 14px; padding-bottom: 16px; }
 .feed-card-compact .content { line-height: 1.65; }
 .feed-card-compact h2 { margin-bottom: 4px; }
@@ -253,6 +259,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .card-actions .open-action { margin-left: auto; }
 .passive-metric { color: var(--muted); font-size: 11px; }
 
+/* Lightbox 位于 Shadow DOM 接管层内，层级无需与原站组件协商。 */
 .lightbox { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 48px; border: 0; background: rgb(15 22 34 / 92%); cursor: zoom-out; }
 .lightbox img { max-width: min(1200px, 92vw); max-height: 84vh; object-fit: contain; box-shadow: 0 24px 80px rgb(0 0 0 / 40%); }
 .lightbox span { position: absolute; bottom: 20px; color: #b8c4d6; font-size: 11px; letter-spacing: .08em; }
@@ -267,6 +274,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #9fc6ff; outline-offs
 
 @keyframes scan { to { transform: rotate(360deg); } }
 
+/* 移动端优先保证正文宽度，并让操作区自然换行。 */
 @media (max-width: 720px) {
   .reader-app { padding: 0 16px 40px; }
   .reading-rail { display: none; }

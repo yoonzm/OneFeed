@@ -10,6 +10,7 @@ interface DetailAppProps {
   onAction: (itemId: string, actionId: string) => boolean;
 }
 
+/** 根据 DetailContent.kind 在文章详情与讨论详情之间分流的 Surface 外壳。 */
 export default function DetailApp({
   scrollElement,
   source,
@@ -24,6 +25,7 @@ export default function DetailApp({
       const nextProgress = available > 0 ? scrollElement.scrollTop / available : 0;
       setProgress(Math.min(1, Math.max(0, nextProgress)));
 
+      // 只有无限 Thread 需要借原页面触底加载；文章和分页 Thread 不应产生副作用。
       if (
         content?.kind === 'thread' &&
         content.loadingMode === 'infinite' &&
@@ -41,6 +43,7 @@ export default function DetailApp({
     originalUrl: string,
     action: FeedActionDescriptor,
   ) => {
+    // 详情头与 Thread 条目拥有不同 URL，因此由调用方一并传入动作目标。
     if (!onAction(itemId, action.id) && action.fallback === 'openOriginal') {
       window.open(originalUrl, '_blank', 'noopener,noreferrer');
     }

@@ -22,6 +22,7 @@ function formatPublishedAt(value: string | number): string {
   }).format(date);
 }
 
+/** 单篇正文视图：保留作者元信息，并始终完整渲染所有标准 Block。 */
 export function DetailArticle({ content, onAction }: DetailArticleProps) {
   const [preview, setPreview] = useState<FeedImage>();
 
@@ -58,6 +59,7 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
 
       {content.title && <h1>{content.title}</h1>}
 
+      {/* 详情正文不复用 Feed Card 的预览折叠规则。 */}
       <div className="detail-body block-stack">
         {content.body.map((block, blockIndex) => (
           <BlockRenderer
@@ -69,6 +71,7 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
         ))}
       </div>
 
+      {/* 与列表不同，详情页允许保留 Adapter 提供的原文入口。 */}
       <ActionBar
         originalUrl={content.originalUrl}
         metrics={content.metrics}

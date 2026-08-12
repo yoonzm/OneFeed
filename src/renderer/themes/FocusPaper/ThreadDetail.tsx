@@ -27,9 +27,11 @@ function formatPublishedAt(value: string | number): string {
   }).format(date);
 }
 
+/** 讨论详情由独立主题头、标准 Card 条目和可选分页三部分组成。 */
 export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
   const [preview, setPreview] = useState<FeedImage>();
   const replyMetric = content.header.metrics.find((metric) => metric.kind === 'replies');
+  // 原站总数可能大于当前已解析条目数；没有可用统计值时再回退到本地长度。
   const totalEntries = replyMetric?.value || content.entries.length;
 
   return (
@@ -114,6 +116,7 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
           <h2>{content.entryLabel}</h2>
           <span>{totalEntries.toLocaleString('zh-CN')} 条</span>
         </header>
+        {/* 回答和回复复用 Feed Card，保证折叠、操作代理和媒体行为一致。 */}
         {content.entries.length ? content.entries.map((item, index) => (
           <Card
             item={item}
@@ -128,6 +131,7 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
         )}
       </section>
 
+      {/* paged 模式使用原站 URL 导航；infinite 模式由 DetailApp 的滚动同步负责。 */}
       {content.pagination && content.pagination.totalPages > 1 && (
         <nav className="thread-pagination" aria-label="分页">
           {content.pagination.previousUrl ? (

@@ -9,6 +9,7 @@ interface FeedAppProps {
   onAction: (itemId: string, actionId: string) => boolean;
 }
 
+/** Feed Surface 外壳：连接状态库、阅读进度和原页面的无限加载。 */
 export default function FeedApp({
   scrollElement,
   source,
@@ -23,6 +24,7 @@ export default function FeedApp({
       const nextProgress = available > 0 ? scrollElement.scrollTop / available : 0;
       setProgress(Math.min(1, Math.max(0, nextProgress)));
 
+      // 新视图在 Shadow DOM 内滚动；接近底部时同步驱动被隐藏的原页面继续加载。
       if (available - scrollElement.scrollTop < 800) {
         window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
       }
@@ -32,6 +34,7 @@ export default function FeedApp({
   }, [scrollElement]);
 
   const handleAction = (item: FeedItem, action: FeedActionDescriptor) => {
+    // Adapter 返回 false 表示无法代理原站操作；仅显式声明回退的动作才打开原文。
     if (!onAction(item.id, action.id) && action.fallback === 'openOriginal') {
       window.open(item.originalUrl, '_blank', 'noopener,noreferrer');
     }
