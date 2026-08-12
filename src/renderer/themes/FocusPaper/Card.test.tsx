@@ -21,16 +21,54 @@ const shortReply: FeedItem = {
 };
 
 describe('Card', () => {
-  it('renders short plain text as a compact card without the author row', () => {
+  it('renders short plain text as a compact card with author metadata but no avatar', () => {
     const markup = renderToStaticMarkup(
       <Card item={shortReply} index={0} onAction={vi.fn()} />,
     );
 
     expect(markup).toContain('feed-card-compact');
     expect(markup).toContain('class="content content-expanded"');
+    expect(markup).toContain('class="card-meta-row"');
+    expect(markup).toContain('class="card-author">Alice</span>');
     expect(markup).not.toContain('author-row');
-    expect(markup).not.toContain('Alice');
+    expect(markup).not.toContain('avatar');
     expect(markup).not.toContain('展开全文');
+  });
+
+  it('orders title, body and remaining metadata as three semantic rows', () => {
+    const markup = renderToStaticMarkup(
+      <Card
+        item={{
+          ...shortReply,
+          title: '测试标题',
+          publishedAt: '2026-08-12T09:00:00+08:00',
+          context: {
+            community: { name: '分享创造' },
+            tags: [{ name: '设计' }],
+          },
+          flags: { pinned: true },
+          metrics: [{ kind: 'views', value: 42, label: '浏览' }],
+          actions: [{ id: 'reply', kind: 'reply', label: '回复', enabled: true }],
+        }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+
+    const titleIndex = markup.indexOf('card-title-row');
+    const bodyIndex = markup.indexOf('card-body-row');
+    const metaIndex = markup.indexOf('card-meta-row');
+
+    expect(titleIndex).toBeGreaterThan(-1);
+    expect(bodyIndex).toBeGreaterThan(titleIndex);
+    expect(metaIndex).toBeGreaterThan(bodyIndex);
+    expect(markup).toContain('Alice');
+    expect(markup).toContain('V2EX');
+    expect(markup).toContain('分享创造');
+    expect(markup).toContain('#设计');
+    expect(markup).toContain('置顶');
+    expect(markup).toContain('浏览 42');
+    expect(markup).toContain('回复');
   });
 
   it('keeps contextual short text compact', () => {

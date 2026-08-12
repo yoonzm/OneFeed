@@ -31,6 +31,18 @@ function getDensityClassName(item: FeedItem): string {
   return 'feed-card-compact';
 }
 
+function formatPublishedAt(value: string | number): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+
+  return new Intl.DateTimeFormat('zh-CN', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(date);
+}
+
 /** Focus Paper 的通用列表卡片；平台差异应在 Adapter 归一化阶段消化。 */
 export function Card({ item, index, onAction }: CardProps) {
   const [expanded, setExpanded] = useState(false);
@@ -46,45 +58,17 @@ export function Card({ item, index, onAction }: CardProps) {
     <article
       className={`feed-card feed-card-${item.kind} feed-card-${item.role} ${densityClassName}`.trim()}
     >
-      <div className="card-index" aria-hidden="true">
-        {String(item.sequence || index + 1).padStart(2, '0')}
-      </div>
       <div className="card-main">
-        {(item.context?.reason || item.context?.community || item.context?.tags?.length) && (
-          <div className="context-row">
-            {item.context.reason && <span>{item.context.reason.label}</span>}
-            {item.context.community && (
-              item.context.community.url ? (
-                <a href={item.context.community.url} target="_blank" rel="noreferrer">
-                  {item.context.community.name}
-                </a>
-              ) : <span>{item.context.community.name}</span>
-            )}
-            {item.context.tags?.map((tag) => tag.url ? (
-              <a href={tag.url} target="_blank" rel="noreferrer" key={tag.id || tag.name}>
-                #{tag.name}
-              </a>
-            ) : <span key={tag.id || tag.name}>#{tag.name}</span>)}
-          </div>
-        )}
-
-        {item.flags && Object.values(item.flags).some(Boolean) && (
-          <div className="flag-row" aria-label="内容状态">
-            {item.flags.pinned && <span>置顶</span>}
-            {item.flags.sensitive && <span>敏感内容</span>}
-            {item.flags.spoiler && <span>含剧透</span>}
-            {item.flags.locked && <span>已锁定</span>}
-          </div>
-        )}
-
         {item.title && (
-          <h2>
-            <a href={item.originalUrl} target="_blank" rel="noreferrer">{item.title}</a>
-          </h2>
+          <div className="card-title-row">
+            <h2>
+              <a href={item.originalUrl} target="_blank" rel="noreferrer">{item.title}</a>
+            </h2>
+          </div>
         )}
 
         {!!item.previewBlocks.length && (
-          <div className="block-stack">
+          <div className="card-body-row block-stack">
             {item.previewBlocks.map((block, blockIndex) => (
               <BlockRenderer
                 block={block}
@@ -96,19 +80,65 @@ export function Card({ item, index, onAction }: CardProps) {
           </div>
         )}
 
-        {expandable && (
-          <button className="text-action" type="button" onClick={() => setExpanded(!expanded)}>
-            {expanded ? '收起' : '展开全文'}
-          </button>
-        )}
+        {/* 作者、上下文、状态和操作统一收敛到第三行；列表不恢复头像。 */}
+        <div className="card-meta-row">
+          <span className="card-index" aria-label={`第 ${item.sequence || index + 1} 条`}>
+            {String(item.sequence || index + 1).padStart(2, '0')}
+          </span>
+          {item.author.link ? (
+            <a className="card-author" href={item.author.link} target="_blank" rel="noreferrer">
+              {item.author.name}
+            </a>
+          ) : <span className="card-author">{item.author.name}</span>}
+          <span className="card-source">
+            {item.source.name}
+            {item.publishedAt !== undefined && (
+              <> · <time>{formatPublishedAt(item.publishedAt)}</time></>
+            )}
+            {item.updatedAt !== undefined && ' · 已编辑'}
+          </span>
 
-        {/* 列表标题已承担原文跳转，Card 不再重复显示 open 操作。 */}
-        <ActionBar
-          originalUrl={item.originalUrl}
-          metrics={item.metrics}
-          actions={item.actions.filter((action) => action.kind !== 'open')}
-          onAction={(action) => onAction(item, action)}
-        />
+          {(item.context?.reason || item.context?.community || item.context?.tags?.length) && (
+            <span className="context-row">
+              {item.context.reason && <span>{item.context.reason.label}</span>}
+              {item.context.community && (
+                item.context.community.url ? (
+                  <a href={item.context.community.url} target="_blank" rel="noreferrer">
+                    {item.context.community.name}
+                  </a>
+                ) : <span>{item.context.community.name}</span>
+              )}
+              {item.context.tags?.map((tag) => tag.url ? (
+                <a href={tag.url} target="_blank" rel="noreferrer" key={tag.id || tag.name}>
+                  #{tag.name}
+                </a>
+              ) : <span key={tag.id || tag.name}>#{tag.name}</span>)}
+            </span>
+          )}
+
+          {item.flags && Object.values(item.flags).some(Boolean) && (
+            <span className="flag-row" aria-label="内容状态">
+              {item.flags.pinned && <span>置顶</span>}
+              {item.flags.sensitive && <span>敏感内容</span>}
+              {item.flags.spoiler && <span>含剧透</span>}
+              {item.flags.locked && <span>已锁定</span>}
+            </span>
+          )}
+
+          {expandable && (
+            <button className="text-action" type="button" onClick={() => setExpanded(!expanded)}>
+              {expanded ? '收起' : '展开全文'}
+            </button>
+          )}
+
+          {/* 列表标题已承担原文跳转，Card 不再重复显示 open 操作。 */}
+          <ActionBar
+            originalUrl={item.originalUrl}
+            metrics={item.metrics}
+            actions={item.actions.filter((action) => action.kind !== 'open')}
+            onAction={(action) => onAction(item, action)}
+          />
+        </div>
       </div>
 
       {/* 预览状态属于单张 Card，关闭后不会影响其他卡片的媒体状态。 */}
