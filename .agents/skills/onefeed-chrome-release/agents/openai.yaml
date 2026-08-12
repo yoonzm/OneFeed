@@ -1,0 +1,4 @@
+interface:
+  display_name: "Release OneFeed Chrome"
+  short_description: "Publish the next OneFeed patch to Chrome"
+  default_prompt: "Use $onefeed-chrome-release to publish the next patch version of OneFeed and monitor the store submission."
