@@ -9,8 +9,9 @@ function item(id: string, likes = 1): FeedItem {
     source: { id: 'zhihu', name: '知乎' },
     originalUrl: 'https://www.zhihu.com/',
     kind: 'article',
+    role: 'answer',
     author: { name: '测试用户', avatar: '' },
-    blocks: [{ type: 'richText', html: '<p>内容</p>', plainText: '内容' }],
+    previewBlocks: [{ type: 'richText', html: '<p>内容</p>', plainText: '内容' }],
     metrics: [{ kind: 'reactions', value: likes, label: '赞同' }],
     actions: [{
       id: 'react',

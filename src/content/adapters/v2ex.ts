@@ -2,7 +2,7 @@ import type { FeedItem, FeedSource } from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
 const CARD_SELECTOR = '.cell.item';
-const SOURCE: FeedSource = {
+export const V2EX_SOURCE: FeedSource = {
   id: 'v2ex',
   name: 'V2EX',
   homeUrl: 'https://www.v2ex.com/',
@@ -61,7 +61,6 @@ export function parseV2exCard(element: Element): FeedItem | null {
     stableHash(`${originalUrl}|${title}|${authorName}`);
   const communityLink = element.querySelector<HTMLAnchorElement>('.topic_info .node, a.node');
   const communityName = communityLink?.textContent?.trim();
-  const reactions = parseV2exCount(element.querySelector('.votes')?.textContent || '');
   const replies = parseV2exCount(
     element.querySelector('.count_livid, .count_orange, .count_blue')?.textContent || '',
   );
@@ -69,9 +68,10 @@ export function parseV2exCard(element: Element): FeedItem | null {
   return {
     id: `v2ex_${originId}`,
     platform: 'v2ex',
-    source: SOURCE,
+    source: V2EX_SOURCE,
     originalUrl: originalUrl || window.location.href,
     kind: 'discussion',
+    role: 'topic',
     title,
     author: {
       name: authorName,
@@ -87,21 +87,9 @@ export function parseV2exCard(element: Element): FeedItem | null {
       },
     } : undefined,
     publishedAt: element.querySelector('.topic_info [title]')?.getAttribute('title') || undefined,
-    blocks: [],
-    metrics: [
-      { kind: 'reactions', value: reactions, label: '赞同' },
-      { kind: 'replies', value: replies, label: '回复' },
-    ],
+    previewBlocks: [],
+    metrics: [{ kind: 'replies', value: replies, label: '回复' }],
     actions: [
-      {
-        id: 'react',
-        kind: 'react',
-        variant: 'agree',
-        label: '赞同',
-        count: reactions,
-        enabled: true,
-        fallback: 'openOriginal',
-      },
       {
         id: 'reply',
         kind: 'reply',
@@ -116,13 +104,10 @@ export function parseV2exCard(element: Element): FeedItem | null {
 }
 
 export function triggerV2exAction(element: Element | undefined, actionId: string): boolean {
-  const selector = actionId === 'react'
-    ? '.votes button, button[aria-label*="赞同"], button[title*="赞同"]'
-    : actionId === 'reply'
-      ? 'button[aria-label*="回复"], button[title*="回复"]'
-      : '';
-  if (!selector) return false;
-  const button = element?.querySelector<HTMLElement>(selector);
+  if (actionId !== 'reply') return false;
+  const button = element?.querySelector<HTMLElement>(
+    'button[aria-label*="回复"], button[title*="回复"]',
+  );
   if (!button) return false;
   button.click();
   return true;
@@ -141,7 +126,9 @@ export class V2exAdapter extends BaseAdapter {
 }
 
 export const v2exAdapterDefinition: AdapterDefinition = {
-  source: SOURCE,
-  matches: (hostname) => hostname === 'v2ex.com' || hostname.endsWith('.v2ex.com'),
+  source: V2EX_SOURCE,
+  matches: (url) => (
+    url.hostname === 'v2ex.com' || url.hostname.endsWith('.v2ex.com')
+  ) && ['/', '/recent'].includes(url.pathname),
   create: (onItems) => new V2exAdapter(onItems),
 };

@@ -4,7 +4,7 @@ export type FeedItemsListener = (items: FeedItem[]) => void;
 
 export interface AdapterDefinition {
   source: FeedSource;
-  matches: (hostname: string) => boolean;
+  matches: (url: URL) => boolean;
   create: (onItems: FeedItemsListener) => BaseAdapter;
 }
 

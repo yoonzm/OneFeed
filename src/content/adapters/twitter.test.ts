@@ -51,14 +51,15 @@ describe('parseTwitterCard', () => {
         avatar: 'https://pbs.twimg.com/profile_images/avatar.jpg',
       },
       kind: 'post',
+      role: 'post',
       publishedAt: '2026-08-06T01:02:03.000Z',
       metrics: [
         { kind: 'reactions', value: 1200, label: '喜欢' },
         { kind: 'replies', value: 34, label: '回复' },
       ],
     });
-    const text = item?.blocks.find((block) => block.type === 'richText');
-    const gallery = item?.blocks.find((block) => block.type === 'gallery');
+    const text = item?.previewBlocks.find((block) => block.type === 'richText');
+    const gallery = item?.previewBlocks.find((block) => block.type === 'gallery');
     expect(text?.html).toContain('保持专注');
     expect(text?.html).not.toContain('script');
     expect(text?.html).not.toContain('style=');

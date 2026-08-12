@@ -24,7 +24,7 @@ describe('parseV2exCard', () => {
           <a class="topic-link" href="/t/123456#reply12">如何保持专注？</a>
         </span>
         <span class="topic_info">
-          <div class="votes">3</div>
+          <div class="votes"></div>
           <a class="node" href="/go/programmer">程序员</a> ·
           <strong><a href="/member/alice">Alice</a></strong> ·
           <span title="2026-08-06 11:42:50 +08:00">2 分钟前</span>
@@ -39,6 +39,7 @@ describe('parseV2exCard', () => {
       id: 'v2ex_123456',
       platform: 'v2ex',
       kind: 'discussion',
+      role: 'topic',
       title: '如何保持专注？',
       author: {
         name: 'Alice',
@@ -47,12 +48,12 @@ describe('parseV2exCard', () => {
       context: { community: { name: '程序员' } },
       publishedAt: '2026-08-06 11:42:50 +08:00',
       metrics: [
-        { kind: 'reactions', value: 3, label: '赞同' },
         { kind: 'replies', value: 12, label: '回复' },
       ],
     });
+    expect(item?.actions.map((action) => action.kind)).toEqual(['reply', 'open']);
     expect(item?.originalUrl).toBe('http://localhost:3000/t/123456#reply12');
-    expect(item?.blocks).toEqual([]);
+    expect(item?.previewBlocks).toEqual([]);
     expect(item).not.toHaveProperty('rawElementRef');
   });
 
@@ -63,7 +64,7 @@ describe('parseV2exCard', () => {
 });
 
 describe('triggerV2exAction', () => {
-  it('clicks a native vote control and falls back when no reply control exists', () => {
+  it('ignores unsupported vote controls and falls back when no reply control exists', () => {
     document.body.innerHTML = `
       <div class="cell item">
         <div class="votes"><button type="button">赞同</button></div>
@@ -72,8 +73,8 @@ describe('triggerV2exAction', () => {
     const click = vi.spyOn(vote, 'click');
     const element = document.querySelector('.cell.item')!;
 
-    expect(triggerV2exAction(element, 'react')).toBe(true);
-    expect(click).toHaveBeenCalledOnce();
+    expect(triggerV2exAction(element, 'react')).toBe(false);
+    expect(click).not.toHaveBeenCalled();
     expect(triggerV2exAction(element, 'reply')).toBe(false);
   });
 });

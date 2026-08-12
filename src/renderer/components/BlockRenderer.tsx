@@ -10,6 +10,7 @@ interface BlockComponentProps {
 function RichTextBlock({ block, expanded }: BlockComponentProps) {
   if (block.type !== 'richText') return null;
 
+  // FeedBlock 契约要求 Adapter 先清洗 html；Renderer 只负责保持富文本结构。
   return (
     <div
       className={`content ${expanded ? 'content-expanded' : ''}`}
@@ -23,6 +24,7 @@ function GalleryBlock({ block, onPreview }: BlockComponentProps) {
 
   return (
     <div className={`media-grid media-count-${Math.min(block.items.length, 3)}`}>
+      {/* 限制单卡资源数量，防止异常页面一次挂载过多图片节点。 */}
       {block.items.slice(0, 6).map((image, index) => (
         <button
           className="media-button"
@@ -127,6 +129,7 @@ interface BlockRendererProps extends Omit<BlockComponentProps, 'block'> {
 }
 
 export function BlockRenderer({ block, expanded, onPreview }: BlockRendererProps) {
+  // 注册表让新增标准 Block 保持集中且穷尽，避免在主题组件中加入平台判断。
   const Renderer = blockRegistry[block.type];
   return <Renderer block={block} expanded={expanded} onPreview={onPreview} />;
 }

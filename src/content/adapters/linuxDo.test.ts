@@ -49,6 +49,7 @@ describe('parseLinuxDoCard', () => {
       id: 'linux-do_2703711',
       platform: 'linux-do',
       kind: 'discussion',
+      role: 'topic',
       title: '这个冷饭是必须得炒一下了',
       author: {
         name: 'Neo',
@@ -65,7 +66,7 @@ describe('parseLinuxDoCard', () => {
       ],
     });
     expect(item?.originalUrl).toBe('http://localhost:3000/t/topic/2703711');
-    expect(item?.blocks).toEqual([]);
+    expect(item?.previewBlocks).toEqual([]);
     expect(item).not.toHaveProperty('rawElementRef');
   });
 

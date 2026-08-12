@@ -1,5 +1,13 @@
 import DOMPurify from 'dompurify';
-import type { FeedImage, FeedItem, FeedSource } from '../../types/feed';
+import type {
+  FeedActionDescriptor,
+  FeedAuthor,
+  FeedBlock,
+  FeedImage,
+  FeedItem,
+  FeedMetric,
+  FeedSource,
+} from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
 const CARD_SELECTOR = [
@@ -11,12 +19,13 @@ const CARD_SELECTOR = [
 
 const BODY_SELECTOR = [
   '.RichContent-inner',
+  '.Post-RichText',
   '.RichText',
   '.CopyrightRichText-richText',
   '.ContentItem-content',
 ].join(', ');
 
-const SOURCE: FeedSource = {
+export const ZHIHU_SOURCE: FeedSource = {
   id: 'zhihu',
   name: '知乎',
   homeUrl: 'https://www.zhihu.com/',
@@ -73,6 +82,10 @@ interface ZhihuMetadata {
   authorName?: string;
   itemId?: string;
   title?: string;
+  type?: string;
+  dateCreated?: string | number;
+  datePublished?: string | number;
+  dateModified?: string | number;
 }
 
 function getMetadata(element: Element): ZhihuMetadata {
@@ -130,12 +143,41 @@ function cleanContent(body: Element): string {
     node.removeAttribute('id');
   });
   return DOMPurify.sanitize(clone.innerHTML, {
-    ALLOWED_TAGS: ['p', 'br', 'strong', 'b', 'em', 'i', 'u', 's', 'blockquote', 'ol', 'ul', 'li', 'a', 'code', 'pre'],
+    ALLOWED_TAGS: ['p', 'br', 'h2', 'h3', 'h4', 'strong', 'b', 'em', 'i', 'u', 's', 'blockquote', 'ol', 'ul', 'li', 'a', 'code', 'pre'],
     ALLOWED_ATTR: ['href', 'target', 'rel'],
   });
 }
 
-export function parseZhihuCard(element: Element): FeedItem | null {
+export function parseZhihuBlocks(body: Element): FeedBlock[] {
+  const html = cleanContent(body);
+  const textContainer = document.createElement('div');
+  textContainer.innerHTML = html;
+  const contentText = textContainer.textContent?.trim() || '';
+  const images = extractMedia(body);
+  return [
+    ...(contentText ? [{
+      type: 'richText' as const,
+      html,
+      plainText: contentText,
+    }] : []),
+    ...(images.length ? [{ type: 'gallery' as const, items: images }] : []),
+  ];
+}
+
+export interface ParsedZhihuContent {
+  originId: string;
+  originalUrl: string;
+  title?: string;
+  role: 'answer' | 'article';
+  author: FeedAuthor;
+  publishedAt?: string | number;
+  updatedAt?: string | number;
+  blocks: FeedBlock[];
+  metrics: FeedMetric[];
+  actions: FeedActionDescriptor[];
+}
+
+export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
   const body = element.querySelector(BODY_SELECTOR);
   if (!body) return null;
 
@@ -154,8 +196,8 @@ export function parseZhihuCard(element: Element): FeedItem | null {
   const avatar = absoluteUrl(
     firstAttribute(element, ['.Avatar', '.AuthorInfo-avatar img'], 'src'),
   );
-  const contentHtml = cleanContent(body);
-  const contentText = body.textContent?.trim() || '';
+  const blocks = parseZhihuBlocks(body);
+  const contentText = blocks.find((block) => block.type === 'richText')?.plainText || '';
   if (!title && !contentText) return null;
 
   const originId =
@@ -165,26 +207,27 @@ export function parseZhihuCard(element: Element): FeedItem | null {
     originalUrl.match(/\/p\/(\d+)/)?.[1] ||
     originalUrl.match(/\/question\/(\d+)/)?.[1] ||
     stableHash(`${originalUrl}|${title}|${authorName}|${contentText.slice(0, 120)}`);
-  const images = extractMedia(body);
   const agrees = parseCount(firstText(element, ['.Button--voteUp', '[aria-label*="赞同"]']));
   const comments = parseCount(firstText(element, ['.ContentItem-action', 'button[aria-label*="评论"]']));
+  const role = metadata.type === 'article' ||
+    element.matches('.ArticleItem, .Post-content, .Post-Main') ||
+    /\/p\/\d+/.test(originalUrl)
+    ? 'article'
+    : 'answer';
 
   return {
-    id: `zhihu_${originId}`,
-    platform: 'zhihu',
-    source: SOURCE,
+    originId,
     originalUrl,
-    kind: 'article',
     title: title || undefined,
+    role,
     author: {
       name: authorName || '知乎用户',
       avatar,
       link: absoluteUrl(firstAttribute(element, ['.AuthorInfo-name a', '.UserLink-link'], 'href')) || undefined,
     },
-    blocks: [
-      { type: 'richText', html: contentHtml, plainText: contentText },
-      ...(images.length ? [{ type: 'gallery' as const, items: images }] : []),
-    ],
+    publishedAt: metadata.dateCreated ?? metadata.datePublished,
+    updatedAt: metadata.dateModified,
+    blocks,
     metrics: [
       { kind: 'reactions', value: agrees, label: '赞同' },
       { kind: 'replies', value: comments, label: '评论' },
@@ -212,9 +255,30 @@ export function parseZhihuCard(element: Element): FeedItem | null {
   };
 }
 
+export function parseZhihuCard(element: Element): FeedItem | null {
+  const content = parseZhihuContent(element);
+  if (!content) return null;
+
+  return {
+    id: `zhihu_${content.originId}`,
+    platform: 'zhihu',
+    source: ZHIHU_SOURCE,
+    originalUrl: content.originalUrl,
+    kind: 'article',
+    role: content.role,
+    title: content.title,
+    author: content.author,
+    publishedAt: content.publishedAt,
+    updatedAt: content.updatedAt,
+    previewBlocks: content.blocks,
+    metrics: content.metrics,
+    actions: content.actions,
+  };
+}
+
 export function triggerZhihuAction(element: Element | undefined, actionId: string): boolean {
   const selector = actionId === 'react'
-    ? '.Button--voteUp, [aria-label*="赞同"]'
+    ? 'button.VoteButton:not(.VoteButton--down), .Button--voteUp, [aria-label*="赞同"]'
     : actionId === 'reply'
       ? '.ContentItem-action, button[aria-label*="评论"]'
       : '';
@@ -238,7 +302,10 @@ export class ZhihuAdapter extends BaseAdapter {
 }
 
 export const zhihuAdapterDefinition: AdapterDefinition = {
-  source: SOURCE,
-  matches: (hostname) => hostname === 'zhihu.com' || hostname.endsWith('.zhihu.com'),
+  source: ZHIHU_SOURCE,
+  matches: (url) => [
+    'zhihu.com',
+    'www.zhihu.com',
+  ].includes(url.hostname) && ['/', '/follow', '/hot', '/recommend'].includes(url.pathname),
   create: (onItems) => new ZhihuAdapter(onItems),
 };

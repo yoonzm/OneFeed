@@ -1,17 +1,18 @@
 import { useEffect, useState } from 'react';
-import type { FeedActionDescriptor, FeedItem, FeedSource } from '../types/feed';
+import type { FeedActionDescriptor, FeedItem } from '../types/feed';
 import { useFeedStore } from './store/useFeedStore';
 import { Card } from './themes/FocusPaper/Card';
-import { Header } from './themes/FocusPaper/Header';
 
-interface AppProps {
+interface FeedAppProps {
   scrollElement: HTMLElement;
-  source: FeedSource;
-  onDisable: () => void;
   onAction: (itemId: string, actionId: string) => boolean;
 }
 
-export default function App({ scrollElement, source, onDisable, onAction }: AppProps) {
+/** Feed Surface 外壳：连接状态库、阅读进度和原页面的无限加载。 */
+export default function FeedApp({
+  scrollElement,
+  onAction,
+}: FeedAppProps) {
   const items = useFeedStore((state) => state.items);
   const [progress, setProgress] = useState(0);
 
@@ -21,6 +22,7 @@ export default function App({ scrollElement, source, onDisable, onAction }: AppP
       const nextProgress = available > 0 ? scrollElement.scrollTop / available : 0;
       setProgress(Math.min(1, Math.max(0, nextProgress)));
 
+      // 新视图在 Shadow DOM 内滚动；接近底部时同步驱动被隐藏的原页面继续加载。
       if (available - scrollElement.scrollTop < 800) {
         window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' });
       }
@@ -30,6 +32,7 @@ export default function App({ scrollElement, source, onDisable, onAction }: AppP
   }, [scrollElement]);
 
   const handleAction = (item: FeedItem, action: FeedActionDescriptor) => {
+    // Adapter 返回 false 表示无法代理原站操作；仅显式声明回退的动作才打开原文。
     if (!onAction(item.id, action.id) && action.fallback === 'openOriginal') {
       window.open(item.originalUrl, '_blank', 'noopener,noreferrer');
     }
@@ -43,7 +46,6 @@ export default function App({ scrollElement, source, onDisable, onAction }: AppP
         <span className="rail-percent">{Math.round(progress * 100)}%</span>
       </div>
 
-      <Header count={items.length} source={source} onDisable={onDisable} />
       <main>
         {items.length ? (
           items.map((item, index) => (
@@ -57,7 +59,7 @@ export default function App({ scrollElement, source, onDisable, onAction }: AppP
         ) : (
           <section className="empty-state" aria-live="polite">
             <span className="scan-mark" aria-hidden="true" />
-            <p>正在整理{source.name}信息流</p>
+            <p>正在整理信息流</p>
             <small>页面内容出现后，会自动转换为专注阅读模式。</small>
           </section>
         )}
