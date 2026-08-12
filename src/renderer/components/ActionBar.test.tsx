@@ -50,6 +50,19 @@ describe('ActionBar', () => {
     expect(markup).toContain('查看回复');
   });
 
+  it('renders an explicitly declared zero action count', () => {
+    const markup = renderToStaticMarkup(
+      <ActionBar
+        originalUrl={item.originalUrl}
+        metrics={[]}
+        actions={[{ id: 'reply', kind: 'reply', label: '评论', count: 0, enabled: true }]}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain('评论 0');
+  });
+
   it('removes redundant engagement and original links on detail surfaces', () => {
     const markup = renderToStaticMarkup(
       <ActionBar

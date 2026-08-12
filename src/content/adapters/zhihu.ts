@@ -25,6 +25,33 @@ const BODY_SELECTOR = [
   '.ContentItem-content',
 ].join(', ');
 
+type ZhihuActionId = 'react' | 'downvote' | 'reply' | 'bookmark' | 'like';
+
+const ACTION_SELECTORS: Record<ZhihuActionId, string[]> = {
+  react: [
+    'button.VoteButton:not(.VoteButton--down)',
+    '.Button--voteUp',
+    'button[aria-label*="赞同"]',
+  ],
+  downvote: [
+    'button.VoteButton--down',
+    '.Button--voteDown',
+    'button[aria-label*="反对"]',
+    'button[aria-label*="踩"]',
+  ],
+  reply: ['button[aria-label*="评论"]'],
+  bookmark: ['button[aria-label*="收藏"]'],
+  like: ['button[aria-label*="喜欢"]'],
+};
+
+const ACTION_LABELS: Record<ZhihuActionId, string[]> = {
+  react: ['赞同'],
+  downvote: ['踩', '反对'],
+  reply: ['评论'],
+  bookmark: ['收藏'],
+  like: ['喜欢'],
+};
+
 export const ZHIHU_SOURCE: FeedSource = {
   id: 'zhihu',
   name: '知乎',
@@ -49,6 +76,29 @@ function firstAttribute(
     if (value) return value;
   }
   return '';
+}
+
+function findActionControl(element: Element, actionId: ZhihuActionId): HTMLElement | null {
+  for (const selector of ACTION_SELECTORS[actionId]) {
+    const control = element.querySelector<HTMLElement>(selector);
+    if (control) return control;
+  }
+
+  return Array.from(element.querySelectorAll<HTMLElement>('button, [role="button"]'))
+    .find((control) => {
+      const label = `${control.getAttribute('aria-label') || ''} ${control.textContent || ''}`;
+      return ACTION_LABELS[actionId].some((keyword) => label.includes(keyword));
+    }) || null;
+}
+
+function actionControlText(element: Element, actionId: ZhihuActionId): string {
+  const control = findActionControl(element, actionId);
+  if (!control) return '';
+  return [
+    control.getAttribute('aria-label'),
+    control.getAttribute('title'),
+    control.textContent,
+  ].filter(Boolean).join(' ');
 }
 
 function absoluteUrl(value: string): string {
@@ -207,13 +257,67 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
     originalUrl.match(/\/p\/(\d+)/)?.[1] ||
     originalUrl.match(/\/question\/(\d+)/)?.[1] ||
     stableHash(`${originalUrl}|${title}|${authorName}|${contentText.slice(0, 120)}`);
-  const agrees = parseCount(firstText(element, ['.Button--voteUp', '[aria-label*="赞同"]']));
-  const comments = parseCount(firstText(element, ['.ContentItem-action', 'button[aria-label*="评论"]']));
+  const agrees = parseCount(actionControlText(element, 'react'));
+  const downvotes = parseCount(actionControlText(element, 'downvote'));
+  const comments = parseCount(actionControlText(element, 'reply'));
+  const bookmarks = parseCount(actionControlText(element, 'bookmark'));
+  const likes = parseCount(actionControlText(element, 'like'));
   const role = metadata.type === 'article' ||
     element.matches('.ArticleItem, .Post-content, .Post-Main') ||
     /\/p\/\d+/.test(originalUrl)
     ? 'article'
     : 'answer';
+  const actions: FeedActionDescriptor[] = [
+    {
+      id: 'react',
+      kind: 'react',
+      variant: 'agree',
+      label: '赞同',
+      count: agrees,
+      enabled: true,
+      fallback: 'openOriginal',
+    },
+  ];
+  // 知乎没有提供踩数或数量为 0 时，不在统一列表中展示无信息量的入口。
+  if (downvotes > 0) {
+    actions.push({
+      id: 'downvote',
+      kind: 'react',
+      variant: 'downvote',
+      label: '踩',
+      count: downvotes,
+      enabled: true,
+      fallback: 'openOriginal',
+    });
+  }
+  actions.push(
+    {
+      id: 'reply',
+      kind: 'reply',
+      label: '评论',
+      count: comments,
+      enabled: true,
+      fallback: 'openOriginal',
+    },
+    {
+      id: 'bookmark',
+      kind: 'bookmark',
+      label: '收藏',
+      count: bookmarks,
+      enabled: true,
+      fallback: 'openOriginal',
+    },
+    {
+      id: 'like',
+      kind: 'react',
+      variant: 'like',
+      label: '喜欢',
+      count: likes,
+      enabled: true,
+      fallback: 'openOriginal',
+    },
+    { id: 'open', kind: 'open', label: '查看原文', enabled: true },
+  );
 
   return {
     originId,
@@ -232,26 +336,7 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
       { kind: 'reactions', value: agrees, label: '赞同' },
       { kind: 'replies', value: comments, label: '评论' },
     ],
-    actions: [
-      {
-        id: 'react',
-        kind: 'react',
-        variant: 'agree',
-        label: '赞同',
-        count: agrees,
-        enabled: true,
-        fallback: 'openOriginal',
-      },
-      {
-        id: 'reply',
-        kind: 'reply',
-        label: '评论',
-        count: comments,
-        enabled: true,
-        fallback: 'openOriginal',
-      },
-      { id: 'open', kind: 'open', label: '查看原文', enabled: true },
-    ],
+    actions,
   };
 }
 
@@ -277,13 +362,8 @@ export function parseZhihuCard(element: Element): FeedItem | null {
 }
 
 export function triggerZhihuAction(element: Element | undefined, actionId: string): boolean {
-  const selector = actionId === 'react'
-    ? 'button.VoteButton:not(.VoteButton--down), .Button--voteUp, [aria-label*="赞同"]'
-    : actionId === 'reply'
-      ? '.ContentItem-action, button[aria-label*="评论"]'
-      : '';
-  if (!selector) return false;
-  const button = element?.querySelector<HTMLElement>(selector);
+  if (!element || !Object.hasOwn(ACTION_SELECTORS, actionId)) return false;
+  const button = findActionControl(element, actionId as ZhihuActionId);
   if (!button) return false;
   button.click();
   return true;

@@ -302,6 +302,8 @@ export const zhihuAdapterDefinition: AdapterDefinition = {
 
 知乎问题路由 `/question/:questionId` 由 `zhihuThread.ts` 输出 `ThreadDetail`：问题标题/补充进入 `header`，回答进入带 `role: 'answer'` 的 `entries`，每条回答独立折叠，并在触底时驱动隐藏原页继续加载。回答路由 `/question/:questionId/answer/:answerId` 仍由 `zhihuDetail.ts` 精确选择 URL 指定回答；专栏路由 `/p/:articleId` 只解析匹配的 `.Post-content`，两者输出带不同 `role` 的 `ArticleDetail`。V2EX `/t/:topicId` 由 `v2exThread.ts` 输出主题头、真实楼层回复和分页链接。知乎回答评论内容仍不进入 Thread Schema，统一视图显示评论数量并保留回答原页入口。
 
+知乎列表的操作栏依次展示赞同、踩、评论、收藏和喜欢，并保留查看原文入口；其中“踩”仅在原页面提供大于 0 的数量时展示，数量为 0 或无法取得数量时省略，其余统计在数量为 0 或无法取得时统一显示 `0`。
+
 ---
 
 ## 6. MVP 开发迭代计划与验收标准

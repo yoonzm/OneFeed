@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest';
-import { parseCount, parseZhihuCard } from './zhihu';
+import { describe, expect, it, vi } from 'vitest';
+import { parseCount, parseZhihuCard, triggerZhihuAction } from './zhihu';
 
 describe('parseCount', () => {
   it('parses plain and abbreviated Chinese counts', () => {
@@ -21,7 +21,10 @@ describe('parseZhihuCard', () => {
           <img data-original="https://pic.example/answer.jpg" alt="书桌" />
         </div>
         <button class="Button--voteUp">赞同 1.2 万</button>
+        <button class="VoteButton VoteButton--down" aria-label="踩 3">踩</button>
         <button aria-label="12 条评论">12 条评论</button>
+        <button class="ContentItem-action">收藏 8</button>
+        <button class="ContentItem-action" aria-label="喜欢 6">喜欢</button>
       </article>`;
 
     const item = parseZhihuCard(document.querySelector('.TopstoryItem')!);
@@ -36,6 +39,14 @@ describe('parseZhihuCard', () => {
         { kind: 'reactions', value: 12000, label: '赞同' },
         { kind: 'replies', value: 12, label: '评论' },
       ],
+      actions: [
+        { id: 'react', label: '赞同', count: 12000 },
+        { id: 'downvote', label: '踩', count: 3 },
+        { id: 'reply', label: '评论', count: 12 },
+        { id: 'bookmark', label: '收藏', count: 8 },
+        { id: 'like', label: '喜欢', count: 6 },
+        { id: 'open', label: '查看原文' },
+      ],
     });
     expect(item?.originalUrl).toBe('http://localhost:3000/question/1/answer/42');
     const text = item?.previewBlocks.find((block) => block.type === 'richText');
@@ -45,6 +56,47 @@ describe('parseZhihuCard', () => {
     expect(text?.html).not.toContain('style=');
     expect(gallery?.items).toEqual([{ url: 'https://pic.example/answer.jpg', alt: '书桌' }]);
     expect(item).not.toHaveProperty('rawElementRef');
+  });
+
+  it.each([
+    ['缺失', ''],
+    ['为 0', '<button class="VoteButton VoteButton--down">踩 0</button>'],
+  ])('踩数%s时不展示踩操作', (_, downvoteButton) => {
+    document.body.innerHTML = `
+      <article class="TopstoryItem" data-id="answer-42">
+        <div class="RichContent-inner"><p>先把信息变少。</p></div>
+        ${downvoteButton}
+      </article>`;
+
+    const item = parseZhihuCard(document.querySelector('.TopstoryItem')!);
+
+    expect(item?.actions.some((action) => action.id === 'downvote')).toBe(false);
+    expect(item?.actions.map((action) => action.label)).toEqual([
+      '赞同',
+      '评论',
+      '收藏',
+      '喜欢',
+      '查看原文',
+    ]);
+    expect(item?.actions.slice(0, 4).map((action) => action.count)).toEqual([0, 0, 0, 0]);
+  });
+
+  it.each([
+    ['react', '赞同'],
+    ['downvote', '踩'],
+    ['reply', '评论'],
+    ['bookmark', '收藏'],
+    ['like', '喜欢'],
+  ])('proxies the %s action to its Zhihu control', (actionId, label) => {
+    document.body.innerHTML = `
+      <article>
+        <button aria-label="${label} 2">${label}</button>
+      </article>`;
+    const button = document.querySelector('button')!;
+    const click = vi.spyOn(button, 'click');
+
+    expect(triggerZhihuAction(document.querySelector('article')!, actionId)).toBe(true);
+    expect(click).toHaveBeenCalledOnce();
   });
 
   it('ignores elements without readable content', () => {
