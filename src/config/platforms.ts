@@ -58,9 +58,8 @@ export const XIAOHONGSHU_PLATFORM = {
   id: 'xiaohongshu',
   name: '小红书',
   homeUrl: 'https://www.xiaohongshu.com/',
-  status: 'planned',
+  status: 'supported',
   navOrder: 6,
-  plannedOrder: 1,
   hosts: ['xiaohongshu.com'],
 } as const satisfies PlatformDefinition;
 
@@ -70,7 +69,7 @@ export const BILIBILI_PLATFORM = {
   homeUrl: 'https://www.bilibili.com/',
   status: 'planned',
   navOrder: 7,
-  plannedOrder: 2,
+  plannedOrder: 1,
   hosts: ['bilibili.com'],
 } as const satisfies PlatformDefinition;
 
@@ -80,7 +79,7 @@ export const YOUTUBE_PLATFORM = {
   homeUrl: 'https://www.youtube.com/',
   status: 'planned',
   navOrder: 8,
-  plannedOrder: 3,
+  plannedOrder: 2,
   hosts: ['youtube.com', 'youtu.be'],
 } as const satisfies PlatformDefinition;
 
@@ -90,7 +89,7 @@ export const REDDIT_PLATFORM = {
   homeUrl: 'https://www.reddit.com/',
   status: 'planned',
   navOrder: 9,
-  plannedOrder: 4,
+  plannedOrder: 3,
   hosts: ['reddit.com', 'redd.it'],
 } as const satisfies PlatformDefinition;
 

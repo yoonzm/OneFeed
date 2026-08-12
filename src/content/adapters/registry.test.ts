@@ -7,6 +7,7 @@ import { TwitterAdapter } from './twitter';
 import { V2exAdapter } from './v2ex';
 import { V2exThreadAdapter } from './v2exThread';
 import { WeiboAdapter } from './weibo';
+import { XiaohongshuAdapter } from './xiaohongshu';
 import { ZhihuAdapter } from './zhihu';
 import { ZhihuDetailAdapter } from './zhihuDetail';
 import { ZhihuThreadAdapter } from './zhihuThread';
@@ -58,6 +59,14 @@ describe('createAdapter', () => {
       surface: 'feed',
       adapter: expect.any(WeiboAdapter),
       source: { id: 'weibo', name: '微博' },
+    });
+    expect(createAdapter(
+      new URL('https://www.xiaohongshu.com/explore?channel_id=homefeed_recommend'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(XiaohongshuAdapter),
+      source: { id: 'xiaohongshu', name: '小红书' },
     });
   });
 
@@ -113,6 +122,11 @@ describe('createAdapter', () => {
       listeners(),
     )).toBeNull();
     expect(createAdapter(new URL('https://m.weibo.com/'), listeners())).toBeNull();
+    expect(createAdapter(
+      new URL('https://www.xiaohongshu.com/explore/note-id'),
+      listeners(),
+    )).toBeNull();
+    expect(createAdapter(new URL('https://creator.xiaohongshu.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://www.zhihu.com/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do.example.com/latest'), listeners())).toBeNull();
@@ -124,5 +138,7 @@ describe('createAdapter', () => {
     expect(isSupportedUrl(new URL('https://www.zhihu.com/question/1/answer/42'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.zhihu.com/settings/account'))).toBe(false);
     expect(isSupportedUrl(new URL('https://weibo.com/mygroups?gid=11000'))).toBe(true);
+    expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore'))).toBe(true);
+    expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore/note-id'))).toBe(false);
   });
 });

@@ -15,6 +15,8 @@ export default defineContentScript({
     'https://*.linux.do/*',
     'https://weibo.com/*',
     'https://*.weibo.com/*',
+    'https://xiaohongshu.com/*',
+    'https://*.xiaohongshu.com/*',
   ],
   runAt: 'document_start',
   main(ctx) {
