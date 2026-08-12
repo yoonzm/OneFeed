@@ -13,6 +13,8 @@ export default defineContentScript({
     'https://*.v2ex.com/*',
     'https://linux.do/*',
     'https://*.linux.do/*',
+    'https://weibo.com/*',
+    'https://*.weibo.com/*',
   ],
   runAt: 'document_start',
   main(ctx) {

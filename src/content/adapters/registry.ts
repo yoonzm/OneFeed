@@ -7,6 +7,7 @@ import { linuxDoThreadAdapterDefinition } from './linuxDoThread';
 import { twitterAdapterDefinition } from './twitter';
 import { v2exAdapterDefinition } from './v2ex';
 import { v2exThreadAdapterDefinition } from './v2exThread';
+import { weiboAdapterDefinition } from './weibo';
 import { zhihuAdapterDefinition } from './zhihu';
 import { zhihuDetailAdapterDefinition } from './zhihuDetail';
 import { zhihuThreadAdapterDefinition } from './zhihuThread';
@@ -16,6 +17,7 @@ const feedAdapterDefinitions: AdapterDefinition[] = [
   twitterAdapterDefinition,
   v2exAdapterDefinition,
   linuxDoAdapterDefinition,
+  weiboAdapterDefinition,
 ];
 
 const detailAdapterDefinitions: DetailAdapterDefinition[] = [

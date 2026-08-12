@@ -28,16 +28,16 @@ OneFeed 是一个面向 Web 信息流的浏览器扩展项目。它希望将不�
 | Twitter/X | Home Feed | ✅ 已支持 |
 | V2EX | 首页与最近主题列表；主题详情与分页回复 | ✅ 已支持 |
 | Linux DO | 首页、最新、热门、分类与标签话题列表；话题详情 | ✅ 已支持 |
+| 微博 | 首页、关注与热门信息流；图文、视频、引用微博与基础互动 | ✅ 已支持 |
 
 ### 待支持
 
 | 顺序 | 平台 | 计划适配范围 | 适配进度 |
 | :---: | :--- | :--- | :--- |
-| 1 | 微博 | 基础信息流、图文、视频、引用与互动数据 | ⬜ 待适配 |
-| 2 | 小红书 | 基础笔记 Feed、多图与视频；商品内容先提供安全降级 | ⬜ 待适配 |
-| 3 | 哔哩哔哩 | 首页与动态 Feed、视频卡片；播放器能力分阶段接入 | ⬜ 待适配 |
-| 4 | YouTube | 首页 Home Feed 与视频卡片；播放器能力分阶段接入 | ⬜ 待适配 |
-| 5 | Reddit | 首页与社区 Feed、文本/链接/媒体帖子；帖子详情与评论分阶段接入 | ⬜ 待适配 |
+| 1 | 小红书 | 基础笔记 Feed、多图与视频；商品内容先提供安全降级 | ⬜ 待适配 |
+| 2 | 哔哩哔哩 | 首页与动态 Feed、视频卡片；播放器能力分阶段接入 | ⬜ 待适配 |
+| 3 | YouTube | 首页 Home Feed 与视频卡片；播放器能力分阶段接入 | ⬜ 待适配 |
+| 4 | Reddit | 首页与社区 Feed、文本/链接/媒体帖子；帖子详情与评论分阶段接入 | ⬜ 待适配 |
 
 ## 长期愿景
 
@@ -63,7 +63,7 @@ npm test
 npm run lint
 ```
 
-`npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页、X Home Feed、V2EX 首页或 Linux DO 话题列表后，扩展会将信息流替换为 Focus Paper 阅读界面；知乎问题、V2EX 主题与 Linux DO 话题使用 Thread Detail，知乎独立回答与专栏文章使用 Article Detail。OneFeed 页面顶部会展示已支持与待支持平台，并提供 GitHub 入口与浅色/深色外观切换；点击浏览器工具栏中的扩展图标可全局暂停或开启 OneFeed 接管，页面右侧悬浮开关也可随时切换同一状态。暂停接管不会在 Chrome 中禁用扩展本身。
+`npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页、X Home Feed、V2EX 首页、Linux DO 话题列表或微博首页后，扩展会将信息流替换为 Focus Paper 阅读界面；知乎问题、V2EX 主题与 Linux DO 话题使用 Thread Detail，知乎独立回答与专栏文章使用 Article Detail。OneFeed 页面顶部会展示已支持与待支持平台，并提供 GitHub 入口与浅色/深色外观切换；点击浏览器工具栏中的扩展图标可全局暂停或开启 OneFeed 接管，页面右侧悬浮开关也可随时切换同一状态。暂停接管不会在 Chrome 中禁用扩展本身。
 
 ## 样式开发
 

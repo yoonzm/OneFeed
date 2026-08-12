@@ -6,6 +6,7 @@ import { LinuxDoThreadAdapter } from './linuxDoThread';
 import { TwitterAdapter } from './twitter';
 import { V2exAdapter } from './v2ex';
 import { V2exThreadAdapter } from './v2exThread';
+import { WeiboAdapter } from './weibo';
 import { ZhihuAdapter } from './zhihu';
 import { ZhihuDetailAdapter } from './zhihuDetail';
 import { ZhihuThreadAdapter } from './zhihuThread';
@@ -44,6 +45,19 @@ describe('createAdapter', () => {
       surface: 'feed',
       adapter: expect.any(LinuxDoAdapter),
       source: { id: 'linux-do', name: 'Linux DO' },
+    });
+    expect(createAdapter(new URL('https://weibo.com/hot/weibo/102803'), listeners())).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(WeiboAdapter),
+      source: { id: 'weibo', name: '微博' },
+    });
+    expect(createAdapter(
+      new URL('https://weibo.com/newlogin?tabtype=weibo&gid=102803&openLoginLayer=0&url=https://weibo.com/'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(WeiboAdapter),
+      source: { id: 'weibo', name: '微博' },
     });
   });
 
@@ -93,6 +107,12 @@ describe('createAdapter', () => {
   it('leaves unsupported site pages untouched', () => {
     expect(createAdapter(new URL('https://x.com/reader/status/123'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do/settings/account'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://weibo.com/newlogin'), listeners())).toBeNull();
+    expect(createAdapter(
+      new URL('https://weibo.com/newlogin?tabtype=weibo&url=https://example.com/'),
+      listeners(),
+    )).toBeNull();
+    expect(createAdapter(new URL('https://m.weibo.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://www.zhihu.com/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do.example.com/latest'), listeners())).toBeNull();
@@ -103,5 +123,6 @@ describe('createAdapter', () => {
     expect(isSupportedUrl(new URL('https://www.zhihu.com/'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.zhihu.com/question/1/answer/42'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.zhihu.com/settings/account'))).toBe(false);
+    expect(isSupportedUrl(new URL('https://weibo.com/mygroups?gid=11000'))).toBe(true);
   });
 });

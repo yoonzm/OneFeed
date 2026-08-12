@@ -13,16 +13,16 @@ describe('platform catalog', () => {
       'X',
       'V2EX',
       'Linux DO',
+      '微博',
     ]);
     expect(getPlannedPlatforms().map((platform) => [
       platform.name,
       platform.plannedOrder,
     ])).toEqual([
-      ['微博', 1],
-      ['小红书', 2],
-      ['哔哩哔哩', 3],
-      ['YouTube', 4],
-      ['Reddit', 5],
+      ['小红书', 1],
+      ['哔哩哔哩', 2],
+      ['YouTube', 3],
+      ['Reddit', 4],
     ]);
   });
 
@@ -38,6 +38,7 @@ describe('platform catalog', () => {
     expect(getPlatformForUrl('https://mobile.twitter.com/home')?.id).toBe('twitter');
     expect(getPlatformForUrl('https://www.v2ex.com/')?.id).toBe('v2ex');
     expect(getPlatformForUrl('https://linux.do/latest')?.id).toBe('linux-do');
+    expect(getPlatformForUrl('https://www.weibo.com/hot/weibo/102803')?.id).toBe('weibo');
     expect(getPlatformForUrl('https://linux.do.example.com/')).toBeUndefined();
     expect(getPlatformForUrl('not-a-url')).toBeUndefined();
   });
