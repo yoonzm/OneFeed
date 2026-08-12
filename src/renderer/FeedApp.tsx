@@ -59,12 +59,12 @@ export default function FeedApp({
         ) : (
           <section className="empty-state" aria-live="polite">
             <span className="scan-mark" aria-hidden="true" />
-            <p>正在整理信息流</p>
-            <small>页面内容出现后，会自动转换为专注阅读模式。</small>
           </section>
         )}
       </main>
-      <footer className="reader-footer">已读到这里 · 继续滚动会加载原信息流</footer>
+      {!!items.length && (
+        <footer className="reader-footer">已读到这里 · 继续滚动会加载原信息流</footer>
+      )}
     </div>
   );
 }

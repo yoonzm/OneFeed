@@ -72,7 +72,7 @@ a { color: inherit; }
 
 .card-main { display: grid; gap: 12px; }
 .card-title-row, .card-body-row { min-width: 0; }
-.card-title-row h2 { margin: 0; font-size: clamp(16px, 1.2vw, 18px); font-weight: 400; }
+.card-title-row h2 { margin: 0; font-size: clamp(16px, 1.2vw, 18px); font-weight: 500; }
 
 .card-meta-row {
   display: flex;

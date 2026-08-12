@@ -27,4 +27,18 @@ describe('reader app shells', () => {
     expect(markup).not.toContain('查看原页面');
     expect(markup).not.toContain('测试站点');
   });
+
+  it('renders only the loading icon while organizing the feed', () => {
+    const markup = renderToStaticMarkup(
+      <FeedApp
+        scrollElement={document.createElement('div')}
+        onAction={vi.fn(() => false)}
+      />,
+    );
+
+    expect(markup).toContain('scan-mark');
+    expect(markup).not.toContain('正在整理信息流');
+    expect(markup).not.toContain('页面内容出现后');
+    expect(markup).not.toContain('已读到这里');
+  });
 });
