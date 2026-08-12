@@ -135,7 +135,8 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .thread-header h1 {
   margin: 0 0 24px;
   font-family: "Songti SC", SimSun, Georgia, serif;
-  font-size: clamp(30px, 4.5vw, 46px);
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 500;
   line-height: 1.28;
   letter-spacing: -.025em;
 }

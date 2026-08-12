@@ -50,6 +50,32 @@ describe('ActionBar', () => {
     expect(markup).toContain('查看回复');
   });
 
+  it('removes redundant engagement and original links on detail surfaces', () => {
+    const markup = renderToStaticMarkup(
+      <ActionBar
+        originalUrl={item.originalUrl}
+        metrics={[
+          { kind: 'reactions', value: 9, label: '喜欢' },
+          { kind: 'replies', value: 3, label: '回复' },
+          { kind: 'views', value: 1200, label: '浏览' },
+        ]}
+        actions={[
+          ...item.actions,
+          { id: 'reply', kind: 'reply', label: '回复', enabled: true },
+          { id: 'share', kind: 'share', label: '分享', enabled: true },
+        ]}
+        onAction={vi.fn()}
+        surface="detail"
+      />,
+    );
+
+    expect(markup).toContain('浏览 1,200');
+    expect(markup).toContain('分享');
+    expect(markup).not.toContain('喜欢');
+    expect(markup).not.toContain('回复');
+    expect(markup).not.toContain('查看原文');
+  });
+
   it('omits an empty action row', () => {
     const markup = renderToStaticMarkup(
       <ActionBar

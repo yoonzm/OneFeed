@@ -73,12 +73,13 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
         ))}
       </div>
 
-      {/* 与列表不同，详情页允许保留 Adapter 提供的原文入口。 */}
+      {/* 详情态统一隐藏重复的原文、回复和赞同入口，仅保留其他辅助操作与只读统计。 */}
       <ActionBar
         originalUrl={content.originalUrl}
         metrics={content.metrics}
         actions={content.actions}
         onAction={onAction}
+        surface="detail"
       />
 
       {preview && (

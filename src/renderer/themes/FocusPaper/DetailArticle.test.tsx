@@ -18,8 +18,15 @@ const content: ArticleDetail = {
     html: '<p>超过列表摘要长度的完整正文。</p>',
     plainText: '超过列表摘要长度的完整正文。',
   }],
-  metrics: [],
-  actions: [],
+  metrics: [
+    { kind: 'reactions', value: 8, label: '赞同' },
+    { kind: 'replies', value: 3, label: '评论' },
+  ],
+  actions: [
+    { id: 'react', kind: 'react', label: '赞同', enabled: true },
+    { id: 'reply', kind: 'reply', label: '评论', enabled: true },
+    { id: 'open', kind: 'open', label: '查看原文', enabled: true },
+  ],
 };
 
 describe('DetailArticle', () => {
@@ -35,5 +42,8 @@ describe('DetailArticle', () => {
     expect(markup).toContain('<time>');
     expect(markup).not.toContain(content.source.name);
     expect(markup).not.toContain('展开全文');
+    expect(markup).not.toContain('赞同');
+    expect(markup).not.toContain('评论');
+    expect(markup).not.toContain('查看原文');
   });
 });

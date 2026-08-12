@@ -17,8 +17,14 @@ const content: ThreadDetailContent = {
     author: { name: '提问者', avatar: '' },
     publishedAt: '2026-08-12T09:00:00+08:00',
     body: [{ type: 'richText', html: '<p>问题补充。</p>', plainText: '问题补充。' }],
-    metrics: [{ kind: 'replies', value: 12, label: '回答' }],
-    actions: [{ id: 'open', kind: 'open', label: '查看原问题', enabled: true }],
+    metrics: [
+      { kind: 'reactions', value: 8, label: '赞同' },
+      { kind: 'replies', value: 12, label: '回答' },
+    ],
+    actions: [
+      { id: 'react', kind: 'react', label: '赞同', enabled: true },
+      { id: 'open', kind: 'open', label: '查看原问题', enabled: true },
+    ],
   },
   entries: [{
     id: 'zhihu_42',
@@ -53,6 +59,8 @@ describe('ThreadDetail', () => {
     expect(markup).toContain('<time>');
     expect(markup).not.toContain(content.source.name);
     expect(markup).toContain('展开全文');
+    expect(markup).not.toContain('查看原问题');
+    expect(markup).not.toContain('>赞同');
     expect(markup).not.toContain('查看回答');
   });
 });

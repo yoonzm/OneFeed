@@ -100,6 +100,7 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
           originalUrl={content.header.originalUrl}
           metrics={content.header.metrics}
           actions={content.header.actions}
+          surface="detail"
           onAction={(action) => onAction(
             content.header.id,
             content.header.originalUrl,
