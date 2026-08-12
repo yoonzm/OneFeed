@@ -63,6 +63,12 @@ npm run lint
 
 `npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页、X Home Feed、V2EX 首页或 Linux DO 话题列表后，扩展会将信息流替换为 Focus Paper 阅读界面；知乎问题、V2EX 主题与 Linux DO 话题使用 Thread Detail，知乎独立回答与专栏文章使用 Article Detail。OneFeed 页面顶部和扩展 Popup 会展示已支持与待支持平台，点击已支持平台可在当前标签页切换；页面右侧悬浮开关可随时恢复原始页面。
 
+## 样式开发
+
+项目使用 Tailwind CSS v4 和官方 Vite 插件。新增或调整普通组件布局、间距、颜色与交互状态时，应优先在 TSX 中使用 Tailwind 工具类；颜色和字体等共享设计 Token 统一维护在 `src/styles/tailwind-theme.css`，避免在组件内重复硬编码。
+
+阅读器样式通过 `src/renderer/styles.css` 编译后以内联 CSS 注入 Shadow DOM，Popup 使用独立的 `src/entrypoints/popup/popup.css` 入口。两个入口都关闭了 Tailwind Preflight，以免重置现有阅读内容；富文本排版、伪元素、复杂内容状态和原站兼容规则可以继续保留在 CSS 中。Tailwind 类名必须以完整字符串出现，不要通过字符串拼接动态生成类名。
+
 ## 技术状态
 
 当前版本基于 WXT、React 和 TypeScript，实现了 Feed、Article Detail 与 Thread Detail 三类 Surface，以及归一化去重、Shadow DOM 隔离渲染、图片预览、原站点赞代理和启用状态持久化。三类 Surface 通过共享 Block、内容角色和 Action 协议复用内容积木；SPA 路由变化时会清理旧 Surface 并重新识别页面。产品规划与市场分析请参阅：

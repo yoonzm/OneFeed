@@ -1,19 +1,33 @@
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "../styles/tailwind-theme.css";
+@import "tailwindcss/utilities.css" layer(utilities) source(none) important;
+@source "./**/*.tsx";
+
 /* Shadow DOM 根级视觉 Token，同时隔离原站继承样式。 */
 :host {
-  --paper: #f7f8fa;
-  --surface: #ffffff;
-  --ink: #172033;
-  --muted: #5f6b7e;
-  --line: #d8dee8;
-  --blue: #1769e0;
-  --blue-soft: #e6f0ff;
+  --paper: var(--color-onefeed-paper);
+  --surface: var(--color-onefeed-surface);
+  --ink: var(--color-onefeed-ink);
+  --muted: var(--color-onefeed-muted);
+  --line: var(--color-onefeed-line);
+  --blue: var(--color-onefeed-blue);
+  --blue-soft: var(--color-onefeed-blue-soft);
+  /* Chrome 不会在 Shadow 样式中注册 Tailwind 的 @property，组合工具类需要继承默认值。 */
+  --tw-border-style: solid;
+  --tw-outline-style: solid;
+  --tw-translate-y: 0px;
+  --tw-inset-shadow: 0 0 #0000;
+  --tw-inset-ring-shadow: 0 0 #0000;
+  --tw-ring-offset-shadow: 0 0 #0000;
+  --tw-ring-shadow: 0 0 #0000;
   position: fixed;
   inset: 0;
   z-index: 2147483646;
   display: block;
   background: var(--paper);
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  font-family: var(--font-onefeed-sans);
   font-size: 16px;
   line-height: 1.7;
 }
@@ -30,98 +44,6 @@ a { color: inherit; }
   overscroll-behavior: contain;
   scrollbar-color: #b8c4d6 transparent;
 }
-
-.reader-shell { min-height: 100%; }
-
-/* 平台栏保持轻量，只承担跨站导航和适配状态展示。 */
-.platform-bar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  border-bottom: 1px solid var(--line);
-  background: rgb(247 248 250 / 96%);
-  backdrop-filter: blur(12px);
-}
-
-.platform-bar-inner {
-  display: flex;
-  width: min(100%, 1040px);
-  height: 52px;
-  margin: 0 auto;
-  padding: 0 48px;
-  align-items: stretch;
-  gap: 28px;
-}
-
-.platform-brand {
-  display: inline-flex;
-  flex: 0 0 auto;
-  align-items: center;
-  color: var(--ink);
-  font: 650 14px/1 Georgia, serif;
-  letter-spacing: .03em;
-  text-decoration: none;
-}
-
-.platform-tabs {
-  display: flex;
-  min-width: 0;
-  align-items: stretch;
-  gap: 4px;
-}
-
-.platform-item {
-  position: relative;
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  padding: 0 9px;
-  border: 0;
-  background: transparent;
-  color: var(--muted);
-  cursor: pointer;
-  font-size: 11px;
-  line-height: 1.25;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.platform-supported:hover { color: var(--blue); }
-.platform-active { color: var(--blue); font-weight: 650; }
-.platform-active::after {
-  position: absolute;
-  right: 8px;
-  bottom: -1px;
-  left: 8px;
-  height: 2px;
-  background: var(--blue);
-  content: "";
-}
-
-.platform-divider { width: 1px; height: 18px; margin: auto 6px; background: var(--line); }
-.platform-planned { flex-direction: column; gap: 2px; color: #8793a5; }
-.platform-planned:hover { background: var(--blue-soft); color: var(--ink); }
-.platform-planned small { color: #9aa5b6; font-size: 8.5px; font-weight: 400; }
-.platform-menu-trigger { display: none; }
-
-.platform-notice {
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  z-index: 2;
-  margin: 0;
-  padding: 7px 11px;
-  border: 1px solid var(--line);
-  background: var(--surface);
-  box-shadow: 0 8px 24px rgb(23 32 51 / 12%);
-  color: var(--muted);
-  font-size: 10.5px;
-  line-height: 1.4;
-  transform: translateX(-50%);
-}
-
-.platform-menu-layer { display: none; }
 
 .reader-app {
   position: relative;
@@ -392,68 +314,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid #9fc6ff; outline-offs
 
 /* 移动端优先保证正文宽度，并让操作区自然换行。 */
 @media (max-width: 720px) {
-  .platform-bar-inner { height: 56px; padding: 0 16px; justify-content: space-between; }
-  .platform-tabs { display: none; }
-  .platform-menu-trigger {
-    display: inline-flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0;
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-    font-size: 11px;
-  }
-  .platform-menu-trigger span { color: var(--muted); }
-  .platform-menu-trigger strong { color: var(--blue); font-size: 11px; font-weight: 650; }
-  .platform-menu-layer { position: fixed; inset: 0; z-index: 30; display: block; }
-  .platform-menu-backdrop {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    border: 0;
-    background: rgb(15 22 34 / 48%);
-  }
-  .platform-menu {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    max-height: 78vh;
-    overflow-y: auto;
-    padding: 18px 20px calc(24px + env(safe-area-inset-bottom));
-    border-radius: 14px 14px 0 0;
-    background: var(--surface);
-    box-shadow: 0 -16px 48px rgb(15 22 34 / 20%);
-  }
-  .platform-menu-heading { display: flex; min-height: 38px; align-items: center; justify-content: space-between; }
-  .platform-menu-heading strong { font: 650 18px/1.3 "Songti SC", SimSun, serif; }
-  .platform-menu-heading button {
-    min-height: 36px;
-    padding: 0 4px;
-    border: 0;
-    background: transparent;
-    color: var(--blue);
-    cursor: pointer;
-    font-size: 12px;
-  }
-  .platform-group-label { margin: 18px 0 5px; color: var(--muted); font-size: 10px; letter-spacing: .08em; }
-  .platform-menu-options { display: grid; }
-  .platform-menu-options .platform-item {
-    min-height: 48px;
-    justify-content: space-between;
-    padding: 0;
-    border-bottom: 1px solid var(--line);
-    color: var(--ink);
-    font-size: 13px;
-  }
-  .platform-menu-options .platform-planned { flex-direction: row; }
-  .platform-menu-options .platform-planned small { font-size: 10px; }
-  .platform-menu-options .platform-active { color: var(--blue); }
-  .platform-menu-options .platform-active::after { display: none; }
-  .platform-notice { top: calc(100% + 6px); max-width: calc(100vw - 32px); white-space: nowrap; }
   .reader-app { padding: 0 16px 40px; }
   .reading-rail { display: none; }
   .feed-card { padding: 16px 0; }

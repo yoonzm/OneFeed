@@ -15,7 +15,7 @@ export function OneFeedShell({
   children,
 }: OneFeedShellProps) {
   return (
-    <div className="reader-shell">
+    <div className="min-h-full">
       <PlatformBar
         activePlatformId={activePlatformId}
         surface={surface}

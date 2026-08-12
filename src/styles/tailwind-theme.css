@@ -1,0 +1,29 @@
+/** OneFeed 设计 Token 的唯一来源，Tailwind 工具类与遗留样式共同消费这些变量。 */
+@theme static {
+  --color-onefeed-paper: #f7f8fa;
+  --color-onefeed-surface: #ffffff;
+  --color-onefeed-popup: #f4f7fb;
+  --color-onefeed-ink: #172033;
+  --color-onefeed-body: #374257;
+  --color-onefeed-muted: #5f6b7e;
+  --color-onefeed-subtle: #8793a5;
+  --color-onefeed-faint: #8c98aa;
+  --color-onefeed-line: #d8dee8;
+  --color-onefeed-blue: #1769e0;
+  --color-onefeed-blue-soft: #e6f0ff;
+  --color-onefeed-focus: #9fc6ff;
+  --color-onefeed-control: #c6cfdb;
+  --color-onefeed-notice: #44536a;
+  --color-onefeed-overlay: #0f1622;
+
+  --font-onefeed-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
+  --font-onefeed-brand: Georgia, serif;
+  --font-onefeed-reading: "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif;
+  --font-onefeed-mono: "SFMono-Regular", Consolas, monospace;
+  --font-weight-onefeed-emphasis: 650;
+
+  --radius-onefeed-sheet: 14px;
+  --shadow-onefeed-toggle: 0 1px 4px rgb(23 32 51 / 25%);
+  --shadow-onefeed-popover: 0 8px 24px rgb(23 32 51 / 12%);
+  --shadow-onefeed-sheet: 0 -16px 48px rgb(15 22 34 / 20%);
+}

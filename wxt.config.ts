@@ -1,3 +1,4 @@
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'wxt';
 
 const extensionVersion = process.env.EXTENSION_VERSION?.trim();
@@ -6,6 +7,9 @@ export default defineConfig({
   srcDir: 'src',
   manifestVersion: 3,
   modules: ['@wxt-dev/module-react'],
+  vite: () => ({
+    plugins: [tailwindcss()],
+  }),
   manifest: {
     ...(extensionVersion ? { version: extensionVersion } : {}),
     name: 'OneFeed',
