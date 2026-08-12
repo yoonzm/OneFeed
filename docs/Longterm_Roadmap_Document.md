@@ -8,7 +8,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 ## 2. 演进路线图总览
 
 ```
-[Phase 1: MVP - 核心可行性验证]
+[Phase 1: Core Foundation - 核心能力与架构基线]
   │ (已知：数据解析 -> Shadow DOM -> Notion 单主题)
   ▼
 [Phase 2: Theme Engine & Multi-Platform] ─── (体验拓展)
@@ -25,7 +25,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 ## 3. 分阶段深度规划
 
-### Phase 1: MVP 验证与技术打通 (已规划)
+### Phase 1: 核心能力与架构基线 (已完成)
 * **核心目标**：验证“完全隐藏原 DOM，在 Shadow DOM 中接管全局渲染”的工程可行性。
 * **覆盖平台**：知乎、Twitter/X、V2EX、Linux DO。
 * **核心交付**：1 款 Notion 风格基础主题，打通 Feed Surface，并以知乎回答/专栏验证 Article Detail，以知乎问题、V2EX 主题和 Linux DO 话题验证 Thread Detail。
@@ -36,7 +36,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 ---
 
-### Phase 2: 渲染引擎强化与平台大扩张 (0 ~ 6 个月)
+### Phase 2: 渲染引擎强化与平台扩张 (当前阶段)
 
 #### 1. 目标平台扩展 (Platform Expansion)
 
@@ -79,14 +79,14 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 | 迭代 | 目标 | 平台交付 | 验收重点 |
 | :--- | :--- | :--- | :--- |
-| **2.0 统一协议** | 完成 Schema、Surface 与 Renderer 解耦 | 迁移知乎、Twitter/X、V2EX、Linux DO | `FeedItem`/`ArticleDetail`/`ThreadDetail` 可序列化；URL 路由互斥；SPA 切换清理旧 Surface；Block Registry 与 Action Bar 跨 Surface 复用 |
-| **2.1 讨论型扩展** | 验证 `discussion` 通用性 | Reddit、Hacker News | 社区/标签、分数、回复、投票、剧透/锁定和链接帖降级 |
-| **2.2 开放社交扩展** | 验证复杂 `post` 通用性 | Mastodon、Bluesky | 引用、转发原因、内容警告、可见范围、链接卡片、图片比例和投票 |
-| **2.3 视频扩展** | 验证媒体 Block 与播放器代理 | YouTube、B站 | 封面、时长、字幕/直播状态、播放量、原生播放器 Portal 与回退 |
-| **2.4 视觉内容扩展** | 验证高密度图片/短视频布局 | Instagram、小红书、Pinterest | 多图比例、竖屏视频、收藏/外链、敏感内容和商品信息降级 |
+| **基础能力（已完成）** | 完成 Schema、Surface 与 Renderer 解耦 | 知乎、Twitter/X、V2EX、Linux DO | `FeedItem`/`ArticleDetail`/`ThreadDetail` 可序列化；URL 路由互斥；SPA 切换清理旧 Surface；Block Registry 与 Action Bar 跨 Surface 复用 |
+| **2.1 微博适配** | 扩展国内开放社交覆盖 | 微博 | 图文、视频、引用、转发原因、互动数据、原站操作代理与无限加载 |
+| **2.2 小红书适配** | 验证高密度视觉内容 | 小红书 | 多图比例、竖屏视频、收藏/外链、敏感内容和商品信息降级 |
+| **2.3 哔哩哔哩适配** | 验证媒体 Block 与播放器代理 | 哔哩哔哩 | 首页与动态 Feed、封面、时长、播放量、原生播放器 Portal 与回退 |
+| **2.4 社区与开放社交扩展** | 继续验证 `discussion` 与复杂 `post` 通用性 | Reddit、Hacker News、Mastodon、Bluesky | 社区/标签、回复、投票、内容警告、可见范围和链接卡片 |
 | **2.5 内容订阅扩展** | 验证文章与开放订阅源 | RSS/Atom、Medium、Substack、WordPress | Feed 摘要与 Detail/RSS 全文独立解析；作者与来源、发布时间、已读/稍后读和重复文章处理 |
 
-Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准：优先完成当前 4 个平台和 2.1、2.2 的四个平台。2.3 之后的平台按真实用户需求、目标站点政策和 Adapter 维护成本逐步进入正式支持，不以 Schema 理论覆盖数冒充已交付平台数。
+Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准。当前交付顺序固定为微博、小红书、哔哩哔哩；后续平台按真实用户需求、目标站点政策和 Adapter 维护成本逐步进入正式支持，不以 Schema 理论覆盖数冒充已交付平台数。平台支持状态和适配进度以 README 为准。
 
 建模依据包括 [ActivityStreams 2.0](https://www.w3.org/TR/activitystreams-core/)、[Mastodon Status](https://docs.joinmastodon.org/entities/Status/)、[Bluesky Posts](https://docs.bsky.app/docs/advanced-guides/posts)、[Reddit Post](https://developers.reddit.com/docs/api/redditapi/models/classes/Post)、[Hacker News API](https://github.com/HackerNews/API)、[LinkedIn Posts API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api)、[YouTube Video](https://developers.google.com/youtube/v3/docs/videos)、[Twitch API](https://dev.twitch.tv/docs/api/reference/) 与 [Atom RFC 4287](https://www.rfc-editor.org/rfc/rfc4287)。
 
@@ -161,7 +161,7 @@ Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准：优先完成当�
 
 | 阶段 | 目标节点 | 关键 KPI 指标 |
 | :--- | :--- | :--- |
-| **Phase 1** | M1 - M2 | 完成 MVP 开发，知乎/Twitter/V2EX/Linux DO 渲染成功率 > 95%，卡片解析延迟 < 100ms。 |
+| **Phase 1** | 已完成 | 建立核心架构基线，知乎/Twitter/V2EX/Linux DO 渲染成功率 > 95%，卡片解析延迟 < 100ms。 |
 | **Phase 2** | M3 - M6 | 交付至少 8 个稳定 Adapter，Schema 可表达 20 余个主流产品的基础 Feed，内置 6 款主题，获得 10,000+ 活跃用户 (WAU)。 |
 | **Phase 3** | M7 - M10 | 上线 AI 摘要与过滤功能，端到端解析修复成功率 > 90%，留存率 (D30) > 35%。 |
 | **Phase 4** | M11 - M12 | 推出 Pro 订阅，转化率达到 3% - 5%，开放 Theme Marketplace 开发者社区。 |
