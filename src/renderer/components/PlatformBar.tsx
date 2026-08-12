@@ -23,12 +23,6 @@ interface PlatformBarProps {
   onColorSchemeChange: (colorScheme: ColorScheme) => void;
 }
 
-function plannedStatus(platform: PlatformDefinition): string {
-  if (platform.status === 'adapting') return '适配中';
-  if (platform.status === 'testing') return '测试中';
-  return platform.plannedOrder ? `待支持 · 第 ${platform.plannedOrder} 位` : '待支持';
-}
-
 export function PlatformBar({
   activePlatformId,
   surface,
@@ -41,7 +35,6 @@ export function PlatformBar({
   const plannedPlatforms = getPlannedPlatforms();
   const activePlatform = getPlatformById(activePlatformId);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [notice, setNotice] = useState('');
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -67,7 +60,6 @@ export function PlatformBar({
     event: MouseEvent<HTMLAnchorElement>,
     platform: PlatformDefinition,
   ) => {
-    setNotice('');
     if (
       platform.id === activePlatformId &&
       surface === 'feed' &&
@@ -81,11 +73,6 @@ export function PlatformBar({
       setMenuOpen(false);
       scrollElement.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  };
-
-  const handlePlannedClick = (platform: PlatformDefinition) => {
-    setNotice(`${platform.name}：${plannedStatus(platform)}`);
-    setMenuOpen(false);
   };
 
   const renderSupportedLinks = (mobile = false) => supportedPlatforms.map((platform) => {
@@ -109,23 +96,17 @@ export function PlatformBar({
     );
   });
 
-  const renderPlannedButtons = (mobile = false) => plannedPlatforms.map((platform) => (
-    <button
+  const renderPlannedItems = (mobile = false) => plannedPlatforms.map((platform) => (
+    <span
       key={platform.id}
       className={mobile
-        ? `${mobileItemClass} cursor-pointer text-onefeed-ink`
-        : `${desktopItemClass} cursor-pointer flex-col gap-0.5 text-onefeed-subtle hover:bg-onefeed-blue-soft hover:text-onefeed-ink`}
-      type="button"
-      onClick={() => handlePlannedClick(platform)}
-      aria-label={`${platform.name}，${plannedStatus(platform)}`}
+        ? `${mobileItemClass} cursor-help text-onefeed-subtle`
+        : `${desktopItemClass} cursor-help text-onefeed-faint`}
+      title="敬请期待"
+      aria-label={`${platform.name}，敬请期待`}
     >
-      <span>{platform.name}</span>
-      <small className={mobile
-        ? 'text-[10px] font-normal text-onefeed-subtle'
-        : 'text-[8.5px] font-normal text-onefeed-faint'}>
-        {plannedStatus(platform)}
-      </small>
-    </button>
+      {platform.name}
+    </span>
   ));
 
   return (
@@ -141,7 +122,7 @@ export function PlatformBar({
         <nav className="flex min-w-0 items-stretch gap-1 max-[720px]:hidden" aria-label="切换平台">
           {renderSupportedLinks()}
           <span className="mx-1.5 my-auto h-[18px] w-px bg-onefeed-line" aria-hidden="true" />
-          {renderPlannedButtons()}
+          {renderPlannedItems()}
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
@@ -169,15 +150,6 @@ export function PlatformBar({
           </button>
         </div>
       </div>
-
-      {notice && (
-        <p
-          className="absolute top-[calc(100%+8px)] left-1/2 z-2 m-0 -translate-x-1/2 border border-onefeed-line bg-onefeed-surface px-[11px] py-[7px] text-[10.5px] leading-snug text-onefeed-muted shadow-onefeed-popover max-[720px]:top-[calc(100%+6px)] max-[720px]:max-w-[calc(100vw-32px)] max-[720px]:whitespace-nowrap"
-          role="status"
-        >
-          {notice}
-        </p>
-      )}
 
       {menuOpen && (
         <div className="fixed inset-0 z-30 hidden max-[720px]:block">
@@ -220,7 +192,7 @@ export function PlatformBar({
               待支持
             </p>
             <div className="grid">
-              {renderPlannedButtons(true)}
+              {renderPlannedItems(true)}
             </div>
           </section>
         </div>

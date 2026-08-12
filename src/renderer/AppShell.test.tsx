@@ -33,6 +33,9 @@ describe('reader app shells', () => {
     expect(markup.indexOf('小红书')).toBeLessThan(markup.indexOf('哔哩哔哩'));
     expect(markup.indexOf('哔哩哔哩')).toBeLessThan(markup.indexOf('YouTube'));
     expect(markup.indexOf('YouTube')).toBeLessThan(markup.indexOf('Reddit'));
+    expect(markup).toContain('aria-label="Reddit，敬请期待"');
+    expect(markup).toContain('title="敬请期待"');
+    expect(markup).not.toContain('待支持 · 第');
   });
 
   it('renders only the loading icon while organizing the feed', () => {

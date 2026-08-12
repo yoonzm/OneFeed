@@ -22,7 +22,6 @@
   --font-weight-onefeed-emphasis: 650;
 
   --radius-onefeed-sheet: 14px;
-  --shadow-onefeed-popover: 0 8px 24px rgb(23 32 51 / 12%);
   --shadow-onefeed-sheet: 0 -16px 48px rgb(15 22 34 / 20%);
 }
 
@@ -45,7 +44,6 @@
   --color-onefeed-overlay: #05080d;
   --color-onefeed-code: #182536;
   --color-onefeed-media: #1b293a;
-  --shadow-onefeed-popover: 0 10px 28px rgb(0 0 0 / 35%);
   --shadow-onefeed-sheet: 0 -16px 48px rgb(0 0 0 / 46%);
 
   /* 兼容阅读器中仍使用短 Token 的富文本样式。 */
