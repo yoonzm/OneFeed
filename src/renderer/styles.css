@@ -66,13 +66,13 @@ a { color: inherit; }
 .feed-card {
   position: relative;
   display: block;
-  padding: 26px 0 28px;
+  padding: 16px 0;
   border-bottom: 1px solid var(--line);
 }
 
 .card-main { display: grid; gap: 12px; }
 .card-title-row, .card-body-row { min-width: 0; }
-.card-title-row h2 { margin: 0; }
+.card-title-row h2 { margin: 0; font-size: clamp(16px, 1.2vw, 18px); font-weight: 400; }
 
 .card-meta-row {
   display: flex;
@@ -173,7 +173,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 }
 .thread-list-header span { font-size: 12px; }
 .thread-empty { padding: 64px 0; color: var(--muted); text-align: center; }
-.feed-card-reply { padding-top: 22px; padding-bottom: 24px; }
+.feed-card-reply { padding-top: 16px; padding-bottom: 16px; }
 .thread-pagination {
   display: flex;
   align-items: center;
@@ -207,7 +207,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .block-stack { display: grid; gap: 14px; }
 
 /* 只有结构简单的短标题或短纯文本会由 Card 选择紧凑密度。 */
-.feed-card-compact { padding-top: 14px; padding-bottom: 16px; }
+.feed-card-compact { padding-top: 16px; padding-bottom: 16px; }
 .feed-card-compact .card-main { gap: 8px; }
 .feed-card-compact .content { line-height: 1.65; }
 
@@ -298,11 +298,11 @@ button:focus-visible, a:focus-visible { outline: 3px solid #9fc6ff; outline-offs
 @media (max-width: 720px) {
   .reader-app { padding: 0 16px 40px; }
   .reading-rail { display: none; }
-  .feed-card { padding: 20px 0 22px; }
+  .feed-card { padding: 16px 0; }
   .detail-article { padding-top: 32px; }
   .thread-header { padding: 32px 0 26px; }
   .thread-list-header { padding-top: 20px; }
-  .feed-card-reply { padding: 18px 0 20px; }
+  .feed-card-reply { padding: 16px 0; }
   .card-main { gap: 10px; }
   .card-meta-row { gap: 5px 10px; }
   .card-meta-row .card-actions { margin-left: 0; }
