@@ -47,6 +47,11 @@ export function isSupportedUrl(url: URL): boolean {
     feedAdapterDefinitions.some((candidate) => candidate.matches(url));
 }
 
+/** 供平台目录一致性检查使用；每个已支持平台必须具备默认 Feed 入口。 */
+export function getRegisteredPlatformIds(): string[] {
+  return feedAdapterDefinitions.map((definition) => definition.source.id);
+}
+
 export function createAdapter(url: URL, listeners: AdapterListeners): ActiveAdapter | null {
   const detailDefinition = detailAdapterDefinitions.find((candidate) => candidate.matches(url));
   if (detailDefinition) {

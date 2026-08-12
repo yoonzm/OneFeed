@@ -1,15 +1,18 @@
 import { useEffect, useState } from 'react';
 import type { FeedActionDescriptor, FeedItem } from '../types/feed';
+import { OneFeedShell } from './OneFeedShell';
 import { useFeedStore } from './store/useFeedStore';
 import { Card } from './themes/FocusPaper/Card';
 
 interface FeedAppProps {
+  activePlatformId: string;
   scrollElement: HTMLElement;
   onAction: (itemId: string, actionId: string) => boolean;
 }
 
 /** Feed Surface 外壳：连接状态库、阅读进度和原页面的无限加载。 */
 export default function FeedApp({
+  activePlatformId,
   scrollElement,
   onAction,
 }: FeedAppProps) {
@@ -39,32 +42,38 @@ export default function FeedApp({
   };
 
   return (
-    <div className="reader-app">
-      <div className="reading-rail" aria-hidden="true">
-        <span className="rail-label">READ</span>
-        <span className="rail-track"><i style={{ height: `${progress * 100}%` }} /></span>
-        <span className="rail-percent">{Math.round(progress * 100)}%</span>
-      </div>
+    <OneFeedShell
+      activePlatformId={activePlatformId}
+      surface="feed"
+      scrollElement={scrollElement}
+    >
+      <div className="reader-app">
+        <div className="reading-rail" aria-hidden="true">
+          <span className="rail-label">READ</span>
+          <span className="rail-track"><i style={{ height: `${progress * 100}%` }} /></span>
+          <span className="rail-percent">{Math.round(progress * 100)}%</span>
+        </div>
 
-      <main>
-        {items.length ? (
-          items.map((item, index) => (
-            <Card
-              key={item.id}
-              item={item}
-              index={index}
-              onAction={handleAction}
-            />
-          ))
-        ) : (
-          <section className="empty-state" aria-live="polite">
-            <span className="scan-mark" aria-hidden="true" />
-          </section>
+        <main>
+          {items.length ? (
+            items.map((item, index) => (
+              <Card
+                key={item.id}
+                item={item}
+                index={index}
+                onAction={handleAction}
+              />
+            ))
+          ) : (
+            <section className="empty-state" aria-live="polite">
+              <span className="scan-mark" aria-hidden="true" />
+            </section>
+          )}
+        </main>
+        {!!items.length && (
+          <footer className="reader-footer">已读到这里 · 继续滚动会加载原信息流</footer>
         )}
-      </main>
-      {!!items.length && (
-        <footer className="reader-footer">已读到这里 · 继续滚动会加载原信息流</footer>
-      )}
-    </div>
+      </div>
+    </OneFeedShell>
   );
 }

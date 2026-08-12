@@ -126,8 +126,14 @@ function mount(initialHideStyle?: HTMLStyleElement): (() => void) | undefined {
     activeAdapter.adapter.init();
     root.render(
       activeAdapter.surface === 'feed'
-        ? <FeedApp {...sharedProps} />
-        : <DetailApp {...sharedProps} />,
+        ? <FeedApp {...sharedProps} activePlatformId={activeAdapter.source.id} />
+        : (
+            <DetailApp
+              {...sharedProps}
+              activePlatformId={activeAdapter.source.id}
+              surface={activeAdapter.surface}
+            />
+          ),
     );
 
     return cleanup;

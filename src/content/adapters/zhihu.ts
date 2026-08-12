@@ -1,4 +1,5 @@
 import DOMPurify from 'dompurify';
+import { ZHIHU_PLATFORM } from '../../config/platforms';
 import type {
   FeedActionDescriptor,
   FeedAuthor,
@@ -6,7 +7,6 @@ import type {
   FeedImage,
   FeedItem,
   FeedMetric,
-  FeedSource,
 } from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
@@ -52,11 +52,7 @@ const ACTION_LABELS: Record<ZhihuActionId, string[]> = {
   like: ['喜欢'],
 };
 
-export const ZHIHU_SOURCE: FeedSource = {
-  id: 'zhihu',
-  name: '知乎',
-  homeUrl: 'https://www.zhihu.com/',
-};
+export const ZHIHU_SOURCE = ZHIHU_PLATFORM;
 
 function firstText(element: Element, selectors: string[]): string {
   for (const selector of selectors) {

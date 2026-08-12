@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createAdapter, isSupportedUrl } from './registry';
+import { getSupportedPlatforms } from '../../config/platforms';
+import { createAdapter, getRegisteredPlatformIds, isSupportedUrl } from './registry';
 import { LinuxDoAdapter } from './linuxDo';
 import { LinuxDoThreadAdapter } from './linuxDoThread';
 import { TwitterAdapter } from './twitter';
@@ -17,6 +18,12 @@ function listeners() {
 }
 
 describe('createAdapter', () => {
+  it('registers a feed adapter for every supported platform', () => {
+    expect(getRegisteredPlatformIds()).toEqual(
+      getSupportedPlatforms().map((platform) => platform.id),
+    );
+  });
+
   it('selects feed adapters by supported URL', () => {
     expect(createAdapter(new URL('https://www.zhihu.com/'), listeners())).toMatchObject({
       surface: 'feed',

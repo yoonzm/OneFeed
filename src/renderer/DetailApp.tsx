@@ -1,16 +1,21 @@
 import { useEffect, useState } from 'react';
 import type { FeedActionDescriptor } from '../types/feed';
+import { OneFeedShell } from './OneFeedShell';
 import { useDetailStore } from './store/useDetailStore';
 import { DetailArticle } from './themes/FocusPaper/DetailArticle';
 import { ThreadDetail } from './themes/FocusPaper/ThreadDetail';
 
 interface DetailAppProps {
+  activePlatformId: string;
+  surface: 'article' | 'thread';
   scrollElement: HTMLElement;
   onAction: (itemId: string, actionId: string) => boolean;
 }
 
 /** 根据 DetailContent.kind 在文章详情与讨论详情之间分流的 Surface 外壳。 */
 export default function DetailApp({
+  activePlatformId,
+  surface,
   scrollElement,
   onAction,
 }: DetailAppProps) {
@@ -48,32 +53,38 @@ export default function DetailApp({
   };
 
   return (
-    <div className="reader-app detail-app">
-      <div className="reading-rail" aria-hidden="true">
-        <span className="rail-label">READ</span>
-        <span className="rail-track"><i style={{ height: `${progress * 100}%` }} /></span>
-        <span className="rail-percent">{Math.round(progress * 100)}%</span>
-      </div>
+    <OneFeedShell
+      activePlatformId={activePlatformId}
+      surface={surface}
+      scrollElement={scrollElement}
+    >
+      <div className="reader-app detail-app">
+        <div className="reading-rail" aria-hidden="true">
+          <span className="rail-label">READ</span>
+          <span className="rail-track"><i style={{ height: `${progress * 100}%` }} /></span>
+          <span className="rail-percent">{Math.round(progress * 100)}%</span>
+        </div>
 
-      <main>
-        {content?.kind === 'article' ? (
-          <DetailArticle
-            content={content}
-            onAction={(action) => handleAction(content.id, content.originalUrl, action)}
-          />
-        ) : content?.kind === 'thread' ? (
-          <ThreadDetail content={content} onAction={handleAction} />
-        ) : (
-          <section className="empty-state" aria-live="polite">
-            <span className="scan-mark" aria-hidden="true" />
-            <p>正在整理详情</p>
-            <small>正文出现后，会自动转换为专注阅读模式。</small>
-          </section>
-        )}
-      </main>
-      <footer className="reader-footer">
-        {content?.kind === 'thread' ? `已读完本页${content.entryLabel}` : '已读完本文'}
-      </footer>
-    </div>
+        <main>
+          {content?.kind === 'article' ? (
+            <DetailArticle
+              content={content}
+              onAction={(action) => handleAction(content.id, content.originalUrl, action)}
+            />
+          ) : content?.kind === 'thread' ? (
+            <ThreadDetail content={content} onAction={handleAction} />
+          ) : (
+            <section className="empty-state" aria-live="polite">
+              <span className="scan-mark" aria-hidden="true" />
+              <p>正在整理详情</p>
+              <small>正文出现后，会自动转换为专注阅读模式。</small>
+            </section>
+          )}
+        </main>
+        <footer className="reader-footer">
+          {content?.kind === 'thread' ? `已读完本页${content.entryLabel}` : '已读完本文'}
+        </footer>
+      </div>
+    </OneFeedShell>
   );
 }

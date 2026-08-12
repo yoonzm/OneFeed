@@ -1,12 +1,9 @@
-import type { FeedItem, FeedSource } from '../../types/feed';
+import { LINUX_DO_PLATFORM } from '../../config/platforms';
+import type { FeedItem } from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
 const CARD_SELECTOR = '.topic-list-item';
-export const LINUX_DO_SOURCE: FeedSource = {
-  id: 'linux-do',
-  name: 'Linux DO',
-  homeUrl: 'https://linux.do/',
-};
+export const LINUX_DO_SOURCE = LINUX_DO_PLATFORM;
 
 function absoluteUrl(value: string): string {
   if (!value) return '';

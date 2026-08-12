@@ -1,13 +1,10 @@
 import DOMPurify from 'dompurify';
-import type { FeedImage, FeedItem, FeedSource } from '../../types/feed';
+import { TWITTER_PLATFORM } from '../../config/platforms';
+import type { FeedImage, FeedItem } from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
 const CARD_SELECTOR = 'article[data-testid="tweet"]';
-const SOURCE: FeedSource = {
-  id: 'twitter',
-  name: 'X',
-  homeUrl: 'https://x.com/home',
-};
+const SOURCE = TWITTER_PLATFORM;
 
 function absoluteUrl(value: string): string {
   if (!value) return '';

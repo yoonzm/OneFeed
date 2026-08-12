@@ -11,26 +11,30 @@ describe('reader app shells', () => {
     useDetailStore.getState().clear();
   });
 
-  it.each([
-    ['feed', FeedApp],
-    ['detail', DetailApp],
-  ] as const)('renders the %s surface without a product header', (_name, App) => {
+  it.each(['feed', 'detail'] as const)('renders platform navigation on the %s surface', (surface) => {
+    const commonProps = {
+      activePlatformId: 'zhihu',
+      scrollElement: document.createElement('div'),
+      onAction: vi.fn(() => false),
+    };
     const markup = renderToStaticMarkup(
-      <App
-        scrollElement={document.createElement('div')}
-        onAction={vi.fn(() => false)}
-      />,
+      surface === 'feed'
+        ? <FeedApp {...commonProps} />
+        : <DetailApp {...commonProps} surface="article" />,
     );
 
-    expect(markup).not.toContain('reader-header');
-    expect(markup).not.toContain('OneFeed');
-    expect(markup).not.toContain('查看原页面');
-    expect(markup).not.toContain('测试站点');
+    expect(markup).toContain('OneFeed');
+    expect(markup).toContain('aria-label="切换平台"');
+    expect(markup).toContain('href="https://www.zhihu.com/"');
+    expect(markup).toContain('aria-current="page"');
+    expect(markup.indexOf('微博')).toBeLessThan(markup.indexOf('小红书'));
+    expect(markup.indexOf('小红书')).toBeLessThan(markup.indexOf('哔哩哔哩'));
   });
 
   it('renders only the loading icon while organizing the feed', () => {
     const markup = renderToStaticMarkup(
       <FeedApp
+        activePlatformId="zhihu"
         scrollElement={document.createElement('div')}
         onAction={vi.fn(() => false)}
       />,
