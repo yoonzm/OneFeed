@@ -42,6 +42,11 @@ export type ActiveAdapter =
       source: FeedSource;
     };
 
+export function isSupportedUrl(url: URL): boolean {
+  return detailAdapterDefinitions.some((candidate) => candidate.matches(url)) ||
+    feedAdapterDefinitions.some((candidate) => candidate.matches(url));
+}
+
 export function createAdapter(url: URL, listeners: AdapterListeners): ActiveAdapter | null {
   const detailDefinition = detailAdapterDefinitions.find((candidate) => candidate.matches(url));
   if (detailDefinition) {

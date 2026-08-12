@@ -14,7 +14,7 @@ export default defineContentScript({
     'https://linux.do/*',
     'https://*.linux.do/*',
   ],
-  runAt: 'document_idle',
+  runAt: 'document_start',
   main(ctx) {
     const controller = startContentScript();
     ctx.addEventListener(window, 'wxt:locationchange', () => {

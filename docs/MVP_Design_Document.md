@@ -228,6 +228,8 @@ onefeed-extension/
 ### 5.1 Content Script 注入入口与 Shadow DOM 挂载 (`src/content/index.tsx`)
 下例聚焦 Surface 分流，`createReaderRoot` 代表实际实现中的 Shadow DOM Host、样式注入与清理样板。
 
+Content Script 在 `document_start` 阶段仅对 Adapter Registry 支持的 URL 建立临时纸张色遮罩，避免原站首屏先于统一视图曝光；待 `document.body` 可用后再挂载 Shadow DOM。扩展关闭、路由不支持或初始化失败时必须移除遮罩并恢复原页。Adapter 应在 React 首次渲染前同步解析当前已有内容，使 Store 已有数据时直接绘制信息流，仅在原站尚未产出内容时显示加载态。
+
 ```typescript
 import { createRoot } from 'react-dom/client';
 import DetailApp from '../renderer/DetailApp';

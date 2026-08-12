@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createAdapter } from './registry';
+import { createAdapter, isSupportedUrl } from './registry';
 import { LinuxDoAdapter } from './linuxDo';
 import { LinuxDoThreadAdapter } from './linuxDoThread';
 import { TwitterAdapter } from './twitter';
@@ -90,5 +90,11 @@ describe('createAdapter', () => {
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do.example.com/latest'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://example.com/'), listeners())).toBeNull();
+  });
+
+  it('reports whether a URL supports early page takeover', () => {
+    expect(isSupportedUrl(new URL('https://www.zhihu.com/'))).toBe(true);
+    expect(isSupportedUrl(new URL('https://www.zhihu.com/question/1/answer/42'))).toBe(true);
+    expect(isSupportedUrl(new URL('https://www.zhihu.com/settings/account'))).toBe(false);
   });
 });
