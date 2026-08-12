@@ -5,6 +5,9 @@ import {
   getSupportedPlatforms,
   type PlatformDefinition,
 } from '../../config/platforms';
+import type { ColorScheme } from '../../theme/useColorScheme';
+import { GitHubLink } from './GitHubLink';
+import { ThemeSwitch } from './ThemeSwitch';
 
 type ReaderSurface = 'feed' | 'article' | 'thread';
 
@@ -15,6 +18,9 @@ interface PlatformBarProps {
   activePlatformId: string;
   surface: ReaderSurface;
   scrollElement: HTMLElement;
+  colorScheme: ColorScheme;
+  themeReady: boolean;
+  onColorSchemeChange: (colorScheme: ColorScheme) => void;
 }
 
 function plannedStatus(platform: PlatformDefinition): string {
@@ -27,6 +33,9 @@ export function PlatformBar({
   activePlatformId,
   surface,
   scrollElement,
+  colorScheme,
+  themeReady,
+  onColorSchemeChange,
 }: PlatformBarProps) {
   const supportedPlatforms = getSupportedPlatforms();
   const plannedPlatforms = getPlannedPlatforms();
@@ -135,17 +144,30 @@ export function PlatformBar({
           {renderPlannedButtons()}
         </nav>
 
-        <button
-          ref={menuButtonRef}
-          className="hidden cursor-pointer items-center gap-3 border-0 bg-transparent p-0 text-[11px] focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-onefeed-focus max-[720px]:inline-flex"
-          type="button"
-          aria-expanded={menuOpen}
-          aria-controls="onefeed-platform-menu"
-          onClick={() => setMenuOpen(true)}
-        >
-          <span className="text-onefeed-muted">当前：{activePlatform?.name || '未识别'}</span>
-          <strong className="text-[11px] font-onefeed-emphasis text-onefeed-blue">切换平台</strong>
-        </button>
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <GitHubLink />
+          <span className="h-4 w-px shrink-0 bg-onefeed-line" aria-hidden="true" />
+          <ThemeSwitch
+            colorScheme={colorScheme}
+            disabled={!themeReady}
+            onChange={onColorSchemeChange}
+          />
+          <button
+            ref={menuButtonRef}
+            className="ml-2 hidden cursor-pointer items-center gap-3 border-0 bg-transparent p-0 text-[11px] focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-onefeed-focus max-[720px]:inline-flex max-[420px]:ml-1 max-[420px]:gap-1.5"
+            type="button"
+            aria-expanded={menuOpen}
+            aria-controls="onefeed-platform-menu"
+            onClick={() => setMenuOpen(true)}
+          >
+            <span className="text-onefeed-muted max-[420px]:hidden">
+              当前：{activePlatform?.name || '未识别'}
+            </span>
+            <strong className="text-[11px] font-onefeed-emphasis text-onefeed-blue">
+              切换平台
+            </strong>
+          </button>
+        </div>
       </div>
 
       {notice && (

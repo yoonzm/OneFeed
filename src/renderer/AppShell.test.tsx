@@ -25,6 +25,8 @@ describe('reader app shells', () => {
 
     expect(markup).toContain('OneFeed');
     expect(markup).toContain('aria-label="切换平台"');
+    expect(markup).toContain('aria-label="切换到深色主题"');
+    expect(markup).toContain('href="https://github.com/yoonzm/OneFeed"');
     expect(markup).toContain('href="https://www.zhihu.com/"');
     expect(markup).toContain('aria-current="page"');
     expect(markup.indexOf('微博')).toBeLessThan(markup.indexOf('小红书'));

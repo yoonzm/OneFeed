@@ -9,12 +9,15 @@
   --color-onefeed-subtle: #8793a5;
   --color-onefeed-faint: #8c98aa;
   --color-onefeed-line: #d8dee8;
+  --color-onefeed-line-strong: #b8c4d6;
   --color-onefeed-blue: #1769e0;
   --color-onefeed-blue-soft: #e6f0ff;
   --color-onefeed-focus: #9fc6ff;
   --color-onefeed-control: #c6cfdb;
   --color-onefeed-notice: #44536a;
   --color-onefeed-overlay: #0f1622;
+  --color-onefeed-code: #eaf0f8;
+  --color-onefeed-media: #e7ecf3;
 
   --font-onefeed-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
   --font-onefeed-brand: Georgia, serif;
@@ -26,4 +29,40 @@
   --shadow-onefeed-toggle: 0 1px 4px rgb(23 32 51 / 25%);
   --shadow-onefeed-popover: 0 8px 24px rgb(23 32 51 / 12%);
   --shadow-onefeed-sheet: 0 -16px 48px rgb(15 22 34 / 20%);
+}
+
+/** Focus Paper 深色模式保持低对比纸张层次，避免纯黑背景带来的眩光。 */
+[data-onefeed-theme='dark'],
+:host([data-onefeed-theme='dark']) {
+  color-scheme: dark;
+  --color-onefeed-paper: #101722;
+  --color-onefeed-surface: #172130;
+  --color-onefeed-popup: #111925;
+  --color-onefeed-ink: #edf2f8;
+  --color-onefeed-body: #cbd5e1;
+  --color-onefeed-muted: #a8b4c5;
+  --color-onefeed-subtle: #8492a6;
+  --color-onefeed-faint: #758399;
+  --color-onefeed-line: #2b394b;
+  --color-onefeed-line-strong: #42536b;
+  --color-onefeed-blue: #69a8ff;
+  --color-onefeed-blue-soft: #1b3556;
+  --color-onefeed-focus: #8dbdff;
+  --color-onefeed-control: #465469;
+  --color-onefeed-notice: #c7d4e6;
+  --color-onefeed-overlay: #05080d;
+  --color-onefeed-code: #182536;
+  --color-onefeed-media: #1b293a;
+  --shadow-onefeed-toggle: 0 1px 4px rgb(0 0 0 / 45%);
+  --shadow-onefeed-popover: 0 10px 28px rgb(0 0 0 / 35%);
+  --shadow-onefeed-sheet: 0 -16px 48px rgb(0 0 0 / 46%);
+
+  /* 兼容阅读器中仍使用短 Token 的富文本样式。 */
+  --paper: var(--color-onefeed-paper);
+  --surface: var(--color-onefeed-surface);
+  --ink: var(--color-onefeed-ink);
+  --muted: var(--color-onefeed-muted);
+  --line: var(--color-onefeed-line);
+  --blue: var(--color-onefeed-blue);
+  --blue-soft: var(--color-onefeed-blue-soft);
 }

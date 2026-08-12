@@ -14,7 +14,7 @@ OneFeed 是一个面向 Web 信息流的浏览器扩展项目。它希望将不�
 - 将不同平台的数据归一化为统一模型；
 - 通过 Shadow DOM 隔离并重新渲染界面；
 - 在 OneFeed 页面和扩展 Popup 中查看适配进度并切换已支持平台；
-- 提供一套极简、低干扰的 Notion 风格主题。
+- 提供一套极简、低干扰的 Focus Paper 主题，并支持可持久化的浅色/深色外观切换。
 
 ## 平台支持与适配进度
 
@@ -61,7 +61,7 @@ npm test
 npm run lint
 ```
 
-`npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页、X Home Feed、V2EX 首页或 Linux DO 话题列表后，扩展会将信息流替换为 Focus Paper 阅读界面；知乎问题、V2EX 主题与 Linux DO 话题使用 Thread Detail，知乎独立回答与专栏文章使用 Article Detail。OneFeed 页面顶部和扩展 Popup 会展示已支持与待支持平台，点击已支持平台可在当前标签页切换；页面右侧悬浮开关可随时恢复原始页面。
+`npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页、X Home Feed、V2EX 首页或 Linux DO 话题列表后，扩展会将信息流替换为 Focus Paper 阅读界面；知乎问题、V2EX 主题与 Linux DO 话题使用 Thread Detail，知乎独立回答与专栏文章使用 Article Detail。OneFeed 页面顶部和扩展 Popup 会展示已支持与待支持平台，点击已支持平台可在当前标签页切换；两处右上角均提供 GitHub 入口与浅色/深色外观切换，页面右侧悬浮开关可随时恢复原始页面。
 
 ## 样式开发
 
@@ -71,7 +71,7 @@ npm run lint
 
 ## 技术状态
 
-当前版本基于 WXT、React 和 TypeScript，实现了 Feed、Article Detail 与 Thread Detail 三类 Surface，以及归一化去重、Shadow DOM 隔离渲染、图片预览、原站点赞代理和启用状态持久化。三类 Surface 通过共享 Block、内容角色和 Action 协议复用内容积木；SPA 路由变化时会清理旧 Surface 并重新识别页面。产品规划与市场分析请参阅：
+当前版本基于 WXT、React 和 TypeScript，实现了 Feed、Article Detail 与 Thread Detail 三类 Surface，以及归一化去重、Shadow DOM 隔离渲染、图片预览、原站点赞代理、启用状态和明暗外观持久化。三类 Surface 通过共享 Block、内容角色和 Action 协议复用内容积木；SPA 路由变化时会清理旧 Surface 并重新识别页面。产品规划与市场分析请参阅：
 
 - [长期产品路线图](docs/Longterm_Roadmap_Document.md)
 - [市场竞品分析](docs/Competitor_Analysis_Document.md)

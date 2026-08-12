@@ -4,6 +4,11 @@ import FeedApp from '../renderer/FeedApp';
 import readerStyles from '../renderer/styles.css?inline';
 import { useDetailStore } from '../renderer/store/useDetailStore';
 import { useFeedStore } from '../renderer/store/useFeedStore';
+import {
+  DEFAULT_COLOR_SCHEME,
+  normalizeColorScheme,
+  type ColorScheme,
+} from '../theme/useColorScheme';
 import { createAdapter, isSupportedUrl } from './adapters/registry';
 import { FloatingToggle } from './FloatingToggle';
 import toggleStyles from './floatingToggle.css?inline';
@@ -69,7 +74,10 @@ function onBodyReady(callback: () => void): () => void {
   };
 }
 
-function mount(initialHideStyle?: HTMLStyleElement): (() => void) | undefined {
+function mount(
+  initialHideStyle?: HTMLStyleElement,
+  initialColorScheme: ColorScheme = DEFAULT_COLOR_SCHEME,
+): (() => void) | undefined {
   if (!document.body || document.getElementById(READER_HOST_ID)) return undefined;
 
   let revealSurface = () => undefined;
@@ -84,6 +92,7 @@ function mount(initialHideStyle?: HTMLStyleElement): (() => void) | undefined {
 
   const host = document.createElement('div');
   host.id = READER_HOST_ID;
+  host.dataset.onefeedTheme = initialColorScheme;
   if (activeAdapter.surface !== 'feed') host.style.display = 'none';
   document.body.appendChild(host);
 
@@ -111,6 +120,7 @@ function mount(initialHideStyle?: HTMLStyleElement): (() => void) | undefined {
     root = createRoot(viewport);
     const sharedProps = {
       scrollElement: viewport,
+      initialColorScheme,
       onAction: (itemId: string, actionId: string) => (
         activeAdapter.adapter.triggerAction(itemId, actionId)
       ),
@@ -153,6 +163,7 @@ export interface ContentScriptController {
 export function startContentScript(): ContentScriptController {
   let active = true;
   let enabled = false;
+  let colorScheme = DEFAULT_COLOR_SCHEME;
   let storageReady = false;
   let domReady = false;
   let currentRouteKey = routeKey(new URL(window.location.href));
@@ -167,6 +178,7 @@ export function startContentScript(): ContentScriptController {
       <FloatingToggle
         enabled={enabled}
         ready={ready}
+        colorScheme={colorScheme}
         onToggle={() => chrome.storage.local.set({ enabled: !enabled })}
       />,
     );
@@ -189,7 +201,7 @@ export function startContentScript(): ContentScriptController {
 
     const hideStyle = pendingHideStyle || hideOriginalPage(new URL(window.location.href));
     pendingHideStyle = undefined;
-    unmount = mount(hideStyle);
+    unmount = mount(hideStyle, colorScheme);
     if (!unmount) hideStyle?.remove();
   };
 
@@ -216,11 +228,21 @@ export function startContentScript(): ContentScriptController {
     changes: Record<string, chrome.storage.StorageChange>,
     areaName: string,
   ) => {
-    if (areaName !== 'local' || !changes.enabled) return;
-    storageReady = true;
-    enabled = changes.enabled.newValue !== false;
-    renderToggle(true);
-    applyEnabledState();
+    if (areaName !== 'local') return;
+    if (changes.colorScheme) {
+      colorScheme = normalizeColorScheme(changes.colorScheme.newValue);
+      const readerHost = document.getElementById(READER_HOST_ID);
+      if (readerHost instanceof HTMLDivElement) {
+        readerHost.dataset.onefeedTheme = colorScheme;
+      }
+      renderToggle(storageReady);
+    }
+    if (changes.enabled) {
+      storageReady = true;
+      enabled = changes.enabled.newValue !== false;
+      renderToggle(true);
+      applyEnabledState();
+    }
   };
 
   const refresh = () => {
@@ -236,13 +258,17 @@ export function startContentScript(): ContentScriptController {
     applyEnabledState();
   };
 
-  chrome.storage.local.get({ enabled: true }, ({ enabled: storedEnabled }) => {
-    if (!active) return;
-    storageReady = true;
-    enabled = storedEnabled !== false;
-    renderToggle(true);
-    applyEnabledState();
-  });
+  chrome.storage.local.get(
+    { enabled: true, colorScheme: DEFAULT_COLOR_SCHEME },
+    ({ enabled: storedEnabled, colorScheme: storedColorScheme }) => {
+      if (!active) return;
+      storageReady = true;
+      enabled = storedEnabled !== false;
+      colorScheme = normalizeColorScheme(storedColorScheme);
+      renderToggle(true);
+      applyEnabledState();
+    },
+  );
   chrome.storage.onChanged.addListener(handleStorageChange);
 
   return {

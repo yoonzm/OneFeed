@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { ColorScheme } from '../theme/useColorScheme';
 import type { FeedActionDescriptor } from '../types/feed';
 import { OneFeedShell } from './OneFeedShell';
 import { useDetailStore } from './store/useDetailStore';
@@ -9,6 +10,7 @@ interface DetailAppProps {
   activePlatformId: string;
   surface: 'article' | 'thread';
   scrollElement: HTMLElement;
+  initialColorScheme?: ColorScheme;
   onAction: (itemId: string, actionId: string) => boolean;
 }
 
@@ -17,6 +19,7 @@ export default function DetailApp({
   activePlatformId,
   surface,
   scrollElement,
+  initialColorScheme,
   onAction,
 }: DetailAppProps) {
   const content = useDetailStore((state) => state.content);
@@ -57,6 +60,7 @@ export default function DetailApp({
       activePlatformId={activePlatformId}
       surface={surface}
       scrollElement={scrollElement}
+      initialColorScheme={initialColorScheme}
     >
       <div className="reader-app detail-app">
         <div className="reading-rail" aria-hidden="true">

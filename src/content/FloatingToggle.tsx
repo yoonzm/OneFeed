@@ -1,16 +1,24 @@
+import type { ColorScheme } from '../theme/useColorScheme';
+
 interface FloatingToggleProps {
   enabled: boolean;
   ready: boolean;
+  colorScheme?: ColorScheme;
   onToggle: () => void;
 }
 
-export function FloatingToggle({ enabled, ready, onToggle }: FloatingToggleProps) {
+export function FloatingToggle({
+  enabled,
+  ready,
+  colorScheme = 'light',
+  onToggle,
+}: FloatingToggleProps) {
   const label = enabled
     ? '关闭 OneFeed，显示原页面'
     : '开启 OneFeed 专注阅读';
 
   return (
-    <div className="floating-toggle">
+    <div className="floating-toggle" data-onefeed-theme={colorScheme}>
       <span className="toggle-tip" role="status">
         <strong>{enabled ? 'OneFeed 已开启' : 'OneFeed 已暂停'}</strong>
         <small>{enabled ? '点击显示原页面' : '点击开启专注阅读'}</small>

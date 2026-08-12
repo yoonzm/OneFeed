@@ -6,6 +6,9 @@ import {
   getSupportedPlatforms,
   type PlatformDefinition,
 } from '../../config/platforms';
+import { GitHubLink } from '../../renderer/components/GitHubLink';
+import { ThemeSwitch } from '../../renderer/components/ThemeSwitch';
+import { useColorScheme } from '../../theme/useColorScheme';
 
 export function navigateToPlatform(platform: PlatformDefinition): void {
   chrome.tabs.update({ url: platform.homeUrl }, () => window.close());
@@ -18,6 +21,7 @@ export function Popup() {
   const [ready, setReady] = useState(false);
   const [activePlatformId, setActivePlatformId] = useState<string>();
   const [notice, setNotice] = useState('');
+  const { colorScheme, ready: themeReady, setColorScheme } = useColorScheme();
 
   useEffect(() => {
     chrome.storage.local.get({ enabled: true }, (stored) => {
@@ -43,18 +47,32 @@ export function Popup() {
     : undefined;
 
   return (
-    <main className="box-border px-5 py-[18px] [&_*]:box-border">
-      <header className="flex items-center gap-[11px] border-b border-onefeed-line pb-4">
-        <span className="grid size-8 place-items-center bg-onefeed-blue font-onefeed-brand text-lg font-bold text-white">
-          O
-        </span>
-        <div>
-          <strong className="block font-onefeed-brand text-sm font-onefeed-emphasis tracking-[.03em]">
-            OneFeed
-          </strong>
-          <small className="mt-[3px] block text-[10px] tracking-[.1em] text-onefeed-muted">
-            统一信息流
-          </small>
+    <main
+      className="box-border min-h-screen bg-onefeed-popup px-5 py-[18px] text-onefeed-ink transition-colors duration-200 [&_*]:box-border"
+      data-onefeed-theme={colorScheme}
+    >
+      <header className="flex items-center justify-between border-b border-onefeed-line pb-4">
+        <div className="flex items-center gap-[11px]">
+          <span className="grid size-8 place-items-center bg-onefeed-blue font-onefeed-brand text-lg font-bold text-white">
+            O
+          </span>
+          <div>
+            <strong className="block font-onefeed-brand text-sm font-onefeed-emphasis tracking-[.03em]">
+              OneFeed
+            </strong>
+            <small className="mt-[3px] block text-[10px] tracking-[.1em] text-onefeed-muted">
+              统一信息流
+            </small>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <GitHubLink />
+          <span className="h-4 w-px shrink-0 bg-onefeed-line" aria-hidden="true" />
+          <ThemeSwitch
+            colorScheme={colorScheme}
+            disabled={!themeReady}
+            onChange={setColorScheme}
+          />
         </div>
       </header>
       <section className="flex items-center justify-between py-[18px]">

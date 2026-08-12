@@ -41,8 +41,9 @@ a { color: inherit; }
   width: 100%;
   height: 100%;
   overflow-y: auto;
+  background: var(--paper);
   overscroll-behavior: contain;
-  scrollbar-color: #b8c4d6 transparent;
+  scrollbar-color: var(--color-onefeed-line-strong) transparent;
 }
 
 .reader-app {
@@ -99,7 +100,7 @@ a { color: inherit; }
 }
 
 .card-index {
-  color: #9aa8bb;
+  color: var(--color-onefeed-subtle);
   font-size: 10.5px;
   font-weight: 500;
   line-height: 1.4;
@@ -201,7 +202,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
   font-size: 12px;
 }
 .thread-pagination a { color: var(--blue); text-decoration: none; }
-.thread-pagination span { color: #a7b1c1; }
+.thread-pagination span { color: var(--color-onefeed-subtle); }
 .thread-pagination strong { color: var(--muted); font-weight: 500; }
 
 /* 列表富文本通过高度而非行数截断；展开状态会移除高度和渐隐层。 */
@@ -209,7 +210,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
   position: relative;
   max-height: 9.8em;
   overflow: hidden;
-  color: #374257;
+  color: var(--color-onefeed-body);
   font-size: 15.5px;
   line-height: 1.78;
 }
@@ -220,7 +221,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .content p:last-child { margin-bottom: 0; }
 .content blockquote { margin: 1.2em 0; padding: 2px 0 2px 18px; border-left: 3px solid var(--blue); color: var(--muted); }
 .content a { color: var(--blue); text-underline-offset: 3px; }
-.content pre { overflow-x: auto; padding: 16px; background: #eaf0f8; font: 13px/1.7 "SFMono-Regular", Consolas, monospace; }
+.content pre { overflow-x: auto; padding: 16px; background: var(--color-onefeed-code); font: 13px/1.7 "SFMono-Regular", Consolas, monospace; }
 
 .block-stack { display: grid; gap: 14px; }
 
@@ -243,7 +244,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .media-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .media-count-1 { grid-template-columns: 1fr; }
 .media-count-2 { grid-template-columns: repeat(2, 1fr); }
-.media-button { height: 170px; padding: 0; overflow: hidden; border: 0; background: #e7ecf3; cursor: zoom-in; }
+.media-button { height: 170px; padding: 0; overflow: hidden; border: 0; background: var(--color-onefeed-media); cursor: zoom-in; }
 .media-count-1 .media-button { height: min(48vw, 380px); }
 .media-button img { width: 100%; height: 100%; object-fit: cover; transition: transform 240ms ease; }
 .media-button:hover img { transform: scale(1.018); }
@@ -271,7 +272,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .link-preview small { color: var(--muted); font-size: 10px; }
 .link-preview strong { margin-top: 3px; font-size: 14px; line-height: 1.45; }
 .link-preview p { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
-.link-preview:hover { border-color: #b8c4d6; }
+.link-preview:hover { border-color: var(--color-onefeed-line-strong); }
 
 .quote-block {
   display: block;
@@ -308,7 +309,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .scan-mark { width: 42px; height: 42px; margin: auto; border: 1px solid var(--line); border-top-color: var(--blue); animation: scan 900ms linear infinite; }
 .reader-footer { padding: 42px 0 10px; color: var(--muted); text-align: center; font-size: 11px; letter-spacing: .08em; }
 
-button:focus-visible, a:focus-visible { outline: 3px solid #9fc6ff; outline-offset: 4px; }
+button:focus-visible, a:focus-visible { outline: 3px solid var(--color-onefeed-focus); outline-offset: 4px; }
 
 @keyframes scan { to { transform: rotate(360deg); } }
 

@@ -22,6 +22,9 @@ describe('Popup platform navigation', () => {
     const markup = renderToStaticMarkup(<Popup />);
 
     expect(markup).toContain('切换平台');
+    expect(markup).toContain('切换到深色主题');
+    expect(markup).toContain('href="https://github.com/yoonzm/OneFeed"');
+    expect(markup).toContain('在 GitHub 查看 OneFeed');
     expect(markup).toContain('知乎');
     expect(markup).toContain('Linux DO');
     expect(markup.indexOf('微博')).toBeLessThan(markup.indexOf('小红书'));

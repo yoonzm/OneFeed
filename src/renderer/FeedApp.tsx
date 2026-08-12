@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { ColorScheme } from '../theme/useColorScheme';
 import type { FeedActionDescriptor, FeedItem } from '../types/feed';
 import { OneFeedShell } from './OneFeedShell';
 import { useFeedStore } from './store/useFeedStore';
@@ -7,6 +8,7 @@ import { Card } from './themes/FocusPaper/Card';
 interface FeedAppProps {
   activePlatformId: string;
   scrollElement: HTMLElement;
+  initialColorScheme?: ColorScheme;
   onAction: (itemId: string, actionId: string) => boolean;
 }
 
@@ -14,6 +16,7 @@ interface FeedAppProps {
 export default function FeedApp({
   activePlatformId,
   scrollElement,
+  initialColorScheme,
   onAction,
 }: FeedAppProps) {
   const items = useFeedStore((state) => state.items);
@@ -46,6 +49,7 @@ export default function FeedApp({
       activePlatformId={activePlatformId}
       surface="feed"
       scrollElement={scrollElement}
+      initialColorScheme={initialColorScheme}
     >
       <div className="reader-app">
         <div className="reading-rail" aria-hidden="true">
