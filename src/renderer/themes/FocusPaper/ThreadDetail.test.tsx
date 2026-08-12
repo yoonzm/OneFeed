@@ -14,6 +14,8 @@ const content: ThreadDetailContent = {
     role: 'question',
     originalUrl: 'https://www.zhihu.com/question/1',
     title: '如何保持专注？',
+    author: { name: '提问者', avatar: '' },
+    publishedAt: '2026-08-12T09:00:00+08:00',
     body: [{ type: 'richText', html: '<p>问题补充。</p>', plainText: '问题补充。' }],
     metrics: [{ kind: 'replies', value: 12, label: '回答' }],
     actions: [{ id: 'open', kind: 'open', label: '查看原问题', enabled: true }],
@@ -47,6 +49,9 @@ describe('ThreadDetail', () => {
     expect(markup.match(/如何保持专注？/g)).toHaveLength(1);
     expect(markup).toContain('问题补充。');
     expect(markup).toContain('12 条');
+    expect(markup).toContain('avatar-fallback');
+    expect(markup).toContain('<time>');
+    expect(markup).not.toContain(content.source.name);
     expect(markup).toContain('展开全文');
     expect(markup).not.toContain('查看回答');
   });

@@ -5,12 +5,6 @@ import FeedApp from './FeedApp';
 import { useDetailStore } from './store/useDetailStore';
 import { useFeedStore } from './store/useFeedStore';
 
-const source = {
-  id: 'test',
-  name: '测试站点',
-  homeUrl: 'https://example.com/',
-};
-
 describe('reader app shells', () => {
   beforeEach(() => {
     useFeedStore.getState().clear();
@@ -24,7 +18,6 @@ describe('reader app shells', () => {
     const markup = renderToStaticMarkup(
       <App
         scrollElement={document.createElement('div')}
-        source={source}
         onAction={vi.fn(() => false)}
       />,
     );
@@ -32,5 +25,6 @@ describe('reader app shells', () => {
     expect(markup).not.toContain('reader-header');
     expect(markup).not.toContain('OneFeed');
     expect(markup).not.toContain('查看原页面');
+    expect(markup).not.toContain('测试站点');
   });
 });

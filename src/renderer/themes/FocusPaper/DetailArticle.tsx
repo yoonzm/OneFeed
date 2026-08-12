@@ -42,18 +42,20 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
           <img className="avatar" src={content.author.avatar} alt="" />
         ) : (
           <span className="avatar avatar-fallback" aria-hidden="true">
-            {content.source.name.slice(0, 1)}
+            {content.author.name.trim().slice(0, 1)}
           </span>
         )}
         <div>
           <strong>{content.author.name}</strong>
-          <span>
-            来自{content.source.name}
-            {content.publishedAt !== undefined && (
-              <> · <time>{formatPublishedAt(content.publishedAt)}</time></>
-            )}
-            {content.updatedAt !== undefined && ' · 已编辑'}
-          </span>
+          {(content.publishedAt !== undefined || content.updatedAt !== undefined) && (
+            <span>
+              {content.publishedAt !== undefined && (
+                <time>{formatPublishedAt(content.publishedAt)}</time>
+              )}
+              {content.publishedAt !== undefined && content.updatedAt !== undefined && ' · '}
+              {content.updatedAt !== undefined && '已编辑'}
+            </span>
+          )}
         </div>
       </div>
 

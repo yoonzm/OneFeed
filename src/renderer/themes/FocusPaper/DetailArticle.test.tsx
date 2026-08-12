@@ -11,6 +11,7 @@ const content: ArticleDetail = {
   kind: 'article',
   role: 'answer',
   author: { name: '林一', avatar: '' },
+  publishedAt: '2026-08-12T09:00:00+08:00',
   title: '如何保持专注？',
   body: [{
     type: 'richText',
@@ -30,6 +31,9 @@ describe('DetailArticle', () => {
     expect(markup).toContain('<h1>如何保持专注？</h1>');
     expect(markup).toContain('content content-expanded');
     expect(markup).toContain('超过列表摘要长度的完整正文。');
+    expect(markup).toContain('avatar-fallback');
+    expect(markup).toContain('<time>');
+    expect(markup).not.toContain(content.source.name);
     expect(markup).not.toContain('展开全文');
   });
 });

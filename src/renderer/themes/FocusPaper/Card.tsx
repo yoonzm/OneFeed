@@ -90,13 +90,11 @@ export function Card({ item, index, onAction }: CardProps) {
               {item.author.name}
             </a>
           ) : <span className="card-author">{item.author.name}</span>}
-          <span className="card-source">
-            {item.source.name}
-            {item.publishedAt !== undefined && (
-              <> · <time>{formatPublishedAt(item.publishedAt)}</time></>
-            )}
-            {item.updatedAt !== undefined && ' · 已编辑'}
-          </span>
+          {item.publishedAt !== undefined && (
+            <span className="card-time">
+              <time>{formatPublishedAt(item.publishedAt)}</time>
+            </span>
+          )}
 
           {(item.context?.reason || item.context?.community || item.context?.tags?.length) && (
             <span className="context-row">

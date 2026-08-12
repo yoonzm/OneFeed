@@ -42,6 +42,7 @@ describe('Card', () => {
           ...shortReply,
           title: '测试标题',
           publishedAt: '2026-08-12T09:00:00+08:00',
+          updatedAt: '2026-08-12T10:00:00+08:00',
           context: {
             community: { name: '分享创造' },
             tags: [{ name: '设计' }],
@@ -63,7 +64,9 @@ describe('Card', () => {
     expect(bodyIndex).toBeGreaterThan(titleIndex);
     expect(metaIndex).toBeGreaterThan(bodyIndex);
     expect(markup).toContain('Alice');
-    expect(markup).toContain('V2EX');
+    expect(markup).toContain('<time>');
+    expect(markup).not.toContain('已编辑');
+    expect(markup).not.toContain(shortReply.source.name);
     expect(markup).toContain('分享创造');
     expect(markup).toContain('#设计');
     expect(markup).toContain('置顶');

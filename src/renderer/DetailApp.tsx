@@ -1,19 +1,17 @@
 import { useEffect, useState } from 'react';
-import type { FeedActionDescriptor, FeedSource } from '../types/feed';
+import type { FeedActionDescriptor } from '../types/feed';
 import { useDetailStore } from './store/useDetailStore';
 import { DetailArticle } from './themes/FocusPaper/DetailArticle';
 import { ThreadDetail } from './themes/FocusPaper/ThreadDetail';
 
 interface DetailAppProps {
   scrollElement: HTMLElement;
-  source: FeedSource;
   onAction: (itemId: string, actionId: string) => boolean;
 }
 
 /** 根据 DetailContent.kind 在文章详情与讨论详情之间分流的 Surface 外壳。 */
 export default function DetailApp({
   scrollElement,
-  source,
   onAction,
 }: DetailAppProps) {
   const content = useDetailStore((state) => state.content);
@@ -68,7 +66,7 @@ export default function DetailApp({
         ) : (
           <section className="empty-state" aria-live="polite">
             <span className="scan-mark" aria-hidden="true" />
-            <p>正在整理{source.name}详情</p>
+            <p>正在整理详情</p>
             <small>正文出现后，会自动转换为专注阅读模式。</small>
           </section>
         )}

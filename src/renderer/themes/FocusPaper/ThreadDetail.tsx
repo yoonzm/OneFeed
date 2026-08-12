@@ -71,17 +71,14 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
               <img className="avatar" src={content.header.author.avatar} alt="" />
             ) : (
               <span className="avatar avatar-fallback" aria-hidden="true">
-                {content.source.name.slice(0, 1)}
+                {content.header.author.name.trim().slice(0, 1)}
               </span>
             )}
             <div>
               <strong>{content.header.author.name}</strong>
-              <span>
-                来自{content.source.name}
-                {content.header.publishedAt !== undefined && (
-                  <> · <time>{formatPublishedAt(content.header.publishedAt)}</time></>
-                )}
-              </span>
+              {content.header.publishedAt !== undefined && (
+                <span><time>{formatPublishedAt(content.header.publishedAt)}</time></span>
+              )}
             </div>
           </div>
         )}

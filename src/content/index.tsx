@@ -63,7 +63,6 @@ function mount(): (() => void) | undefined {
     root = createRoot(viewport);
     const sharedProps = {
       scrollElement: viewport,
-      source: activeAdapter.source,
       onAction: (itemId: string, actionId: string) => (
         activeAdapter.adapter.triggerAction(itemId, actionId)
       ),

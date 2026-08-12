@@ -94,7 +94,7 @@ Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准：优先完成当�
 主题包必须分别声明支持的 Surface。Feed 主题负责卡片密度和预览截断；Article Detail 负责单篇正文排版；Thread Detail 负责固定主题头、回答/回复列表和分页。三者共享视觉 Token 和 Block Renderer，不要求使用相同顶层布局。
 
 内置 6 款精心调优的高质感视觉主题：
-* **Notion Style**：极简折叠、无框卡片、灰白克制留白；列表 Card 按标题、正文、元信息三行组织，作者只显示在第三行且不显示头像，独立“查看原文”操作由标题链接替代；短纯文本自动采用紧凑密度。
+* **Notion Style**：极简折叠、无框卡片、灰白克制留白；列表 Card 按标题、正文、元信息三行组织，作者只显示在第三行且不显示头像；单平台页面隐藏来源名称，独立“查看原文”操作由标题链接替代；短纯文本自动采用紧凑密度。
 * **Apple Design Style**：毛玻璃（Backdrop Filter）、大圆角、流畅微交互。
 * **Terminal / Hacker Style**：纯黑背景、等宽字体、绿/橙高亮、ASCII 分隔符。
 * **Newspaper / Paper Style**：双列报纸排版、复古衬线体、纸质肌理背景。

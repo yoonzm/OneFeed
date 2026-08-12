@@ -15,7 +15,7 @@
 | 功能模块 | MVP 实施范围 | 非 MVP 范围 (暂不实现) |
 | :--- | :--- | :--- |
 | **支持平台** | 知乎（回答/文章流、问题详情、回答详情、专栏文章详情）、Twitter/X（Home Feed）、V2EX（主题列表、主题详情）、Linux DO（话题列表、话题详情） | X 详情页；B站、YouTube、Reddit、小红书等 |
-| **渲染主题** | **1 款默认主题**：Notion 风格（极简、无框、克制留白；列表卡片按标题、正文、元信息三行组织，作者仅在元信息行显示文字，短纯文本使用紧凑密度） | 主题市场、自定义 CSS/JS、多主题切换 |
+| **渲染主题** | **1 款默认主题**：Notion 风格（极简、无框、克制留白；列表卡片按标题、正文、元信息三行组织，作者仅在元信息行显示文字；单平台页面不展示来源名称，短纯文本使用紧凑密度） | 主题市场、自定义 CSS/JS、多主题切换 |
 | **数据解析** | 独立的 Feed、Article Detail 与 Thread Detail 静态选择器适配器 | AI 自动解析、云端规则库更新 |
 | **核心交互** | 基础滚动、图片预览、回答折叠、Thread 无限加载/分页、原网页点赞代理；Popup 与页面右侧悬浮开关 | 知乎回答评论区接管、复杂富文本编辑、视频内嵌播放 |
 | **数据持久化**| 本地存储 (chrome.storage.local) 记录启用状态与主题偏好 | 云端同步、知识库导出 (Notion/Obsidian) |
@@ -250,7 +250,6 @@ function mountCurrentSurface() {
 
   const props = {
     scrollElement: viewport,
-    source: activeAdapter.source,
     onAction: (itemId: string, actionId: string) => (
       activeAdapter.adapter.triggerAction(itemId, actionId)
     ),
@@ -338,7 +337,8 @@ export const zhihuAdapterDefinition: AdapterDefinition = {
 
 * **Week 3: Notion 极简主题渲染**
   * 实现基于 Shadow DOM 的 Notion 风格 UI（卡片、标题、作者、图片网格）。
-  * 列表 Card 按标题、正文、元信息三行组织；序号、作者文字、来源时间、社区标签、内容状态、指标及操作合并到第三行，不显示作者头像。
+  * 列表 Card 按标题、正文、元信息三行组织；序号、作者文字、发布时间、社区标签、内容状态、指标及操作合并到第三行，不显示作者头像。
+  * 当前页面由单一 Adapter 接管时不展示来源名称，但保留标准模型中的 `source` 数据，为后续聚合信息流提供兼容空间。
   * 根据标准化内容长度与结构选择紧凑或舒适卡片密度，避免短回复沿用长文留白。
   * 列表 Card 不重复显示“查看原文”操作；带标题内容由标题链接承担原文跳转。
   * 引入虚拟列表，优化滚动性能与卡片加载体验。

@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react';
-import type { FeedActionDescriptor, FeedItem, FeedSource } from '../types/feed';
+import type { FeedActionDescriptor, FeedItem } from '../types/feed';
 import { useFeedStore } from './store/useFeedStore';
 import { Card } from './themes/FocusPaper/Card';
 
 interface FeedAppProps {
   scrollElement: HTMLElement;
-  source: FeedSource;
   onAction: (itemId: string, actionId: string) => boolean;
 }
 
 /** Feed Surface 外壳：连接状态库、阅读进度和原页面的无限加载。 */
 export default function FeedApp({
   scrollElement,
-  source,
   onAction,
 }: FeedAppProps) {
   const items = useFeedStore((state) => state.items);
@@ -61,7 +59,7 @@ export default function FeedApp({
         ) : (
           <section className="empty-state" aria-live="polite">
             <span className="scan-mark" aria-hidden="true" />
-            <p>正在整理{source.name}信息流</p>
+            <p>正在整理信息流</p>
             <small>页面内容出现后，会自动转换为专注阅读模式。</small>
           </section>
         )}
