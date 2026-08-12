@@ -75,7 +75,27 @@ export const BILIBILI_PLATFORM = {
   hosts: ['bilibili.com'],
 } as const satisfies PlatformDefinition;
 
-/** 页面导航、Popup 和适配器共享此目录，避免平台状态与入口地址分别维护。 */
+export const YOUTUBE_PLATFORM = {
+  id: 'youtube',
+  name: 'YouTube',
+  homeUrl: 'https://www.youtube.com/',
+  status: 'planned',
+  navOrder: 8,
+  plannedOrder: 4,
+  hosts: ['youtube.com', 'youtu.be'],
+} as const satisfies PlatformDefinition;
+
+export const REDDIT_PLATFORM = {
+  id: 'reddit',
+  name: 'Reddit',
+  homeUrl: 'https://www.reddit.com/',
+  status: 'planned',
+  navOrder: 9,
+  plannedOrder: 5,
+  hosts: ['reddit.com', 'redd.it'],
+} as const satisfies PlatformDefinition;
+
+/** 页面导航和适配器共享此目录，避免平台状态与入口地址分别维护。 */
 export const PLATFORM_CATALOG = [
   ZHIHU_PLATFORM,
   TWITTER_PLATFORM,
@@ -84,6 +104,8 @@ export const PLATFORM_CATALOG = [
   WEIBO_PLATFORM,
   XIAOHONGSHU_PLATFORM,
   BILIBILI_PLATFORM,
+  YOUTUBE_PLATFORM,
+  REDDIT_PLATFORM,
 ] as const satisfies readonly PlatformDefinition[];
 
 export type PlatformId = (typeof PLATFORM_CATALOG)[number]['id'];

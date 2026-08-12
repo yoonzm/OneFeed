@@ -1,7 +1,0 @@
-@layer theme, base, components, utilities;
-@import "tailwindcss/theme.css" layer(theme);
-@import "../../styles/tailwind-theme.css";
-@import "tailwindcss/utilities.css" layer(utilities) source(none) important;
-@source "./*.{html,tsx}";
-@source "../../renderer/components/ThemeSwitch.tsx";
-@source "../../renderer/components/GitHubLink.tsx";

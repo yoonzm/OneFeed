@@ -21,6 +21,8 @@ describe('platform catalog', () => {
       ['微博', 1],
       ['小红书', 2],
       ['哔哩哔哩', 3],
+      ['YouTube', 4],
+      ['Reddit', 5],
     ]);
   });
 

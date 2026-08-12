@@ -42,11 +42,11 @@ action: {
     16: 'icons/icon-16.png',
     32: 'icons/icon-32.png',
   },
-  default_title: 'OneFeed',
+  default_title: 'OneFeed 已开启，点击暂停',
 },
 ```
 
-Popup 的 `default_popup` 由 WXT 根据 `src/entrypoints/popup/index.html` 自动生成。
+工具栏图标不声明 `default_popup`，点击事件由 Service Worker 切换全局 `enabled` 状态。暂停时显示 `OFF` 徽标和“已暂停，点击开启”标题；页面悬浮开关与工具栏双向同步。
 
 Chrome Web Store 使用 `128×128` 图标展示安装信息和商店条目，`48×48` 用于扩展管理页面，`16×16` 和 `32×32` 用于工具栏及其他小尺寸场景。SVG 不能用于 Manifest 中声明的扩展图标。
 
@@ -353,7 +353,7 @@ POST /v2/publishers/{publisherId}/items/{extensionId}:publish
 - [ ] 知乎信息流、问题/回答/专栏详情和 V2EX、Linux DO 主题详情能够正常解析；
 - [ ] 统一信息流能够主动关闭；
 - [ ] 关闭后原页面立即恢复；
-- [ ] 可以从 Popup 重新开启；
+- [ ] 可以从工具栏图标或页面悬浮开关重新开启；
 - [ ] 刷新页面后保留开关状态；
 - [ ] 解析或挂载异常不会遮挡原页面；
 - [ ] 点赞、评论跳转和图片查看符合商店描述。

@@ -13,7 +13,7 @@ OneFeed 是一个面向 Web 信息流的浏览器扩展项目。它希望将不�
 - 从网页 DOM 中稳定提取信息流卡片和受支持详情正文；
 - 将不同平台的数据归一化为统一模型；
 - 通过 Shadow DOM 隔离并重新渲染界面；
-- 在 OneFeed 页面和扩展 Popup 中查看适配进度并切换已支持平台；
+- 在 OneFeed 页面顶部查看适配进度并切换已支持平台；
 - 提供一套极简、低干扰的 Focus Paper 主题，并支持可持久化的浅色/深色外观切换。
 
 ## 平台支持与适配进度
@@ -36,6 +36,8 @@ OneFeed 是一个面向 Web 信息流的浏览器扩展项目。它希望将不�
 | 1 | 微博 | 基础信息流、图文、视频、引用与互动数据 | ⬜ 待适配 |
 | 2 | 小红书 | 基础笔记 Feed、多图与视频；商品内容先提供安全降级 | ⬜ 待适配 |
 | 3 | 哔哩哔哩 | 首页与动态 Feed、视频卡片；播放器能力分阶段接入 | ⬜ 待适配 |
+| 4 | YouTube | 首页 Home Feed 与视频卡片；播放器能力分阶段接入 | ⬜ 待适配 |
+| 5 | Reddit | 首页与社区 Feed、文本/链接/媒体帖子；帖子详情与评论分阶段接入 | ⬜ 待适配 |
 
 ## 长期愿景
 
@@ -61,13 +63,13 @@ npm test
 npm run lint
 ```
 
-`npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页、X Home Feed、V2EX 首页或 Linux DO 话题列表后，扩展会将信息流替换为 Focus Paper 阅读界面；知乎问题、V2EX 主题与 Linux DO 话题使用 Thread Detail，知乎独立回答与专栏文章使用 Article Detail。OneFeed 页面顶部和扩展 Popup 会展示已支持与待支持平台，点击已支持平台可在当前标签页切换；两处右上角均提供 GitHub 入口与浅色/深色外观切换，页面右侧悬浮开关可随时恢复原始页面。
+`npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页、X Home Feed、V2EX 首页或 Linux DO 话题列表后，扩展会将信息流替换为 Focus Paper 阅读界面；知乎问题、V2EX 主题与 Linux DO 话题使用 Thread Detail，知乎独立回答与专栏文章使用 Article Detail。OneFeed 页面顶部会展示已支持与待支持平台，并提供 GitHub 入口与浅色/深色外观切换；点击浏览器工具栏中的扩展图标可全局暂停或开启 OneFeed 接管，页面右侧悬浮开关也可随时切换同一状态。暂停接管不会在 Chrome 中禁用扩展本身。
 
 ## 样式开发
 
 项目使用 Tailwind CSS v4 和官方 Vite 插件。新增或调整普通组件布局、间距、颜色与交互状态时，应优先在 TSX 中使用 Tailwind 工具类；颜色和字体等共享设计 Token 统一维护在 `src/styles/tailwind-theme.css`，避免在组件内重复硬编码。
 
-阅读器样式通过 `src/renderer/styles.css` 编译后以内联 CSS 注入 Shadow DOM，Popup 使用独立的 `src/entrypoints/popup/popup.css` 入口。两个入口都关闭了 Tailwind Preflight，以免重置现有阅读内容；富文本排版、伪元素、复杂内容状态和原站兼容规则可以继续保留在 CSS 中。Tailwind 类名必须以完整字符串出现，不要通过字符串拼接动态生成类名。
+阅读器样式通过 `src/renderer/styles.css` 编译后以内联 CSS 注入 Shadow DOM，并关闭 Tailwind Preflight，以免重置现有阅读内容；富文本排版、伪元素、复杂内容状态和原站兼容规则可以继续保留在 CSS 中。Tailwind 类名必须以完整字符串出现，不要通过字符串拼接动态生成类名。
 
 ## 技术状态
 

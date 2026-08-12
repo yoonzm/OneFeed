@@ -31,6 +31,8 @@ describe('reader app shells', () => {
     expect(markup).toContain('aria-current="page"');
     expect(markup.indexOf('微博')).toBeLessThan(markup.indexOf('小红书'));
     expect(markup.indexOf('小红书')).toBeLessThan(markup.indexOf('哔哩哔哩'));
+    expect(markup.indexOf('哔哩哔哩')).toBeLessThan(markup.indexOf('YouTube'));
+    expect(markup.indexOf('YouTube')).toBeLessThan(markup.indexOf('Reddit'));
   });
 
   it('renders only the loading icon while organizing the feed', () => {
