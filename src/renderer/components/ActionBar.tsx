@@ -72,7 +72,7 @@ export function ActionBar({
           aria-pressed={action.active}
           onClick={() => onAction(action)}
         >
-          {action.label}{action.count ? ` ${action.count.toLocaleString('zh-CN')}` : ''}
+          {action.label}{action.count !== undefined ? ` ${action.count.toLocaleString('zh-CN')}` : ''}
         </button>
       ))}
     </footer>

@@ -1,12 +1,9 @@
-import type { FeedItem, FeedSource } from '../../types/feed';
+import { V2EX_PLATFORM } from '../../config/platforms';
+import type { FeedItem } from '../../types/feed';
 import { BaseAdapter, type AdapterDefinition } from './base';
 
 const CARD_SELECTOR = '.cell.item';
-export const V2EX_SOURCE: FeedSource = {
-  id: 'v2ex',
-  name: 'V2EX',
-  homeUrl: 'https://www.v2ex.com/',
-};
+export const V2EX_SOURCE = V2EX_PLATFORM;
 
 function absoluteUrl(value: string): string {
   if (!value) return '';

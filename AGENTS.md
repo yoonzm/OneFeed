@@ -2,7 +2,7 @@
 
 ## 项目结构与模块组织
 
-本仓库是基于 WXT、React 和 TypeScript 的 Chrome Manifest V3 扩展。`docs/MVP_Design_Document.md` 定义 MVP，`docs/Longterm_Roadmap_Document.md` 描述后续的平台、主题、AI 与生态阶段。产品决策应记录在 `docs/` 中；当 MVP 决策影响长期规划时，应同步更新两份文档。
+本仓库是基于 WXT、React 和 TypeScript 的 Chrome Manifest V3 扩展。`README.md` 维护平台支持状态与适配顺序，`docs/Longterm_Roadmap_Document.md` 描述后续的平台、主题、AI 与生态阶段。产品决策应记录在 `docs/` 中；当平台范围或交付顺序变化时，应同步更新 README 与长期路线图。
 
 WXT 入口位于 `src/entrypoints/`：`background.ts` 是 Service Worker，`content.tsx` 声明站点匹配并启动接管逻辑，`popup/` 是弹窗页面。内容脚本实现和站点适配器位于 `src/content/`，React 渲染逻辑位于 `src/renderer/`，共享模型位于 `src/types/`。静态扩展资源位于 `public/`，测试与被测代码相邻存放。
 
@@ -21,7 +21,7 @@ WXT 入口位于 `src/entrypoints/`：`background.ts` 是 Service Worker，`cont
 
 ## 编码风格与命名约定
 
-遵循 MVP 设计中的 TypeScript 示例：使用两个空格缩进、分号、单引号，并为共享数据定义明确的接口。React 组件、类和类型使用 `PascalCase`，例如 `FeedItem`、`ZhihuAdapter`；函数和变量使用 `camelCase`。适配器文件按平台命名，如 `zhihu.ts`、`twitter.ts`，并将 DOM 选择器限制在对应适配器内。中英文文档统一保持 UTF-8 编码。
+遵循现有 TypeScript 代码风格：使用两个空格缩进、分号、单引号，并为共享数据定义明确的接口。React 组件、类和类型使用 `PascalCase`，例如 `FeedItem`、`ZhihuAdapter`；函数和变量使用 `camelCase`。适配器文件按平台命名，如 `zhihu.ts`、`twitter.ts`，并将 DOM 选择器限制在对应适配器内。中英文文档统一保持 UTF-8 编码。
 
 ## 代码注释规范
 
@@ -33,4 +33,4 @@ WXT 入口位于 `src/entrypoints/`：`background.ts` 是 Service Worker，`cont
 
 ## 提交与拉取请求规范
 
-仓库尚无提交记录，因此无法从历史中归纳约定。提交主题应简短、使用祈使语气，并可包含作用域，例如 `docs: clarify MVP adapter contract`。每个提交只处理一个明确主题。拉取请求应说明用户可见影响、列出验证结果、关联相关 Issue 或设计章节，并为界面变更附上截图或录屏。若新增 `manifest.json` 权限或依赖目标站点的 DOM 假设，必须明确说明。
+提交主题应简短、使用祈使语气，并可包含作用域，例如 `docs: clarify adapter contract`。每个提交只处理一个明确主题。拉取请求应说明用户可见影响、列出验证结果、关联相关 Issue 或设计章节，并为界面变更附上截图或录屏。若新增 `manifest.json` 权限或依赖目标站点的 DOM 假设，必须明确说明。

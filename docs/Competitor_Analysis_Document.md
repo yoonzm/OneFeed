@@ -1,7 +1,7 @@
 # 市场竞品分析
 
 > 调研日期：2026 年 8 月 5 日
-> 产品范围：OneFeed 的 MVP 与长期路线
+> 产品范围：OneFeed 当前产品与长期路线
 
 ## 1. 结论摘要
 
@@ -28,9 +28,9 @@
 | 产品 | 主要重合点 | 与本产品的关键差异 | 竞争关系 |
 | :--- | :--- | :--- | :--- |
 | [Tapestry](https://tapestry.iconfactory.com/) | 多来源统一时间线、Connector、过滤规则、去重和原平台 Action | 独立客户端，主要通过公开 Feed/API 获取数据，不在原网站内接管 UI | 长期路线中最接近 |
-| [BewlyBewly](https://chromewebstore.google.com/detail/bewlybewly/bbbiejemhfihiooipfcjmjmbfdmobobp) | 浏览器扩展、重新设计 Bilibili 首页、保留原平台能力 | 仅面向 Bilibili，没有跨平台 Feed Schema 和主题生态 | MVP 技术形态最接近 |
+| [BewlyBewly](https://chromewebstore.google.com/detail/bewlybewly/bbbiejemhfihiooipfcjmjmbfdmobobp) | 浏览器扩展、重新设计 Bilibili 首页、保留原平台能力 | 仅面向 Bilibili，没有跨平台 Feed Schema 和主题生态 | 原站重绘技术形态最接近 |
 | [简悦 SimpRead](https://simpread.pro/) | 站点适配、沉浸式重绘、插件中心、AI 阅读与知识库导出 | 核心对象是文章阅读和标注，而不是动态、无限加载的社交 Feed | 产品生态路线高度相似 |
-| [SocialFocus](https://chromewebstore.google.com/detail/socialfocus-%E2%80%94-hide-feeds/abocjojdmemdpiffeadpdnicnlhcndcg) | 在多个社交网站中隐藏 Feed、Shorts、推荐和推广内容 | 主要删除或隐藏内容，不做归一化和完整重绘 | MVP 用户需求的直接替代品 |
+| [SocialFocus](https://chromewebstore.google.com/detail/socialfocus-%E2%80%94-hide-feeds/abocjojdmemdpiffeadpdnicnlhcndcg) | 在多个社交网站中隐藏 Feed、Shorts、推荐和推广内容 | 主要删除或隐藏内容，不做归一化和完整重绘 | 用户需求的直接替代品 |
 | [News Feed Eradicator](https://chromewebstore.google.com/detail/news-feed-eradicator/fjcldmjmjhkklehbacihaiopjklihlgg) | 跨平台移除社交 Feed，降低无意识浏览 | 用引言替换 Feed，不保留并重组内容 | 注意力管理替代品 |
 | [Control Panel for Twitter](https://chromewebstore.google.com/detail/control-panel-for-twitter/kpmjjdhbcfebfjgdnpjagcndoelnidfj) | 深度调整 X 时间线、推荐、侧栏、排序和交互展示 | 单平台，以 DOM/CSS 调整为主 | X 平台专业竞品 |
 | [Unhook](https://chromewebstore.google.com/detail/unhook-remove-youtube-rec/khncfooichmfjbepaaaebmommgaepoid) | 移除 YouTube 推荐、Shorts、评论、侧栏等干扰 | 单平台，只做界面减法 | YouTube 平台专业竞品 |
@@ -57,7 +57,7 @@ Tapestry 将 Bluesky、Mastodon、Tumblr、RSS、播客和 YouTube 等来源组�
 
 主要区别在于 Tapestry 是独立客户端，并以公开 Feed、开放协议和 API 为主要数据源。本产品计划直接利用用户浏览器中的原平台登录态，在目标网站页面内完成提取和重绘，因此能够覆盖没有公开 Feed、API 受限或高度依赖推荐算法的平台。
 
-### 3.2 BewlyBewly：MVP 技术形态最接近
+### 3.2 BewlyBewly：原站重绘技术形态最接近
 
 BewlyBewly 是重新设计 Bilibili 网站界面的浏览器扩展。它不是单纯修改颜色，而是重新组织首页结构、视觉表现和部分功能，同时继续使用 Bilibili 的内容与服务。
 
@@ -127,14 +127,14 @@ Openvibe、Surf、Reeder 和 Inoreader 都在解决“减少应用切换，在�
 
 ## 4. 竞争格局判断
 
-### 4.1 MVP 阶段
+### 4.1 当前平台扩张阶段
 
-MVP 的直接竞争来自两侧：
+当前产品的直接竞争来自两侧：
 
 - BewlyBewly 等产品证明完整重绘的体验价值；
 - SocialFocus、Control Panel for Twitter 等产品用更低的技术成本满足“减少干扰”的核心需求。
 
-因此，MVP 不能只证明 Notion 风格更美观，还应验证：
+因此，产品不能只依赖 Notion 风格的视觉差异，还应持续验证：
 
 1. 无需平台开放 API，也能稳定读取用户实际看到的登录态 Feed；
 2. 完整重绘后仍能可靠完成点赞、跳转、图片查看和无限加载；
@@ -189,7 +189,7 @@ Stylebot 的主题自定义与分发
 
 强调 Phase 3 之后的 AI、知识库与 BYO-Algorithm 能力。
 
-MVP 阶段优先推荐方向 A，因为它最准确地表达了与 RSS 阅读器、换肤插件和 Feed 屏蔽工具之间的差异。
+现阶段优先推荐方向 A，因为它最准确地表达了与 RSS 阅读器、换肤插件和 Feed 屏蔽工具之间的差异。
 
 ## 6. 主要风险
 
@@ -215,7 +215,7 @@ MVP 阶段优先推荐方向 A，因为它最准确地表达了与 RSS 阅读器
 
 ## 7. 后续调研建议
 
-在 MVP 开发期间，建议持续跟踪以下信息：
+在当前平台扩张期间，建议持续跟踪以下信息：
 
 - BewlyBewly 的重绘范围、用户反馈和站点更新后的修复速度；
 - Tapestry 的 Connector SDK、第三方生态和跨平台动作支持；

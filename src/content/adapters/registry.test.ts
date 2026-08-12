@@ -1,10 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createAdapter } from './registry';
+import { getSupportedPlatforms } from '../../config/platforms';
+import { createAdapter, getRegisteredPlatformIds, isSupportedUrl } from './registry';
 import { LinuxDoAdapter } from './linuxDo';
 import { LinuxDoThreadAdapter } from './linuxDoThread';
 import { TwitterAdapter } from './twitter';
 import { V2exAdapter } from './v2ex';
 import { V2exThreadAdapter } from './v2exThread';
+import { WeiboAdapter } from './weibo';
+import { XiaohongshuAdapter } from './xiaohongshu';
 import { ZhihuAdapter } from './zhihu';
 import { ZhihuDetailAdapter } from './zhihuDetail';
 import { ZhihuThreadAdapter } from './zhihuThread';
@@ -17,6 +20,12 @@ function listeners() {
 }
 
 describe('createAdapter', () => {
+  it('registers a feed adapter for every supported platform', () => {
+    expect(getRegisteredPlatformIds()).toEqual(
+      getSupportedPlatforms().map((platform) => platform.id),
+    );
+  });
+
   it('selects feed adapters by supported URL', () => {
     expect(createAdapter(new URL('https://www.zhihu.com/'), listeners())).toMatchObject({
       surface: 'feed',
@@ -37,6 +46,27 @@ describe('createAdapter', () => {
       surface: 'feed',
       adapter: expect.any(LinuxDoAdapter),
       source: { id: 'linux-do', name: 'Linux DO' },
+    });
+    expect(createAdapter(new URL('https://weibo.com/hot/weibo/102803'), listeners())).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(WeiboAdapter),
+      source: { id: 'weibo', name: '微博' },
+    });
+    expect(createAdapter(
+      new URL('https://weibo.com/newlogin?tabtype=weibo&gid=102803&openLoginLayer=0&url=https://weibo.com/'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(WeiboAdapter),
+      source: { id: 'weibo', name: '微博' },
+    });
+    expect(createAdapter(
+      new URL('https://www.xiaohongshu.com/explore?channel_id=homefeed_recommend'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(XiaohongshuAdapter),
+      source: { id: 'xiaohongshu', name: '小红书' },
     });
   });
 
@@ -86,9 +116,29 @@ describe('createAdapter', () => {
   it('leaves unsupported site pages untouched', () => {
     expect(createAdapter(new URL('https://x.com/reader/status/123'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do/settings/account'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://weibo.com/newlogin'), listeners())).toBeNull();
+    expect(createAdapter(
+      new URL('https://weibo.com/newlogin?tabtype=weibo&url=https://example.com/'),
+      listeners(),
+    )).toBeNull();
+    expect(createAdapter(new URL('https://m.weibo.com/'), listeners())).toBeNull();
+    expect(createAdapter(
+      new URL('https://www.xiaohongshu.com/explore/note-id'),
+      listeners(),
+    )).toBeNull();
+    expect(createAdapter(new URL('https://creator.xiaohongshu.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://www.zhihu.com/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do.example.com/latest'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://example.com/'), listeners())).toBeNull();
+  });
+
+  it('reports whether a URL supports early page takeover', () => {
+    expect(isSupportedUrl(new URL('https://www.zhihu.com/'))).toBe(true);
+    expect(isSupportedUrl(new URL('https://www.zhihu.com/question/1/answer/42'))).toBe(true);
+    expect(isSupportedUrl(new URL('https://www.zhihu.com/settings/account'))).toBe(false);
+    expect(isSupportedUrl(new URL('https://weibo.com/mygroups?gid=11000'))).toBe(true);
+    expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore'))).toBe(true);
+    expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore/note-id'))).toBe(false);
   });
 });

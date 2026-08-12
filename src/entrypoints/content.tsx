@@ -13,8 +13,12 @@ export default defineContentScript({
     'https://*.v2ex.com/*',
     'https://linux.do/*',
     'https://*.linux.do/*',
+    'https://weibo.com/*',
+    'https://*.weibo.com/*',
+    'https://xiaohongshu.com/*',
+    'https://*.xiaohongshu.com/*',
   ],
-  runAt: 'document_idle',
+  runAt: 'document_start',
   main(ctx) {
     const controller = startContentScript();
     ctx.addEventListener(window, 'wxt:locationchange', () => {

@@ -32,6 +32,22 @@
   transform: translateX(0);
 }
 
+.floating-toggle[data-onefeed-theme='dark'] .toggle-tip {
+  border-color: #2b394b;
+  background: rgb(23 33 48 / 97%);
+  color: #edf2f8;
+  box-shadow: 0 10px 28px rgb(0 0 0 / 35%);
+}
+
+.floating-toggle[data-onefeed-theme='dark'] .toggle-tip::after {
+  border-color: #2b394b;
+  background: #172130;
+}
+
+.floating-toggle[data-onefeed-theme='dark'] .toggle-tip small {
+  color: #a8b4c5;
+}
+
 .toggle-button {
   position: relative;
   display: grid;
