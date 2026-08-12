@@ -86,10 +86,13 @@ a { color: inherit; }
 
 .card-index {
   color: #9aa8bb;
-  font: 500 10.5px/1.4 "SFMono-Regular", Consolas, monospace;
-  letter-spacing: .08em;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: .02em;
 }
-.card-author { color: var(--ink); font-weight: 600; text-decoration: none; }
+.card-author { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-weight: 600; text-decoration: none; }
+.card-author-avatar { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; background: var(--blue-soft); }
 .card-author:hover { color: var(--blue); }
 .card-time { color: var(--muted); }
 .card-meta-row .context-row,

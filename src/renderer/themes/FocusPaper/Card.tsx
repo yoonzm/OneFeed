@@ -53,6 +53,9 @@ export function Card({ item, index, onAction }: CardProps) {
   );
   const contentExpanded = expanded || !expandable;
   const densityClassName = getDensityClassName(item);
+  const authorAvatar = item.author.avatar ? (
+    <img className="card-author-avatar" src={item.author.avatar} alt="" loading="lazy" />
+  ) : null;
 
   return (
     <article
@@ -80,16 +83,22 @@ export function Card({ item, index, onAction }: CardProps) {
           </div>
         )}
 
-        {/* 作者、上下文、状态和操作统一收敛到第三行；列表不恢复头像。 */}
+        {/* 作者、上下文、状态和操作统一收敛到第三行；头像仅在源站提供时显示。 */}
         <div className="card-meta-row">
           <span className="card-index" aria-label={`第 ${item.sequence || index + 1} 条`}>
             {String(item.sequence || index + 1).padStart(2, '0')}
           </span>
           {item.author.link ? (
             <a className="card-author" href={item.author.link} target="_blank" rel="noreferrer">
+              {authorAvatar}
               {item.author.name}
             </a>
-          ) : <span className="card-author">{item.author.name}</span>}
+          ) : (
+            <span className="card-author">
+              {authorAvatar}
+              {item.author.name}
+            </span>
+          )}
           {item.publishedAt !== undefined && (
             <span className="card-time">
               <time>{formatPublishedAt(item.publishedAt)}</time>

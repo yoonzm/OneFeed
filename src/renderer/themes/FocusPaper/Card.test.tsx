@@ -35,6 +35,28 @@ describe('Card', () => {
     expect(markup).not.toContain('展开全文');
   });
 
+  it('renders a provided avatar beside the linked author name', () => {
+    const markup = renderToStaticMarkup(
+      <Card
+        item={{
+          ...shortReply,
+          author: {
+            name: 'Alice',
+            avatar: 'https://example.com/alice.png',
+            link: 'https://example.com/alice',
+          },
+        }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain('class="card-author-avatar"');
+    expect(markup).toContain('src="https://example.com/alice.png"');
+    expect(markup).toContain('href="https://example.com/alice"');
+    expect(markup).toContain('loading="lazy"');
+  });
+
   it('orders title, body and remaining metadata as three semantic rows', () => {
     const markup = renderToStaticMarkup(
       <Card
