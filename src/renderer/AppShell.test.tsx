@@ -16,6 +16,7 @@ describe('reader app shells', () => {
       activePlatformId: 'zhihu',
       scrollElement: document.createElement('div'),
       onAction: vi.fn(() => false),
+      onLoadMore: vi.fn(async () => ({ kind: 'exhausted' as const })),
     };
     const markup = renderToStaticMarkup(
       surface === 'feed'
@@ -44,6 +45,7 @@ describe('reader app shells', () => {
         activePlatformId="zhihu"
         scrollElement={document.createElement('div')}
         onAction={vi.fn(() => false)}
+        onLoadMore={vi.fn(async () => ({ kind: 'exhausted' as const }))}
       />,
     );
 

@@ -13,6 +13,7 @@ OneFeed 是一个面向 Web 信息流的浏览器扩展项目。它希望将不�
 - 从网页 DOM 中稳定提取信息流卡片和受支持详情正文；
 - 将不同平台的数据归一化为统一模型；
 - 通过 Shadow DOM 隔离并重新渲染界面；
+- 统一驱动原站无限滚动、加载更多控件与 HTML 文档分页；
 - 在 OneFeed 页面顶部查看适配进度并切换已支持平台；
 - 提供一套极简、低干扰的 Focus Paper 主题，并支持可持久化的浅色/深色外观切换。
 
@@ -30,7 +31,7 @@ OneFeed 是一个面向 Web 信息流的浏览器扩展项目。它希望将不�
 | Linux DO | 首页、最新、热门、分类与标签话题列表；话题详情 | ✅ 已支持 |
 | 微博 | 首页、关注与热门信息流；图文、视频、引用微博与基础互动 | ✅ 已支持 |
 | 小红书 | 发现页基础笔记 Feed；图文/视频封面、媒体比例、点赞代理与收藏原页回退 | ✅ 已支持 |
-| Hacker News | News、Newest、Front、Best、Ask、Show 与 Jobs 列表；分数、评论与赞同代理 | ✅ 已支持 |
+| Hacker News | News、Newest、Front、Best、Ask、Show 与 Jobs 列表；More 连续分页、分数、评论与赞同代理 | ✅ 已支持 |
 
 ### 待支持
 
@@ -74,7 +75,7 @@ npm run lint
 
 ## 技术状态
 
-当前版本基于 WXT、React 和 TypeScript，实现了 Feed、Article Detail 与 Thread Detail 三类 Surface，以及归一化去重、Shadow DOM 隔离渲染、图片预览、原站点赞代理、启用状态和明暗外观持久化。三类 Surface 通过共享 Block、内容角色和 Action 协议复用内容积木；SPA 路由变化时会清理旧 Surface 并重新识别页面。产品规划与市场分析请参阅：
+当前版本基于 WXT、React 和 TypeScript，实现了 Feed、Article Detail 与 Thread Detail 三类 Surface，以及归一化去重、Shadow DOM 隔离渲染、统一触底加载、图片预览、原站点赞代理、启用状态和明暗外观持久化。Feed Adapter 可按站点选择原站滚动、加载更多控件或同源 HTML 文档分页；三类 Surface 通过共享 Block、内容角色和 Action 协议复用内容积木，SPA 路由变化时会清理旧 Surface 并重新识别页面。产品规划与市场分析请参阅：
 
 - [长期产品路线图](docs/Longterm_Roadmap_Document.md)
 - [市场竞品分析](docs/Competitor_Analysis_Document.md)

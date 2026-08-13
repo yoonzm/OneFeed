@@ -1,6 +1,10 @@
 import { HACKER_NEWS_PLATFORM } from '../../config/platforms';
 import type { FeedItem } from '../../types/feed';
-import { BaseAdapter, type AdapterDefinition } from './base';
+import {
+  BaseAdapter,
+  type AdapterDefinition,
+  type FeedPageContext,
+} from './base';
 
 const CARD_SELECTOR = 'tr.athing.submission[id]';
 const SUPPORTED_PATHS = new Set([
@@ -16,10 +20,10 @@ const SUPPORTED_PATHS = new Set([
 
 export const HACKER_NEWS_SOURCE = HACKER_NEWS_PLATFORM;
 
-function absoluteUrl(value: string): string {
+function absoluteUrl(value: string, pageUrl: URL): string {
   if (!value) return '';
   try {
-    return new URL(value, window.location.origin).href;
+    return new URL(value, pageUrl).href;
   } catch {
     return '';
   }
@@ -58,7 +62,10 @@ function parsePublishedAt(metadataRow: Element | null): number | undefined {
     : undefined;
 }
 
-export function parseHackerNewsCard(element: Element): FeedItem | null {
+export function parseHackerNewsCard(
+  element: Element,
+  pageUrl = new URL(window.location.href),
+): FeedItem | null {
   const titleLink = element.querySelector<HTMLAnchorElement>('.titleline > a');
   const title = titleLink ? originalText(titleLink) : '';
   const originId = element.getAttribute('id')?.trim() || '';
@@ -78,21 +85,21 @@ export function parseHackerNewsCard(element: Element): FeedItem | null {
     id: `hacker-news_${originId}`,
     platform: 'hacker-news',
     source: HACKER_NEWS_SOURCE,
-    originalUrl: absoluteUrl(titleLink.getAttribute('href') || '') || window.location.href,
+    originalUrl: absoluteUrl(titleLink.getAttribute('href') || '', pageUrl) || pageUrl.href,
     kind: 'discussion',
     role: 'topic',
     author: {
       name: authorLink?.textContent?.trim() || 'Hacker News',
       avatar: '',
       link: authorLink
-        ? absoluteUrl(authorLink.getAttribute('href') || '') || undefined
+        ? absoluteUrl(authorLink.getAttribute('href') || '', pageUrl) || undefined
         : undefined,
     },
     sequence: parseHackerNewsCount(element.querySelector('.rank')?.textContent || '') || undefined,
     context: siteName ? {
       community: {
         name: siteName,
-        url: absoluteUrl(siteLink?.getAttribute('href') || '') || undefined,
+        url: absoluteUrl(siteLink?.getAttribute('href') || '', pageUrl) || undefined,
       },
     } : undefined,
     publishedAt: parsePublishedAt(metadataRow),
@@ -124,26 +131,46 @@ export function parseHackerNewsCard(element: Element): FeedItem | null {
 export function triggerHackerNewsAction(
   element: Element | undefined,
   actionId: string,
+  pageUrl = new URL(window.location.href),
+  live = element?.isConnected ?? false,
 ): boolean {
   const target = actionId === 'react'
-    ? element?.querySelector<HTMLElement>('a[id^="up_"]')
+    ? element?.querySelector<HTMLAnchorElement>('a[id^="up_"]')
     : actionId === 'reply'
       ? getCommentsLink(element ? getMetadataRow(element) : null)
       : undefined;
   if (!target) return false;
-  target.click();
+  if (live && target.isConnected) {
+    target.click();
+    return true;
+  }
+
+  // 抓取页中的控件未挂载到真实文档，改为打开其原站目标，避免离线 click 静默失效。
+  const targetUrl = absoluteUrl(target.getAttribute('href') || '', pageUrl);
+  if (!targetUrl) return false;
+  window.open(targetUrl, '_blank', 'noopener,noreferrer');
   return true;
 }
 
 export class HackerNewsAdapter extends BaseAdapter {
   protected readonly cardSelector = CARD_SELECTOR;
+  protected override readonly loadingStrategy = {
+    kind: 'document-page',
+    nextSelector: 'a.morelink[rel="next"]',
+  } as const;
 
-  parseCard(element: Element): FeedItem | null {
-    return parseHackerNewsCard(element);
+  parseCard(element: Element, context: FeedPageContext): FeedItem | null {
+    return parseHackerNewsCard(element, context.url);
   }
 
   triggerAction(itemId: string, actionId: string): boolean {
-    return triggerHackerNewsAction(this.getRuntimeElement(itemId), actionId);
+    const binding = this.getRuntimeBinding(itemId);
+    return triggerHackerNewsAction(
+      binding?.element,
+      actionId,
+      binding?.pageUrl,
+      binding?.live,
+    );
   }
 }
 

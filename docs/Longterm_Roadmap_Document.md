@@ -82,7 +82,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 | **基础能力（已完成）** | 完成 Schema、Surface 与 Renderer 解耦 | 知乎、Twitter/X、V2EX、Linux DO | `FeedItem`/`ArticleDetail`/`ThreadDetail` 可序列化；URL 路由互斥；SPA 切换清理旧 Surface；Block Registry 与 Action Bar 跨 Surface 复用 |
 | **2.1 微博适配（已完成）** | 扩展国内开放社交覆盖 | 微博 | 图文、视频、引用、转发原因、互动数据、原站操作代理与无限加载 |
 | **2.2 小红书适配（已完成）** | 验证高密度视觉内容 | 小红书 | 发现页图文/视频封面、媒体比例、点赞代理、收藏/原文回退与非标准卡片降级 |
-| **2.3 Hacker News 适配（已完成）** | 验证轻量社区列表 | Hacker News | News/Newest/Front/Best/Ask/Show/Jobs 列表、分数与评论、赞同代理和详情原页回退 |
+| **2.3 Hacker News 适配（已完成）** | 验证轻量社区列表与 HTML 文档分页 | Hacker News | News/Newest/Front/Best/Ask/Show/Jobs 列表、More 连续分页、分数与评论、赞同代理和详情原页回退 |
 | **2.4 哔哩哔哩适配** | 验证媒体 Block 与播放器代理 | 哔哩哔哩 | 首页与动态 Feed、封面、时长、播放量、原生播放器 Portal 与回退 |
 | **2.5 YouTube 适配** | 验证海外视频 Feed 与播放器代理 | YouTube | 首页 Home Feed、封面、时长、观看量、原生播放器 Portal 与回退 |
 | **2.6 社区与开放社交扩展** | 继续验证 `discussion` 与复杂 `post` 通用性 | Reddit、Mastodon、Bluesky | 社区/标签、回复、投票、内容警告、可见范围和链接卡片 |
@@ -108,7 +108,7 @@ Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准。微博、小红�
 #### 4. 架构优化与交互代理
 * **SPA Surface 生命周期**：使用 WXT 路由事件按完整 URL 识别页面，依次销毁旧 Adapter/Store/Renderer、恢复原 DOM，再挂载新 Surface；hash-only 跳转不重建页面。Article/Thread Detail 只有在 URL 对应的目标节点解析成功后才遮罩原页，避免 DOM 延迟或规则失效造成空白详情。
 * **视频播放器节点搬运 (Portal)**：对于 B站/YouTube 视频，通过 DOM `appendChild` 将原平台的播放器节点无缝“移驾”到新 UI 卡片中，保留原生播放状态与清晰度选项。
-* **触底加载同步 (Scroll Synchronization)**：当用户在新 UI 滚动到底部时，自动向被隐藏的原 DOM 派发滚动事件，实现无缝无限翻页。
+* **统一触底加载 (Feed Loading)**：Feed Surface 接近底部时统一向 Adapter 请求下一批内容；Adapter 可驱动被隐藏的原页面滚动、点击同文档加载控件，或抓取并离线解析同源 HTML 下一页。文档分页使用单请求锁、稳定 ID 去重、失败重试和卸载终止，避免整页导航清空当前阅读进度。
 
 ---
 

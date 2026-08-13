@@ -1,9 +1,15 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
+  HackerNewsAdapter,
   parseHackerNewsCard,
   parseHackerNewsCount,
   triggerHackerNewsAction,
 } from './hackerNews';
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
 
 function renderStory(): Element {
   document.body.innerHTML = `
@@ -109,6 +115,20 @@ describe('parseHackerNewsCard', () => {
       <table><tbody><tr class="athing submission"><td class="title"></td></tr></tbody></table>`;
     expect(parseHackerNewsCard(document.querySelector('tr')!)).toBeNull();
   });
+
+  it('resolves relative links against the fetched page URL', () => {
+    const element = renderStory();
+    element.querySelector<HTMLAnchorElement>('.titleline > a')!
+      .setAttribute('href', 'item?id=43876543');
+
+    expect(parseHackerNewsCard(
+      element,
+      new URL('https://news.ycombinator.com/?p=2'),
+    )).toMatchObject({
+      originalUrl: 'https://news.ycombinator.com/item?id=43876543',
+      author: { link: 'https://news.ycombinator.com/user?id=alice' },
+    });
+  });
 });
 
 describe('triggerHackerNewsAction', () => {
@@ -125,5 +145,101 @@ describe('triggerHackerNewsAction', () => {
     expect(triggerHackerNewsAction(element, 'bookmark')).toBe(false);
     expect(voteClick).toHaveBeenCalledOnce();
     expect(commentsClick).toHaveBeenCalledOnce();
+  });
+
+  it('opens the original control target for a card parsed from a detached page', () => {
+    const element = renderStory();
+    element.closest('table')?.remove();
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null);
+
+    expect(triggerHackerNewsAction(
+      element,
+      'reply',
+      new URL('https://news.ycombinator.com/?p=2'),
+      false,
+    )).toBe(true);
+    expect(open).toHaveBeenCalledWith(
+      'https://news.ycombinator.com/item?id=43876543',
+      '_blank',
+      'noopener,noreferrer',
+    );
+  });
+});
+
+describe('HackerNewsAdapter pagination', () => {
+  it('loads the next HTML document without navigating the current page', async () => {
+    renderStory();
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      '<a class="morelink" rel="next" href="?p=2">More</a>',
+    );
+    const responses = [
+      new Response(`
+        <table><tbody>
+          <tr class="athing submission" id="43876544">
+            <td class="title"><span class="rank">31.</span></td>
+            <td></td>
+            <td class="title">
+              <span class="titleline"><a href="item?id=43876544">Page two story</a></span>
+            </td>
+          </tr>
+          <tr><td></td><td></td><td class="subtext"><a href="item?id=43876544">discuss</a></td></tr>
+        </tbody></table>
+        <a class="morelink" rel="next" href="?p=3">More</a>
+      `, { headers: { 'Content-Type': 'text/html' } }),
+      new Response(`
+        <table><tbody>
+          <tr class="athing submission" id="43876545">
+            <td class="title"><span class="rank">61.</span></td>
+            <td></td>
+            <td class="title">
+              <span class="titleline"><a href="item?id=43876545">Page three story</a></span>
+            </td>
+          </tr>
+          <tr><td></td><td></td><td class="subtext"><a href="item?id=43876545">discuss</a></td></tr>
+        </tbody></table>
+      `, { headers: { 'Content-Type': 'text/html' } }),
+    ];
+    const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      void input;
+      void init;
+      return Promise.resolve(responses.shift()!);
+    });
+    vi.stubGlobal('fetch', fetchMock);
+    const onItems = vi.fn();
+    const adapter = new HackerNewsAdapter(onItems);
+    const initialUrl = window.location.href;
+    adapter.init();
+
+    await expect(adapter.requestMore()).resolves.toEqual({
+      kind: 'loaded',
+      added: 1,
+      hasMore: true,
+    });
+    expect(window.location.href).toBe(initialUrl);
+    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(String(fetchMock.mock.calls[0]?.[0])).toBe('http://localhost:3000/?p=2');
+    expect(onItems).toHaveBeenLastCalledWith([
+      expect.objectContaining({
+        id: 'hacker-news_43876544',
+        originalUrl: 'http://localhost:3000/item?id=43876544',
+        sequence: 31,
+      }),
+    ]);
+
+    await expect(adapter.requestMore()).resolves.toEqual({
+      kind: 'loaded',
+      added: 1,
+      hasMore: false,
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(String(fetchMock.mock.calls[1]?.[0])).toBe('http://localhost:3000/?p=3');
+    expect(onItems).toHaveBeenLastCalledWith([
+      expect.objectContaining({
+        id: 'hacker-news_43876545',
+        sequence: 61,
+      }),
+    ]);
+    adapter.disconnect();
   });
 });

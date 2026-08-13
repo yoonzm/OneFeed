@@ -470,9 +470,9 @@ export class WeiboAdapter extends BaseAdapter {
     return triggerWeiboAction(this.getRuntimeElement(itemId), actionId);
   }
 
-  protected override getCards(): Element[] {
+  protected override getCards(root: ParentNode): Element[] {
     // 引用微博可能复用卡片结构，只将最外层 Feed 卡片注册为独立项目。
-    return super.getCards().filter((card) => !card.parentElement?.closest(CARD_SELECTOR));
+    return super.getCards(root).filter((card) => !card.parentElement?.closest(CARD_SELECTOR));
   }
 }
 
