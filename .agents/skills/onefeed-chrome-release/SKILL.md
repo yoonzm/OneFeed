@@ -7,6 +7,11 @@ description: Publish the next OneFeed patch release to the Chrome Web Store by d
 
 Operate only on the repository that contains this skill. Resolve the repository root with Git, then verify `package.json` has `name: onefeed` and `origin` points to `yoonzm/OneFeed`.
 
+## Runtime requirement
+
+- This release workflow supports Node.js 20 or newer. Node.js 22 is preferred but is not required.
+- Do not treat an `engines` warning caused solely by running Node.js 20 as a release blocker. The verification commands below must still complete successfully.
+
 ## Choose the mode
 
 - Treat an explicit `$onefeed-chrome-release` invocation with no additional instruction as authorization to publish the next patch version.
