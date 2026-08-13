@@ -36,6 +36,15 @@ describe('PlatformBar feed channels', () => {
       />,
     ));
 
+    const activePlatformLink = container.querySelector<HTMLAnchorElement>(
+      'a[aria-current="page"]',
+    );
+    const activeChannelLabel = activePlatformLink?.querySelector<HTMLElement>(
+      '[data-onefeed-channel-label="true"]',
+    );
+    expect(activeChannelLabel?.textContent).toBe('推荐');
+    expect(activeChannelLabel?.className).toContain('text-[8px]');
+
     const trigger = container.querySelector<HTMLButtonElement>(
       'button[aria-label="切换知乎频道，当前推荐"]',
     );

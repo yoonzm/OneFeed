@@ -1,3 +1,4 @@
+import { CaretDown, Check } from '@phosphor-icons/react';
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import {
   getPlannedPlatforms,
@@ -116,20 +117,32 @@ export function PlatformBar({
 
   const renderSupportedLinks = (mobile = false) => supportedPlatforms.map((platform) => {
     const active = platform.id === activePlatformId;
+    const showDesktopChannelControl = active && !mobile && channels.length > 1;
     const platformLink = (
       <a
-        className={`${mobile ? mobileItemClass : desktopItemClass} ${
+        className={`${mobile ? mobileItemClass : desktopItemClass} ${showDesktopChannelControl ? 'flex-col gap-[3px] pr-1.5' : ''} ${
           active
             ? mobile
               ? 'font-onefeed-emphasis text-onefeed-blue'
-              : "font-onefeed-emphasis text-onefeed-blue after:absolute after:right-2 after:bottom-[-1px] after:left-2 after:h-0.5 after:bg-onefeed-blue after:content-['']"
+              : showDesktopChannelControl
+                ? "font-onefeed-emphasis text-onefeed-blue after:absolute after:right-1 after:bottom-[-1px] after:left-2 after:h-0.5 after:bg-onefeed-blue after:content-['']"
+                : "font-onefeed-emphasis text-onefeed-blue after:absolute after:right-2 after:bottom-[-1px] after:left-2 after:h-0.5 after:bg-onefeed-blue after:content-['']"
             : 'text-onefeed-muted hover:text-onefeed-blue'
         }`}
         href={platform.homeUrl}
         aria-current={active ? 'page' : undefined}
         onClick={(event) => handleSupportedClick(event, platform)}
       >
-        <span>{platform.name}</span>
+        <span className={showDesktopChannelControl ? 'leading-none' : undefined}>{platform.name}</span>
+        {showDesktopChannelControl && activeChannel && (
+          <span
+            data-onefeed-channel-label="true"
+            className="max-w-[62px] overflow-hidden text-ellipsis text-[8px] leading-none font-normal tracking-[.04em] whitespace-nowrap text-onefeed-muted"
+            aria-hidden="true"
+          >
+            {activeChannel.label}
+          </span>
+        )}
         {mobile && active && activeChannel && (
           <span className="text-[10px] font-normal text-onefeed-muted">
             {activeChannel.label}
@@ -151,7 +164,7 @@ export function PlatformBar({
         {platformLink}
         <button
           ref={channelButtonRef}
-          className="my-auto mr-1 -ml-1 inline-flex h-6 max-w-[82px] cursor-pointer items-center gap-1 rounded-[3px] border border-onefeed-line bg-onefeed-surface px-1.5 text-[9px] leading-none text-onefeed-muted hover:border-onefeed-line-strong hover:text-onefeed-blue focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-onefeed-focus"
+          className="mr-1 inline-flex w-5 cursor-pointer items-center justify-center self-stretch border-0 bg-transparent p-0 text-onefeed-blue transition-colors hover:text-onefeed-ink focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-onefeed-focus"
           type="button"
           aria-label={`切换${platform.name}频道，当前${activeChannel?.label || '未识别'}`}
           aria-haspopup="menu"
@@ -159,22 +172,26 @@ export function PlatformBar({
           aria-controls="onefeed-channel-menu"
           onClick={() => setChannelMenuOpen((open) => !open)}
         >
-          <span className="truncate">{activeChannel?.label || '频道'}</span>
-          <span className="text-[8px]" aria-hidden="true">⌄</span>
+          <CaretDown
+            className={`transition-transform ${channelMenuOpen ? 'rotate-180' : ''}`}
+            size={9}
+            weight="bold"
+            aria-hidden="true"
+          />
         </button>
         {channelMenuOpen && (
           <span
             id="onefeed-channel-menu"
-            className="absolute top-[46px] left-1/2 z-30 grid min-w-36 -translate-x-1/2 overflow-hidden rounded-[4px] border border-onefeed-line bg-onefeed-surface p-1 shadow-[0_12px_32px_rgb(15_22_34_/_16%)]"
+            className="absolute top-[58px] left-2 z-30 grid min-w-[116px] overflow-hidden rounded-[4px] border border-onefeed-line bg-onefeed-surface p-1 shadow-[0_12px_32px_rgb(15_22_34_/_16%)]"
             role="menu"
             aria-label={`${platform.name}信息流频道`}
           >
             {channels.map((channel) => (
               <button
                 key={channel.id}
-                className={`flex min-h-9 cursor-pointer items-center justify-between gap-4 rounded-[2px] border-0 px-2.5 text-left text-[11px] focus-visible:outline-3 focus-visible:outline-offset-[-2px] focus-visible:outline-onefeed-focus ${
+                className={`flex min-h-8 cursor-pointer items-center justify-between gap-4 rounded-[2px] border-0 px-2.5 text-left text-[11px] focus-visible:outline-3 focus-visible:outline-offset-[-2px] focus-visible:outline-onefeed-focus ${
                   channel.active
-                    ? 'bg-onefeed-blue-soft font-onefeed-emphasis text-onefeed-blue'
+                    ? 'bg-transparent font-onefeed-emphasis text-onefeed-blue'
                     : 'bg-transparent text-onefeed-muted hover:bg-onefeed-paper hover:text-onefeed-blue'
                 }`}
                 type="button"
@@ -183,7 +200,7 @@ export function PlatformBar({
                 onClick={() => handleChannelSelect(channel)}
               >
                 <span>{channel.label}</span>
-                {channel.active && <span aria-hidden="true">•</span>}
+                {channel.active && <Check size={11} weight="bold" aria-hidden="true" />}
               </button>
             ))}
           </span>

@@ -72,6 +72,8 @@ describe('reader app shells', () => {
     );
 
     expect(markup).toContain('切换知乎频道，当前推荐');
+    expect(markup).toContain('data-onefeed-channel-label="true"');
+    expect(markup).toContain('text-[8px]');
     expect(markup).not.toContain('href="https://www.zhihu.com/hot"');
   });
 });
