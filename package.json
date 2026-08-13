@@ -2,7 +2,7 @@
   "name": "onefeed",
   "description": "将受支持网站的信息流重新排版为专注、统一、可控的阅读体验。",
   "private": true,
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "module",
   "engines": {
     "node": ">=22"
