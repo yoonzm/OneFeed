@@ -308,6 +308,9 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .empty-state small { color: var(--muted); font-size: 12px; }
 .scan-mark { width: 42px; height: 42px; margin: auto; border: 1px solid var(--line); border-top-color: var(--blue); animation: scan 900ms linear infinite; }
 .reader-footer { padding: 42px 0 10px; color: var(--muted); text-align: center; font-size: 11px; letter-spacing: .08em; }
+.reader-footer button { padding: 0; border: 0; color: inherit; background: transparent; font: inherit; letter-spacing: inherit; cursor: pointer; }
+.reader-footer button:hover { color: var(--blue); }
+.feed-load-sentinel { display: block; width: 1px; height: 1px; }
 
 button:focus-visible, a:focus-visible { outline: 3px solid var(--color-onefeed-focus); outline-offset: 4px; }
 

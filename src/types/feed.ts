@@ -163,6 +163,12 @@ export interface FeedSource extends FeedSourceRef {
   homeUrl: string;
 }
 
+/** Feed Surface 请求下一批内容后的结果；Renderer 只消费状态，不感知站点加载机制。 */
+export type FeedLoadResult =
+  | { kind: 'loaded'; added: number; hasMore: boolean }
+  | { kind: 'exhausted' }
+  | { kind: 'failed'; retryable: boolean };
+
 /**
  * Feed Surface 与 Thread 条目共用的标准卡片模型。
  * 字段保持可序列化，使状态库、测试夹具和未来的持久化层无需理解原站 DOM。

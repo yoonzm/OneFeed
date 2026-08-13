@@ -30,6 +30,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 * **覆盖平台**：知乎、Twitter/X、V2EX、Linux DO。
 * **核心交付**：1 款 Notion 风格基础主题，打通 Feed Surface，并以知乎回答/专栏验证 Article Detail，以知乎问题、V2EX 主题和 Linux DO 话题验证 Thread Detail。
 * **安全回退**：浏览器工具栏图标与页面右侧常驻悬浮开关共同切换全局接管状态。暂停后立即卸载接管层并恢复原页面，初始化异常时自动回退，用户可随时重新开启；该状态不会在 Chrome 中禁用扩展本身。
+* **首次激活**：首次安装后自动打开扩展内欢迎页，通过安装成功反馈、产品愿景、可点击的平台目录、三步使用说明、核心能力和本地隐私承诺，引导用户前往无需登录的 Hacker News 立即体验。欢迎页只在首次安装时出现，扩展升级不主动打断用户。
 * **交付顺序**：`0.1.0` 先交付知乎完整链路，后续迭代已通过统一 Adapter 注册契约接入 Twitter/X、V2EX 与 Linux DO，并将 V2EX、Linux DO 社区主题纳入 Thread Detail；单平台首发用于降低同时调试多个动态 DOM 的风险，社区列表与详情适配继续验证该契约的扩展能力。
 * **工程基础**：使用 WXT 的文件式入口、Manifest 生成、开发加载和发布打包能力承载扩展工程，为后续按浏览器生成独立构建保留统一入口。
 * **扩展边界**：Feed、Article Detail 与 Thread Detail 共享 Block、内容角色、作者、指标和操作描述，但使用独立顶层模型与 Renderer。新增路由通过完整 URL 注册到对应 Surface；未支持路由不得被域名级兜底接管。
@@ -82,12 +83,14 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 | **基础能力（已完成）** | 完成 Schema、Surface 与 Renderer 解耦 | 知乎、Twitter/X、V2EX、Linux DO | `FeedItem`/`ArticleDetail`/`ThreadDetail` 可序列化；URL 路由互斥；SPA 切换清理旧 Surface；Block Registry 与 Action Bar 跨 Surface 复用 |
 | **2.1 微博适配（已完成）** | 扩展国内开放社交覆盖 | 微博 | 图文、视频、引用、转发原因、互动数据、原站操作代理与无限加载 |
 | **2.2 小红书适配（已完成）** | 验证高密度视觉内容 | 小红书 | 发现页图文/视频封面、媒体比例、点赞代理、收藏/原文回退与非标准卡片降级 |
-| **2.3 哔哩哔哩适配** | 验证媒体 Block 与播放器代理 | 哔哩哔哩 | 首页与动态 Feed、封面、时长、播放量、原生播放器 Portal 与回退 |
-| **2.4 YouTube 适配** | 验证海外视频 Feed 与播放器代理 | YouTube | 首页 Home Feed、封面、时长、观看量、原生播放器 Portal 与回退 |
-| **2.5 社区与开放社交扩展** | 继续验证 `discussion` 与复杂 `post` 通用性 | Reddit、Hacker News、Mastodon、Bluesky | 社区/标签、回复、投票、内容警告、可见范围和链接卡片 |
-| **2.6 内容订阅扩展** | 验证文章与开放订阅源 | RSS/Atom、Medium、Substack、WordPress | Feed 摘要与 Detail/RSS 全文独立解析；作者与来源、发布时间、已读/稍后读和重复文章处理 |
+| **2.3 Hacker News 适配（已完成）** | 验证轻量社区列表与 HTML 文档分页 | Hacker News | News/Newest/Front/Best/Ask/Show/Jobs 列表、More 连续分页、分数与评论、赞同代理和详情原页回退 |
+| **2.4 Reddit 适配（已完成）** | 验证海外社区 Feed 与 Shreddit Web Component | Reddit | 首页与社区 Feed、文本/外链/图片/视频封面、社区和作者上下文、分数与评论、赞同代理；帖子详情分阶段接入 |
+| **2.5 哔哩哔哩适配** | 验证媒体 Block 与播放器代理 | 哔哩哔哩 | 首页与动态 Feed、封面、时长、播放量、原生播放器 Portal 与回退 |
+| **2.6 YouTube 适配** | 验证海外视频 Feed 与播放器代理 | YouTube | 首页 Home Feed、封面、时长、观看量、原生播放器 Portal 与回退 |
+| **2.7 社区与开放社交扩展** | 继续验证 `discussion` 与复杂 `post` 通用性 | Mastodon、Bluesky、Reddit 帖子详情 | 标签、回复、内容警告、可见范围、链接卡片与 Thread Detail |
+| **2.8 内容订阅扩展** | 验证文章与开放订阅源 | RSS/Atom、Medium、Substack、WordPress | Feed 摘要与 Detail/RSS 全文独立解析；作者与来源、发布时间、已读/稍后读和重复文章处理 |
 
-Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准。微博与小红书已完成首轮适配，后续交付顺序固定为哔哩哔哩、YouTube、Reddit；其他平台按真实用户需求、目标站点政策和 Adapter 维护成本逐步进入正式支持，不以 Schema 理论覆盖数冒充已交付平台数。平台支持状态和适配进度以 README 为准。
+Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准。微博、小红书、Hacker News 与 Reddit 列表 Feed 已完成首轮适配，剩余计划平台依次为哔哩哔哩、YouTube；其他平台按真实用户需求、目标站点政策和 Adapter 维护成本逐步进入正式支持，不以 Schema 理论覆盖数冒充已交付平台数。平台支持状态和适配进度以 README 为准。
 
 建模依据包括 [ActivityStreams 2.0](https://www.w3.org/TR/activitystreams-core/)、[Mastodon Status](https://docs.joinmastodon.org/entities/Status/)、[Bluesky Posts](https://docs.bsky.app/docs/advanced-guides/posts)、[Reddit Post](https://developers.reddit.com/docs/api/redditapi/models/classes/Post)、[Hacker News API](https://github.com/HackerNews/API)、[LinkedIn Posts API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api)、[YouTube Video](https://developers.google.com/youtube/v3/docs/videos)、[Twitch API](https://dev.twitch.tv/docs/api/reference/) 与 [Atom RFC 4287](https://www.rfc-editor.org/rfc/rfc4287)。
 
@@ -107,7 +110,7 @@ Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准。微博与小红�
 #### 4. 架构优化与交互代理
 * **SPA Surface 生命周期**：使用 WXT 路由事件按完整 URL 识别页面，依次销毁旧 Adapter/Store/Renderer、恢复原 DOM，再挂载新 Surface；hash-only 跳转不重建页面。Article/Thread Detail 只有在 URL 对应的目标节点解析成功后才遮罩原页，避免 DOM 延迟或规则失效造成空白详情。
 * **视频播放器节点搬运 (Portal)**：对于 B站/YouTube 视频，通过 DOM `appendChild` 将原平台的播放器节点无缝“移驾”到新 UI 卡片中，保留原生播放状态与清晰度选项。
-* **触底加载同步 (Scroll Synchronization)**：当用户在新 UI 滚动到底部时，自动向被隐藏的原 DOM 派发滚动事件，实现无缝无限翻页。
+* **统一触底加载 (Feed Loading)**：Feed Surface 接近底部时统一向 Adapter 请求下一批内容；Adapter 可驱动被隐藏的原页面滚动、点击同文档加载控件，或抓取并离线解析同源 HTML 下一页。文档分页使用单请求锁、稳定 ID 去重、失败重试和卸载终止，避免整页导航清空当前阅读进度。
 
 ---
 

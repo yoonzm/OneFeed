@@ -136,7 +136,13 @@ function mount(
     activeAdapter.adapter.init();
     root.render(
       activeAdapter.surface === 'feed'
-        ? <FeedApp {...sharedProps} activePlatformId={activeAdapter.source.id} />
+        ? (
+            <FeedApp
+              {...sharedProps}
+              activePlatformId={activeAdapter.source.id}
+              onLoadMore={() => activeAdapter.adapter.requestMore()}
+            />
+          )
         : (
             <DetailApp
               {...sharedProps}

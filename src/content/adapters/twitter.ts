@@ -191,8 +191,8 @@ export class TwitterAdapter extends BaseAdapter {
     return triggerTwitterAction(this.getRuntimeElement(itemId), actionId);
   }
 
-  protected override getCards(): Element[] {
-    return super.getCards()
+  protected override getCards(root: ParentNode): Element[] {
+    return super.getCards(root)
       .filter((card) => !card.parentElement?.closest(CARD_SELECTOR));
   }
 }
