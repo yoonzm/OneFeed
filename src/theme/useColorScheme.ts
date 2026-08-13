@@ -10,9 +10,16 @@ export function normalizeColorScheme(value: unknown): ColorScheme {
 
 export function useColorScheme(initialColorScheme = DEFAULT_COLOR_SCHEME) {
   const [colorScheme, setColorSchemeState] = useState<ColorScheme>(initialColorScheme);
-  const [ready, setReady] = useState(false);
+  const [ready, setReady] = useState(() => (
+    typeof chrome === 'undefined' || !chrome.storage
+  ));
 
   useEffect(() => {
+    const storage = typeof chrome === 'undefined' || !chrome.storage
+      ? undefined
+      : chrome.storage;
+    if (!storage) return;
+
     let active = true;
     const handleStorageChange = (
       changes: Record<string, chrome.storage.StorageChange>,
@@ -22,7 +29,7 @@ export function useColorScheme(initialColorScheme = DEFAULT_COLOR_SCHEME) {
       setColorSchemeState(normalizeColorScheme(changes.colorScheme.newValue));
     };
 
-    chrome.storage.local.get(
+    storage.local.get(
       { colorScheme: initialColorScheme },
       ({ colorScheme: storedColorScheme }) => {
         if (!active) return;
@@ -30,17 +37,19 @@ export function useColorScheme(initialColorScheme = DEFAULT_COLOR_SCHEME) {
         setReady(true);
       },
     );
-    chrome.storage.onChanged.addListener(handleStorageChange);
+    storage.onChanged.addListener(handleStorageChange);
 
     return () => {
       active = false;
-      chrome.storage.onChanged.removeListener(handleStorageChange);
+      storage.onChanged.removeListener(handleStorageChange);
     };
   }, [initialColorScheme]);
 
   const setColorScheme = useCallback((nextColorScheme: ColorScheme) => {
     setColorSchemeState(nextColorScheme);
-    chrome.storage.local.set({ colorScheme: nextColorScheme });
+    if (typeof chrome !== 'undefined' && chrome.storage) {
+      chrome.storage.local.set({ colorScheme: nextColorScheme });
+    }
   }, []);
 
   return { colorScheme, ready, setColorScheme };

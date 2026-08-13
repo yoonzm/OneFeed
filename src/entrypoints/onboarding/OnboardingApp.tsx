@@ -1,75 +1,9 @@
-import { getPlatformById, type PlatformId } from '../../config/platforms';
+import { PLATFORM_PRESENTATIONS } from '../../config/platformPresentation';
+import { getPlatformById } from '../../config/platforms';
 import type { CSSProperties } from 'react';
 
 const GITHUB_URL = 'https://github.com/yoonzm/OneFeed';
 const ISSUE_URL = `${GITHUB_URL}/issues`;
-
-interface PlatformIntro {
-  id: PlatformId;
-  mark: string;
-  scope: string;
-  access: string;
-  accent: string;
-}
-
-const platformIntros: PlatformIntro[] = [
-  {
-    id: 'zhihu',
-    mark: '知',
-    scope: '首页、热榜、问题与文章',
-    access: '部分页面需登录',
-    accent: '#1677ff',
-  },
-  {
-    id: 'twitter',
-    mark: 'X',
-    scope: 'Home Feed',
-    access: '需要平台账号',
-    accent: '#18202b',
-  },
-  {
-    id: 'v2ex',
-    mark: 'V2',
-    scope: '首页、最近主题与主题详情',
-    access: '无需登录即可体验',
-    accent: '#77889a',
-  },
-  {
-    id: 'linux-do',
-    mark: 'LD',
-    scope: '话题列表与话题详情',
-    access: '部分内容需登录',
-    accent: '#0f8a6a',
-  },
-  {
-    id: 'weibo',
-    mark: '微',
-    scope: '首页、关注与热门信息流',
-    access: '需要平台账号',
-    accent: '#e14a3b',
-  },
-  {
-    id: 'xiaohongshu',
-    mark: '红',
-    scope: '发现页基础笔记 Feed',
-    access: '部分内容需登录',
-    accent: '#ff2442',
-  },
-  {
-    id: 'hacker-news',
-    mark: 'Y',
-    scope: 'News、Newest、Ask、Show 与 Jobs',
-    access: '无需登录即可体验',
-    accent: '#ff6600',
-  },
-  {
-    id: 'reddit',
-    mark: 'R',
-    scope: '首页与社区 Feed',
-    access: '部分内容需登录',
-    accent: '#ff4500',
-  },
-];
 
 const steps = [
   {
@@ -85,7 +19,7 @@ const steps = [
   {
     number: '03',
     title: '随时切回原页',
-    description: '点击页面右侧开关，或点击浏览器工具栏图标，即刻暂停接管。',
+    description: '点击页面右侧开关，或在启动中心关闭总开关，即刻暂停接管。',
   },
 ];
 
@@ -218,7 +152,7 @@ export function OnboardingApp() {
             </div>
             <div>
               <strong>建议将 OneFeed 固定到工具栏</strong>
-              <p>打开 Chrome 的扩展菜单，找到 OneFeed 并点击固定。之后可随时一键暂停或开启。</p>
+              <p>打开 Chrome 的扩展菜单，找到 OneFeed 并点击固定。之后点图标即可打开启动中心。</p>
             </div>
           </aside>
         </section>
@@ -232,7 +166,7 @@ export function OnboardingApp() {
             <p className="section-note">点击任一网站即可前往；OneFeed 只在已适配的页面上接管界面。</p>
           </div>
           <div className="platform-grid">
-            {platformIntros.map((intro) => {
+            {PLATFORM_PRESENTATIONS.map((intro) => {
               const platform = getPlatformById(intro.id)!;
               return (
                 <a
@@ -281,7 +215,7 @@ export function OnboardingApp() {
                 <i><b /></i>
               </div>
               <p className="control-description">
-                页面右侧悬浮开关与工具栏图标使用同一状态。暂停后，原页面会立即恢复。
+                页面右侧悬浮开关与启动中心总开关使用同一状态。暂停后，原页面会立即恢复。
               </p>
             </aside>
           </div>

@@ -26,7 +26,7 @@ export default defineConfig({
         16: 'icons/icon-16.png',
         32: 'icons/icon-32.png',
       },
-      default_title: 'OneFeed 已开启，点击暂停',
+      default_title: '打开 OneFeed 启动中心（已开启）',
     },
   },
 });
