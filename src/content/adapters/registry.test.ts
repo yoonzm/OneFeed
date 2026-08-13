@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { getSupportedPlatforms } from '../../config/platforms';
 import { createAdapter, getRegisteredPlatformIds, isSupportedUrl } from './registry';
+import { HackerNewsAdapter } from './hackerNews';
 import { LinuxDoAdapter } from './linuxDo';
 import { LinuxDoThreadAdapter } from './linuxDoThread';
 import { TwitterAdapter } from './twitter';
@@ -68,6 +69,11 @@ describe('createAdapter', () => {
       adapter: expect.any(XiaohongshuAdapter),
       source: { id: 'xiaohongshu', name: '小红书' },
     });
+    expect(createAdapter(new URL('https://news.ycombinator.com/best'), listeners())).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(HackerNewsAdapter),
+      source: { id: 'hacker-news', name: 'Hacker News' },
+    });
   });
 
   it('prioritizes supported Zhihu detail routes', () => {
@@ -129,6 +135,8 @@ describe('createAdapter', () => {
     expect(createAdapter(new URL('https://creator.xiaohongshu.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://www.zhihu.com/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://news.ycombinator.com/item?id=43876543'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://news.ycombinator.com.example.com/news'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do.example.com/latest'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://example.com/'), listeners())).toBeNull();
   });
@@ -140,5 +148,7 @@ describe('createAdapter', () => {
     expect(isSupportedUrl(new URL('https://weibo.com/mygroups?gid=11000'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore/note-id'))).toBe(false);
+    expect(isSupportedUrl(new URL('https://news.ycombinator.com/news'))).toBe(true);
+    expect(isSupportedUrl(new URL('https://news.ycombinator.com/item?id=43876543'))).toBe(false);
   });
 });

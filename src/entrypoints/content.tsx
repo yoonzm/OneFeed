@@ -17,6 +17,7 @@ export default defineContentScript({
     'https://*.weibo.com/*',
     'https://xiaohongshu.com/*',
     'https://*.xiaohongshu.com/*',
+    'https://news.ycombinator.com/*',
   ],
   runAt: 'document_start',
   main(ctx) {

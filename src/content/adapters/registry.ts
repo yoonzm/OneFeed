@@ -2,6 +2,7 @@ import type { DetailContent } from '../../types/detail';
 import type { FeedSource } from '../../types/feed';
 import { type AdapterDefinition, BaseAdapter, type FeedItemsListener } from './base';
 import type { DetailAdapter, DetailAdapterDefinition } from './detail';
+import { hackerNewsAdapterDefinition } from './hackerNews';
 import { linuxDoAdapterDefinition } from './linuxDo';
 import { linuxDoThreadAdapterDefinition } from './linuxDoThread';
 import { twitterAdapterDefinition } from './twitter';
@@ -20,6 +21,7 @@ const feedAdapterDefinitions: AdapterDefinition[] = [
   linuxDoAdapterDefinition,
   weiboAdapterDefinition,
   xiaohongshuAdapterDefinition,
+  hackerNewsAdapterDefinition,
 ];
 
 const detailAdapterDefinitions: DetailAdapterDefinition[] = [

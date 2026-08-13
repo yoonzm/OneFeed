@@ -15,6 +15,7 @@ describe('platform catalog', () => {
       'Linux DO',
       '微博',
       '小红书',
+      'Hacker News',
     ]);
     expect(getPlannedPlatforms().map((platform) => [
       platform.name,
@@ -40,7 +41,9 @@ describe('platform catalog', () => {
     expect(getPlatformForUrl('https://linux.do/latest')?.id).toBe('linux-do');
     expect(getPlatformForUrl('https://www.weibo.com/hot/weibo/102803')?.id).toBe('weibo');
     expect(getPlatformForUrl('https://www.xiaohongshu.com/explore')?.id).toBe('xiaohongshu');
+    expect(getPlatformForUrl('https://news.ycombinator.com/newest')?.id).toBe('hacker-news');
     expect(getPlatformForUrl('https://linux.do.example.com/')).toBeUndefined();
+    expect(getPlatformForUrl('https://news.ycombinator.com.example.com/')).toBeUndefined();
     expect(getPlatformForUrl('not-a-url')).toBeUndefined();
   });
 });
