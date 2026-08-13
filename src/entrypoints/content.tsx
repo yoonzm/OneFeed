@@ -18,6 +18,8 @@ export default defineContentScript({
     'https://xiaohongshu.com/*',
     'https://*.xiaohongshu.com/*',
     'https://news.ycombinator.com/*',
+    'https://reddit.com/*',
+    'https://*.reddit.com/*',
   ],
   runAt: 'document_start',
   main(ctx) {

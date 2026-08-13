@@ -72,12 +72,21 @@ export const HACKER_NEWS_PLATFORM = {
   hosts: ['news.ycombinator.com'],
 } as const satisfies PlatformDefinition;
 
+export const REDDIT_PLATFORM = {
+  id: 'reddit',
+  name: 'Reddit',
+  homeUrl: 'https://www.reddit.com/',
+  status: 'supported',
+  navOrder: 8,
+  hosts: ['reddit.com', 'redd.it'],
+} as const satisfies PlatformDefinition;
+
 export const BILIBILI_PLATFORM = {
   id: 'bilibili',
   name: '哔哩哔哩',
   homeUrl: 'https://www.bilibili.com/',
   status: 'planned',
-  navOrder: 8,
+  navOrder: 9,
   plannedOrder: 1,
   hosts: ['bilibili.com'],
 } as const satisfies PlatformDefinition;
@@ -87,19 +96,9 @@ export const YOUTUBE_PLATFORM = {
   name: 'YouTube',
   homeUrl: 'https://www.youtube.com/',
   status: 'planned',
-  navOrder: 9,
+  navOrder: 10,
   plannedOrder: 2,
   hosts: ['youtube.com', 'youtu.be'],
-} as const satisfies PlatformDefinition;
-
-export const REDDIT_PLATFORM = {
-  id: 'reddit',
-  name: 'Reddit',
-  homeUrl: 'https://www.reddit.com/',
-  status: 'planned',
-  navOrder: 10,
-  plannedOrder: 3,
-  hosts: ['reddit.com', 'redd.it'],
 } as const satisfies PlatformDefinition;
 
 /** 页面导航和适配器共享此目录，避免平台状态与入口地址分别维护。 */
@@ -111,9 +110,9 @@ export const PLATFORM_CATALOG = [
   WEIBO_PLATFORM,
   XIAOHONGSHU_PLATFORM,
   HACKER_NEWS_PLATFORM,
+  REDDIT_PLATFORM,
   BILIBILI_PLATFORM,
   YOUTUBE_PLATFORM,
-  REDDIT_PLATFORM,
 ] as const satisfies readonly PlatformDefinition[];
 
 export type PlatformId = (typeof PLATFORM_CATALOG)[number]['id'];

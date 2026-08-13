@@ -32,6 +32,7 @@ OneFeed 是一个面向 Web 信息流的浏览器扩展项目。它希望将不�
 | 微博 | 首页、关注与热门信息流；图文、视频、引用微博与基础互动 | ✅ 已支持 |
 | 小红书 | 发现页基础笔记 Feed；图文/视频封面、媒体比例、点赞代理与收藏原页回退 | ✅ 已支持 |
 | Hacker News | News、Newest、Front、Best、Ask、Show 与 Jobs 列表；More 连续分页、分数、评论与赞同代理 | ✅ 已支持 |
+| Reddit | 首页与社区 Feed；文本、外链、图片和视频封面帖子，社区/作者/分数/评论与赞同代理 | ✅ 已支持 |
 
 ### 待支持
 
@@ -39,7 +40,6 @@ OneFeed 是一个面向 Web 信息流的浏览器扩展项目。它希望将不�
 | :---: | :--- | :--- | :--- |
 | 1 | 哔哩哔哩 | 首页与动态 Feed、视频卡片；播放器能力分阶段接入 | ⬜ 待适配 |
 | 2 | YouTube | 首页 Home Feed 与视频卡片；播放器能力分阶段接入 | ⬜ 待适配 |
-| 3 | Reddit | 首页与社区 Feed、文本/链接/媒体帖子；帖子详情与评论分阶段接入 | ⬜ 待适配 |
 
 ## 长期愿景
 
@@ -65,7 +65,7 @@ npm test
 npm run lint
 ```
 
-`npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页、X Home Feed、V2EX 首页、Linux DO 话题列表、微博首页、小红书发现页或 Hacker News 列表页后，扩展会将信息流替换为 Focus Paper 阅读界面；知乎问题、V2EX 主题与 Linux DO 话题使用 Thread Detail，知乎独立回答与专栏文章使用 Article Detail。OneFeed 页面顶部会展示已支持与待支持平台，并提供 GitHub 入口与浅色/深色外观切换；点击浏览器工具栏中的扩展图标可全局暂停或开启 OneFeed 接管，页面右侧悬浮开关也可随时切换同一状态。暂停接管不会在 Chrome 中禁用扩展本身。
+`npm run dev` 会通过 WXT 启动并自动加载开发版扩展。生产构建输出到 `.output/chrome-mv3/`，商店 ZIP 输出到 `.output/onefeed-<version>-chrome.zip`。手动验证时，可在 Chrome 的 `chrome://extensions` 中开启开发者模式，选择“加载已解压的扩展程序”，然后选择 `.output/chrome-mv3/`。打开知乎首页、X Home Feed、V2EX 首页、Linux DO 话题列表、微博首页、小红书发现页、Hacker News 列表页或 Reddit 首页/社区 Feed 后，扩展会将信息流替换为 Focus Paper 阅读界面；知乎问题、V2EX 主题与 Linux DO 话题使用 Thread Detail，知乎独立回答与专栏文章使用 Article Detail。OneFeed 页面顶部会展示已支持与待支持平台，并提供 GitHub 入口与浅色/深色外观切换；点击浏览器工具栏中的扩展图标可全局暂停或开启 OneFeed 接管，页面右侧悬浮开关也可随时切换同一状态。暂停接管不会在 Chrome 中禁用扩展本身。
 
 ## 样式开发
 

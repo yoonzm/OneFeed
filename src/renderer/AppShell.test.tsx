@@ -31,10 +31,11 @@ describe('reader app shells', () => {
     expect(markup).toContain('href="https://www.zhihu.com/"');
     expect(markup).toContain('aria-current="page"');
     expect(markup.indexOf('微博')).toBeLessThan(markup.indexOf('小红书'));
-    expect(markup.indexOf('小红书')).toBeLessThan(markup.indexOf('哔哩哔哩'));
+    expect(markup.indexOf('小红书')).toBeLessThan(markup.indexOf('Reddit'));
+    expect(markup.indexOf('Reddit')).toBeLessThan(markup.indexOf('哔哩哔哩'));
     expect(markup.indexOf('哔哩哔哩')).toBeLessThan(markup.indexOf('YouTube'));
-    expect(markup.indexOf('YouTube')).toBeLessThan(markup.indexOf('Reddit'));
-    expect(markup).toContain('aria-label="Reddit，敬请期待"');
+    expect(markup).toContain('href="https://www.reddit.com/"');
+    expect(markup).not.toContain('aria-label="Reddit，敬请期待"');
     expect(markup).toContain('title="敬请期待"');
     expect(markup).not.toContain('待支持 · 第');
   });

@@ -5,6 +5,7 @@ import type { DetailAdapter, DetailAdapterDefinition } from './detail';
 import { hackerNewsAdapterDefinition } from './hackerNews';
 import { linuxDoAdapterDefinition } from './linuxDo';
 import { linuxDoThreadAdapterDefinition } from './linuxDoThread';
+import { redditAdapterDefinition } from './reddit';
 import { twitterAdapterDefinition } from './twitter';
 import { v2exAdapterDefinition } from './v2ex';
 import { v2exThreadAdapterDefinition } from './v2exThread';
@@ -22,6 +23,7 @@ const feedAdapterDefinitions: AdapterDefinition[] = [
   weiboAdapterDefinition,
   xiaohongshuAdapterDefinition,
   hackerNewsAdapterDefinition,
+  redditAdapterDefinition,
 ];
 
 const detailAdapterDefinitions: DetailAdapterDefinition[] = [

@@ -83,12 +83,13 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 | **2.1 微博适配（已完成）** | 扩展国内开放社交覆盖 | 微博 | 图文、视频、引用、转发原因、互动数据、原站操作代理与无限加载 |
 | **2.2 小红书适配（已完成）** | 验证高密度视觉内容 | 小红书 | 发现页图文/视频封面、媒体比例、点赞代理、收藏/原文回退与非标准卡片降级 |
 | **2.3 Hacker News 适配（已完成）** | 验证轻量社区列表与 HTML 文档分页 | Hacker News | News/Newest/Front/Best/Ask/Show/Jobs 列表、More 连续分页、分数与评论、赞同代理和详情原页回退 |
-| **2.4 哔哩哔哩适配** | 验证媒体 Block 与播放器代理 | 哔哩哔哩 | 首页与动态 Feed、封面、时长、播放量、原生播放器 Portal 与回退 |
-| **2.5 YouTube 适配** | 验证海外视频 Feed 与播放器代理 | YouTube | 首页 Home Feed、封面、时长、观看量、原生播放器 Portal 与回退 |
-| **2.6 社区与开放社交扩展** | 继续验证 `discussion` 与复杂 `post` 通用性 | Reddit、Mastodon、Bluesky | 社区/标签、回复、投票、内容警告、可见范围和链接卡片 |
-| **2.7 内容订阅扩展** | 验证文章与开放订阅源 | RSS/Atom、Medium、Substack、WordPress | Feed 摘要与 Detail/RSS 全文独立解析；作者与来源、发布时间、已读/稍后读和重复文章处理 |
+| **2.4 Reddit 适配（已完成）** | 验证海外社区 Feed 与 Shreddit Web Component | Reddit | 首页与社区 Feed、文本/外链/图片/视频封面、社区和作者上下文、分数与评论、赞同代理；帖子详情分阶段接入 |
+| **2.5 哔哩哔哩适配** | 验证媒体 Block 与播放器代理 | 哔哩哔哩 | 首页与动态 Feed、封面、时长、播放量、原生播放器 Portal 与回退 |
+| **2.6 YouTube 适配** | 验证海外视频 Feed 与播放器代理 | YouTube | 首页 Home Feed、封面、时长、观看量、原生播放器 Portal 与回退 |
+| **2.7 社区与开放社交扩展** | 继续验证 `discussion` 与复杂 `post` 通用性 | Mastodon、Bluesky、Reddit 帖子详情 | 标签、回复、内容警告、可见范围、链接卡片与 Thread Detail |
+| **2.8 内容订阅扩展** | 验证文章与开放订阅源 | RSS/Atom、Medium、Substack、WordPress | Feed 摘要与 Detail/RSS 全文独立解析；作者与来源、发布时间、已读/稍后读和重复文章处理 |
 
-Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准。微博、小红书与 Hacker News 列表 Feed 已完成首轮适配，剩余计划平台依次为哔哩哔哩、YouTube、Reddit；其他平台按真实用户需求、目标站点政策和 Adapter 维护成本逐步进入正式支持，不以 Schema 理论覆盖数冒充已交付平台数。平台支持状态和适配进度以 README 为准。
+Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准。微博、小红书、Hacker News 与 Reddit 列表 Feed 已完成首轮适配，剩余计划平台依次为哔哩哔哩、YouTube；其他平台按真实用户需求、目标站点政策和 Adapter 维护成本逐步进入正式支持，不以 Schema 理论覆盖数冒充已交付平台数。平台支持状态和适配进度以 README 为准。
 
 建模依据包括 [ActivityStreams 2.0](https://www.w3.org/TR/activitystreams-core/)、[Mastodon Status](https://docs.joinmastodon.org/entities/Status/)、[Bluesky Posts](https://docs.bsky.app/docs/advanced-guides/posts)、[Reddit Post](https://developers.reddit.com/docs/api/redditapi/models/classes/Post)、[Hacker News API](https://github.com/HackerNews/API)、[LinkedIn Posts API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api)、[YouTube Video](https://developers.google.com/youtube/v3/docs/videos)、[Twitch API](https://dev.twitch.tv/docs/api/reference/) 与 [Atom RFC 4287](https://www.rfc-editor.org/rfc/rfc4287)。
 

@@ -4,6 +4,7 @@ import { createAdapter, getRegisteredPlatformIds, isSupportedUrl } from './regis
 import { HackerNewsAdapter } from './hackerNews';
 import { LinuxDoAdapter } from './linuxDo';
 import { LinuxDoThreadAdapter } from './linuxDoThread';
+import { RedditAdapter } from './reddit';
 import { TwitterAdapter } from './twitter';
 import { V2exAdapter } from './v2ex';
 import { V2exThreadAdapter } from './v2exThread';
@@ -74,6 +75,12 @@ describe('createAdapter', () => {
       adapter: expect.any(HackerNewsAdapter),
       source: { id: 'hacker-news', name: 'Hacker News' },
     });
+    expect(createAdapter(new URL('https://www.reddit.com/r/typescript/top/'), listeners()))
+      .toMatchObject({
+        surface: 'feed',
+        adapter: expect.any(RedditAdapter),
+        source: { id: 'reddit', name: 'Reddit' },
+      });
   });
 
   it('prioritizes supported Zhihu detail routes', () => {
@@ -136,6 +143,10 @@ describe('createAdapter', () => {
     expect(createAdapter(new URL('https://www.zhihu.com/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://news.ycombinator.com/item?id=43876543'), listeners())).toBeNull();
+    expect(createAdapter(
+      new URL('https://www.reddit.com/r/typescript/comments/abc123/post/'),
+      listeners(),
+    )).toBeNull();
     expect(createAdapter(new URL('https://news.ycombinator.com.example.com/news'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do.example.com/latest'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://example.com/'), listeners())).toBeNull();
@@ -150,5 +161,9 @@ describe('createAdapter', () => {
     expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore/note-id'))).toBe(false);
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/news'))).toBe(true);
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/item?id=43876543'))).toBe(false);
+    expect(isSupportedUrl(new URL('https://www.reddit.com/'))).toBe(true);
+    expect(isSupportedUrl(
+      new URL('https://www.reddit.com/r/typescript/comments/abc123/post/'),
+    )).toBe(false);
   });
 });
