@@ -41,6 +41,12 @@ OneFeed 是一个面向 Web 信息流的浏览器扩展项目。它希望将不�
 | 1 | 哔哩哔哩 | 首页与动态 Feed、视频卡片；播放器能力分阶段接入 | ⬜ 待适配 |
 | 2 | YouTube | 首页 Home Feed 与视频卡片；播放器能力分阶段接入 | ⬜ 待适配 |
 
+## 首次安装与使用
+
+首次安装 OneFeed 后，扩展会自动打开欢迎页，简要介绍产品愿景、当前支持的网站、核心功能与恢复原页面的方法。点击“打开 Hacker News 立即体验”可以在无需登录的公开信息流中直接查看 OneFeed 效果；也可以从欢迎页选择知乎、X、V2EX、Linux DO、微博、小红书、Hacker News 或 Reddit。
+
+进入已适配的页面后，OneFeed 会自动整理当前内容，不需要单独启动。点击页面右侧悬浮开关或浏览器工具栏中的 OneFeed 图标，可随时暂停接管并恢复原页面。欢迎页只在首次安装时自动打开，扩展升级不会重复打扰用户。首次安装体验的设计与维护约定见 [首次安装体验文档](docs/Onboarding_Experience_Document.md)。
+
 ## 长期愿景
 
 OneFeed 的长期愿景是成为跨平台信息流的通用浏览器入口与 AI 内容操作系统，让用户拥有三种关键能力：
@@ -79,3 +85,4 @@ npm run lint
 
 - [长期产品路线图](docs/Longterm_Roadmap_Document.md)
 - [市场竞品分析](docs/Competitor_Analysis_Document.md)
+- [首次安装体验](docs/Onboarding_Experience_Document.md)

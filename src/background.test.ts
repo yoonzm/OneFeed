@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 type ActionClickListener = () => void;
+type InstalledListener = (details: { reason: string }) => void;
 type StorageChangeListener = (
   changes: Record<string, { newValue?: unknown }>,
   areaName: string,
@@ -13,11 +14,13 @@ function createChromeMock(initialEnabled: boolean) {
     colorScheme: 'light',
   };
   let actionClickListener: ActionClickListener | undefined;
+  let installedListener: InstalledListener | undefined;
   let storageChangeListener: StorageChangeListener | undefined;
 
   const setTitle = vi.fn();
   const setBadgeText = vi.fn();
   const setBadgeBackgroundColor = vi.fn();
+  const createTab = vi.fn();
   const set = vi.fn((values: Record<string, boolean | string>) => {
     Object.assign(stored, values);
   });
@@ -34,8 +37,16 @@ function createChromeMock(initialEnabled: boolean) {
       setBadgeBackgroundColor,
     },
     runtime: {
-      onInstalled: { addListener: vi.fn() },
+      getURL: vi.fn((path: string) => `chrome-extension://onefeed${path}`),
+      onInstalled: {
+        addListener: vi.fn((listener: InstalledListener) => {
+          installedListener = listener;
+        }),
+      },
       onStartup: { addListener: vi.fn() },
+    },
+    tabs: {
+      create: createTab,
     },
     storage: {
       local: {
@@ -57,6 +68,8 @@ function createChromeMock(initialEnabled: boolean) {
 
   return {
     actionClick: () => actionClickListener?.(),
+    installed: (reason: string) => installedListener?.({ reason }),
+    createTab,
     storageChange: (enabled: boolean) => storageChangeListener?.(
       { enabled: { newValue: enabled } },
       'local',
@@ -111,5 +124,21 @@ describe('toolbar action state', () => {
       title: 'OneFeed 已开启，点击暂停',
     });
     expect(chromeMock.setBadgeText).toHaveBeenLastCalledWith({ text: '' });
+  });
+
+  it('opens onboarding only after a first install', async () => {
+    const chromeMock = createChromeMock(true);
+    await startBackground();
+
+    chromeMock.installed('install');
+
+    expect(chromeMock.createTab).toHaveBeenCalledWith({
+      url: 'chrome-extension://onefeed/onboarding.html',
+    });
+
+    chromeMock.createTab.mockClear();
+    chromeMock.installed('update');
+
+    expect(chromeMock.createTab).not.toHaveBeenCalled();
   });
 });

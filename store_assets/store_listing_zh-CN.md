@@ -10,11 +10,12 @@
 
 ## 详细说明
 
-OneFeed 面向多平台信息流，将受支持网站的内容转换为简洁、一致的 Focus Paper 阅读界面，帮助你减少页面噪音，把注意力留给内容本身。`0.1.3` 版本支持知乎、Twitter/X、V2EX、Linux DO、微博与小红书信息流。
+OneFeed 面向多平台信息流，将受支持网站的内容转换为简洁、一致的 Focus Paper 阅读界面，帮助你减少页面噪音，把注意力留给内容本身。`0.1.3` 版本支持知乎、Twitter/X、V2EX、Linux DO、微博、小红书、Hacker News 与 Reddit 信息流。
 
 当前版本提供：
 
-- 重新排版知乎、Twitter/X、V2EX、Linux DO、微博与小红书信息流，以及知乎问题/回答/专栏、V2EX 主题和 Linux DO 话题详情；
+- 首次安装后展示欢迎页，可直接打开无需登录的 Hacker News 体验 OneFeed；
+- 重新排版知乎、Twitter/X、V2EX、Linux DO、微博、小红书、Hacker News 与 Reddit 信息流，以及知乎问题/回答/专栏、V2EX 主题和 Linux DO 话题详情；
 - 统一展示标题、作者、正文摘要、图片和互动数量；
 - 支持图片预览，并代理或回退到原页面完成点赞、评论、收藏等互动；
 - 支持目标网站的信息流继续加载；
@@ -37,7 +38,7 @@ OneFeed 是独立开发的第三方扩展，与知乎、X Corp.、V2EX、Linux D
 
 ### 受支持网站访问
 
-对 `zhihu.com`、`x.com`、`twitter.com`、`v2ex.com`、`linux.do`、`weibo.com` 和 `xiaohongshu.com` 的访问权限，仅用于读取用户当前打开的受支持信息流、知乎问题/回答/专栏、V2EX 主题回复和 Linux DO 话题回复，生成统一阅读界面，并代理用户主动触发的原页面互动。扩展不会在这些受支持网站之外运行。
+对 `zhihu.com`、`x.com`、`twitter.com`、`v2ex.com`、`linux.do`、`weibo.com`、`xiaohongshu.com`、`news.ycombinator.com` 和 `reddit.com` 的访问权限，仅用于读取用户当前打开的受支持信息流、知乎问题/回答/专栏、V2EX 主题回复和 Linux DO 话题回复，生成统一阅读界面，并代理用户主动触发的原页面互动。扩展不会在这些受支持网站之外运行。
 
 ## 数据披露建议
 
@@ -51,12 +52,12 @@ OneFeed 是独立开发的第三方扩展，与知乎、X Corp.、V2EX、Linux D
 
 ## 测试说明
 
-1. 安装扩展并打开 `https://www.v2ex.com/`，该站点无需测试账号即可查看公开信息流。
-2. 扩展会将首页信息流显示为 Focus Paper 阅读界面。
+1. 首次安装后会自动打开 OneFeed 欢迎页，点击“打开 Hacker News 立即体验”可进入无需测试账号的公开信息流。
+2. 扩展会将 Hacker News 或 `https://www.v2ex.com/` 的首页信息流显示为 Focus Paper 阅读界面。
 3. 点击页面右侧的 OneFeed 悬浮开关，可立即恢复原页面。
 4. 点击 Chrome 工具栏中的 OneFeed 图标，可暂停或重新开启统一信息流。
 5. 滚动到列表底部，验证后续内容继续加载。
-6. 可另外使用审核人员自己的账号检查知乎、Twitter/X、Linux DO、微博或小红书信息流；无需向审核人员提供 OneFeed 账号或密码。
+6. 可另外使用审核人员自己的账号检查知乎、Twitter/X、Linux DO、微博、小红书或 Reddit 信息流；无需向审核人员提供 OneFeed 账号或密码。
 
 OneFeed 不提供或收集任何目标网站账号凭据。
 

@@ -21,7 +21,7 @@ function syncActionState(): void {
 export default defineBackground({
   type: 'module',
   main() {
-    chrome.runtime.onInstalled.addListener(() => {
+    chrome.runtime.onInstalled.addListener((details) => {
       chrome.storage.local.get(['enabled', 'theme', 'colorScheme'], (stored) => {
         const defaults: Record<string, boolean | string> = {};
         if (stored.enabled === undefined) defaults.enabled = true;
@@ -30,6 +30,11 @@ export default defineBackground({
         if (Object.keys(defaults).length) chrome.storage.local.set(defaults);
         updateActionState(stored.enabled !== false);
       });
+
+      /** 欢迎页只在首次安装时出现，扩展升级不应打断用户当前浏览。 */
+      if (details.reason === 'install') {
+        void chrome.tabs.create({ url: chrome.runtime.getURL('/onboarding.html') });
+      }
     });
 
     chrome.runtime.onStartup.addListener(syncActionState);
