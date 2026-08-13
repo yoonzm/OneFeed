@@ -1,5 +1,6 @@
 import { PLATFORM_PRESENTATIONS } from '../../config/platformPresentation';
 import { getPlatformById } from '../../config/platforms';
+import { DiaTextReveal } from '../../components/DiaTextReveal';
 import type { CSSProperties } from 'react';
 
 const GITHUB_URL = 'https://github.com/yoonzm/OneFeed';
@@ -68,7 +69,7 @@ export function OnboardingApp() {
       <header className="site-header">
         <a className="brand" href="#top" aria-label="OneFeed 欢迎页首页">
           <img src="/icons/icon-128.png" alt="" />
-          <span>OneFeed</span>
+          <DiaTextReveal text="OneFeed" />
         </a>
         <nav aria-label="欢迎页导航">
           <a href="#start">如何使用</a>

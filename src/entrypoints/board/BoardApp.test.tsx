@@ -38,6 +38,9 @@ describe('launch center', () => {
 
     await act(async () => root?.render(<BoardApp />));
 
+    const brandText = container.querySelector<HTMLElement>('.board-brand > span');
+    expect(brandText?.textContent).toBe('OneFeed');
+    expect(brandText?.style.backgroundClip).toBe('text');
     expect(container.querySelector('h1')?.textContent).toBe('继续上次的阅读。');
     expect(container.querySelector('.resume-platform strong')?.textContent).toBe('知乎');
     expect(container.querySelectorAll('.recent-row')).toHaveLength(2);

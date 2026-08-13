@@ -6,6 +6,7 @@ import {
   getSupportedPlatforms,
   type PlatformDefinition,
 } from '../../config/platforms';
+import { DiaTextReveal } from '../../components/DiaTextReveal';
 import type { ColorScheme } from '../../theme/useColorScheme';
 import type { FeedChannel } from '../../types/feed';
 import { GitHubLink } from './GitHubLink';
@@ -229,7 +230,7 @@ export function PlatformBar({
           className="inline-flex shrink-0 items-center font-onefeed-brand text-sm font-onefeed-emphasis tracking-[.03em] text-onefeed-ink no-underline focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-onefeed-focus"
           href={activePlatform?.homeUrl || '#'}
         >
-          OneFeed
+          <DiaTextReveal text="OneFeed" />
         </a>
 
         <nav className="flex min-w-0 items-stretch gap-1 max-[720px]:hidden" aria-label="切换平台">

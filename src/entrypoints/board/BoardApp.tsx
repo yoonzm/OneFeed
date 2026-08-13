@@ -15,6 +15,7 @@ import {
   getSupportedPlatforms,
   type PlatformId,
 } from '../../config/platforms';
+import { DiaTextReveal } from '../../components/DiaTextReveal';
 import { useColorScheme } from '../../theme/useColorScheme';
 import {
   DEFAULT_RECENT_PLATFORM_IDS,
@@ -120,7 +121,7 @@ export function BoardApp() {
       <header className="board-header">
         <a className="board-brand" href="#main" aria-label="OneFeed 启动中心首页">
           <img src="/icons/icon-128.png" alt="" />
-          <span>OneFeed</span>
+          <DiaTextReveal text="OneFeed" />
         </a>
 
         <div className="header-actions">
