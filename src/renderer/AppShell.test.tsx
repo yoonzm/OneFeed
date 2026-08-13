@@ -25,6 +25,7 @@ describe('reader app shells', () => {
     );
 
     expect(markup).toContain('OneFeed');
+    expect(markup).toContain('background-clip:text');
     expect(markup).toContain('aria-label="切换平台"');
     expect(markup).toContain('aria-label="切换到深色主题"');
     expect(markup).toContain('href="https://github.com/yoonzm/OneFeed"');
@@ -54,5 +55,26 @@ describe('reader app shells', () => {
     expect(markup).not.toContain('正在整理信息流');
     expect(markup).not.toContain('页面内容出现后');
     expect(markup).not.toContain('已读到这里');
+  });
+
+  it('places the current site channel control beside the active platform name', () => {
+    const markup = renderToStaticMarkup(
+      <FeedApp
+        activePlatformId="zhihu"
+        channels={[
+          { id: 'recommend', label: '推荐', active: true },
+          { id: 'hot', label: '热榜', active: false },
+        ]}
+        scrollElement={document.createElement('div')}
+        onAction={vi.fn(() => false)}
+        onFeedChannelSelect={vi.fn(() => true)}
+        onLoadMore={vi.fn(async () => ({ kind: 'exhausted' as const }))}
+      />,
+    );
+
+    expect(markup).toContain('切换知乎频道，当前推荐');
+    expect(markup).toContain('data-onefeed-channel-label="true"');
+    expect(markup).toContain('text-[8px]');
+    expect(markup).not.toContain('href="https://www.zhihu.com/hot"');
   });
 });

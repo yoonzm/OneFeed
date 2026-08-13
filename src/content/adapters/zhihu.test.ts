@@ -1,5 +1,30 @@
 import { describe, expect, it, vi } from 'vitest';
-import { parseCount, parseZhihuCard, triggerZhihuAction } from './zhihu';
+import {
+  parseCount,
+  parseZhihuCard,
+  triggerZhihuAction,
+  ZhihuAdapter,
+} from './zhihu';
+
+describe('ZhihuAdapter feed channels', () => {
+  it('reads top-story tabs, including tabs added by the site', () => {
+    document.body.innerHTML = `
+      <nav class="TopstoryTabs">
+        <button class="TopstoryTabs-link is-active" aria-selected="true">推荐</button>
+        <button class="TopstoryTabs-link">热榜</button>
+        <button class="TopstoryTabs-link">圆桌</button>
+      </nav>`;
+    const adapter = new ZhihuAdapter(vi.fn());
+    adapter.init();
+
+    expect(adapter.getFeedChannels().map(({ label, active }) => ({ label, active }))).toEqual([
+      { label: '推荐', active: true },
+      { label: '热榜', active: false },
+      { label: '圆桌', active: false },
+    ]);
+    adapter.disconnect();
+  });
+});
 
 describe('parseCount', () => {
   it('parses plain and abbreviated Chinese counts', () => {

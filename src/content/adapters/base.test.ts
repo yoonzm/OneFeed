@@ -1,6 +1,11 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { FeedItem } from '../../types/feed';
-import { BaseAdapter, type FeedPageContext } from './base';
+import {
+  BaseAdapter,
+  collectFeedChannelBindings,
+  type FeedPageContext,
+  type RuntimeFeedChannelBinding,
+} from './base';
 
 class TestAdapter extends BaseAdapter {
   protected readonly cardSelector = '[data-feed-card]';
@@ -68,12 +73,59 @@ class ControlTestAdapter extends TestAdapter {
   } as const;
 }
 
+class ChannelTestAdapter extends TestAdapter {
+  protected override getFeedChannelBindings(root: ParentNode): RuntimeFeedChannelBinding[] {
+    return collectFeedChannelBindings(
+      root,
+      '[data-feed-channel]',
+      new URL(window.location.href),
+    );
+  }
+}
+
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
 describe('BaseAdapter', () => {
+  it('discovers added site channels and proxies selection through the original control', async () => {
+    document.body.innerHTML = `
+      <nav>
+        <button data-feed-channel data-value="latest" aria-selected="true">最新</button>
+        <button data-feed-channel data-value="top">热门</button>
+      </nav>`;
+    const channelsListener = vi.fn();
+    const adapter = new ChannelTestAdapter(vi.fn());
+    adapter.setFeedChannelsListener(channelsListener);
+    adapter.init();
+
+    expect(adapter.getFeedChannels()).toEqual([
+      expect.objectContaining({ label: '最新', active: true }),
+      expect.objectContaining({ label: '热门', active: false }),
+    ]);
+
+    const experimental = document.createElement('button');
+    experimental.dataset.feedChannel = '';
+    experimental.dataset.value = 'experimental';
+    experimental.textContent = '实验室';
+    document.querySelector('nav')?.appendChild(experimental);
+    await new Promise((resolve) => window.setTimeout(resolve, 180));
+
+    expect(channelsListener).toHaveBeenLastCalledWith([
+      expect.objectContaining({ label: '最新' }),
+      expect.objectContaining({ label: '热门' }),
+      expect.objectContaining({ label: '实验室' }),
+    ]);
+
+    const click = vi.spyOn(experimental, 'click').mockImplementation(() => undefined);
+    const channelId = adapter.getFeedChannels().find((channel) => channel.label === '实验室')?.id;
+    expect(adapter.triggerFeedChannel(channelId!)).toBe(true);
+    expect(click).toHaveBeenCalledOnce();
+    adapter.disconnect();
+    expect(adapter.triggerFeedChannel(channelId!)).toBe(false);
+  });
+
   it('scans existing cards and rescans after an infinite-feed update', async () => {
     document.body.innerHTML = '<article data-feed-card="first"></article>';
     const onItems = vi.fn();

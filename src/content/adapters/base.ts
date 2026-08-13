@@ -1,6 +1,12 @@
-import type { FeedItem, FeedLoadResult, FeedSource } from '../../types/feed';
+import type {
+  FeedChannel,
+  FeedItem,
+  FeedLoadResult,
+  FeedSource,
+} from '../../types/feed';
 
 export type FeedItemsListener = (items: FeedItem[]) => void;
+export type FeedChannelsListener = (channels: FeedChannel[]) => void;
 
 export interface FeedPageContext {
   root: ParentNode;
@@ -19,10 +25,64 @@ export interface RuntimeCardBinding {
   live: boolean;
 }
 
+export interface RuntimeFeedChannelBinding {
+  channel: FeedChannel;
+  element: HTMLElement;
+}
+
 export interface AdapterDefinition {
   source: FeedSource;
   matches: (url: URL) => boolean;
   create: (onItems: FeedItemsListener) => BaseAdapter;
+}
+
+interface FeedChannelCollectionOptions {
+  isActive?: (element: HTMLElement) => boolean;
+}
+
+/** 把站点导航控件转换成轻量描述，同时保留真实 DOM 作为点击代理目标。 */
+export function collectFeedChannelBindings(
+  root: ParentNode,
+  selector: string,
+  pageUrl: URL,
+  options: FeedChannelCollectionOptions = {},
+): RuntimeFeedChannelBinding[] {
+  const bindings: RuntimeFeedChannelBinding[] = [];
+  const knownIds = new Set<string>();
+
+  Array.from(root.querySelectorAll<HTMLElement>(selector)).forEach((element, index) => {
+    const label = element.textContent?.replace(/\s+/g, ' ').trim() || '';
+    if (!label) return;
+
+    const rawHref = element.getAttribute('href')?.trim();
+    let target = '';
+    if (rawHref) {
+      try {
+        const targetUrl = new URL(rawHref, pageUrl);
+        target = `${targetUrl.origin}${targetUrl.pathname}${targetUrl.search}`;
+      } catch {
+        target = rawHref;
+      }
+    }
+    const semanticKey = element.getAttribute('data-key') ||
+      element.getAttribute('data-value') ||
+      element.getAttribute('aria-controls') ||
+      label;
+    const id = target || `${semanticKey}:${index}`;
+    if (knownIds.has(id)) return;
+    knownIds.add(id);
+
+    const active = options.isActive?.(element) ?? (
+      element.getAttribute('aria-current') === 'page' ||
+      element.getAttribute('aria-selected') === 'true' ||
+      element.getAttribute('aria-pressed') === 'true' ||
+      /(?:^|[-_])(active|current|selected)(?:$|[-_])/.test(element.className) ||
+      element.parentElement?.matches('.active, .current, .selected, [aria-current="page"]') === true
+    );
+    bindings.push({ channel: { id, label, active }, element });
+  });
+
+  return bindings;
 }
 
 export abstract class BaseAdapter {
@@ -36,6 +96,10 @@ export abstract class BaseAdapter {
   private readonly knownItemIds = new Set<string>();
   private readonly visitedPageUrls = new Set<string>();
   private readonly runtimeBindings = new Map<string, RuntimeCardBinding>();
+  private readonly runtimeFeedChannelBindings = new Map<string, HTMLElement>();
+  private feedChannels: FeedChannel[] = [];
+  private feedChannelsListener?: FeedChannelsListener;
+  private feedChannelsSignature = '';
 
   protected abstract readonly cardSelector: string;
   protected readonly loadingStrategy: FeedLoadingStrategy = { kind: 'source-scroll' };
@@ -47,10 +111,14 @@ export abstract class BaseAdapter {
     this.livePageContext = { root: document, url: pageUrl, live: true };
     this.visitedPageUrls.add(this.normalizePageUrl(pageUrl));
     this.processCards(this.livePageContext);
+    this.refreshFeedChannels();
     this.observer = new MutationObserver(() => {
       window.clearTimeout(this.timer);
       this.timer = window.setTimeout(() => {
-        if (this.livePageContext) this.processCards(this.livePageContext);
+        if (this.livePageContext) {
+          this.processCards(this.livePageContext);
+          this.refreshFeedChannels();
+        }
       }, 120);
     });
     this.observer.observe(document.body, { childList: true, subtree: true });
@@ -62,12 +130,37 @@ export abstract class BaseAdapter {
     window.clearTimeout(this.timer);
     this.loadAbortController?.abort();
     this.runtimeBindings.clear();
+    this.runtimeFeedChannelBindings.clear();
     this.knownItemIds.clear();
     this.visitedPageUrls.clear();
+    this.feedChannels = [];
+    this.feedChannelsListener = undefined;
+    this.feedChannelsSignature = '';
   }
 
   abstract parseCard(element: Element, context: FeedPageContext): FeedItem | null;
   abstract triggerAction(itemId: string, actionId: string): boolean;
+
+  setFeedChannelsListener(listener: FeedChannelsListener): void {
+    this.feedChannelsListener = listener;
+    listener(this.getFeedChannels());
+  }
+
+  getFeedChannels(): FeedChannel[] {
+    return this.feedChannels.map((channel) => ({ ...channel }));
+  }
+
+  triggerFeedChannel(channelId: string): boolean {
+    const element = this.runtimeFeedChannelBindings.get(channelId);
+    if (!element) return false;
+
+    // 同 URL 的站内 Tab 也需要重新接收当前 DOM 中的项目，避免沿用旧频道去重状态。
+    this.knownItemIds.clear();
+    this.runtimeBindings.clear();
+    element.click();
+    window.setTimeout(() => this.refreshFeedChannels(), 0);
+    return true;
+  }
 
   requestMore(): Promise<FeedLoadResult> {
     if (this.disconnected) {
@@ -103,6 +196,26 @@ export abstract class BaseAdapter {
 
   protected getRuntimeBinding(itemId: string): RuntimeCardBinding | undefined {
     return this.runtimeBindings.get(itemId);
+  }
+
+  protected getFeedChannelBindings(root: ParentNode): RuntimeFeedChannelBinding[] {
+    void root;
+    return [];
+  }
+
+  private refreshFeedChannels(): void {
+    const bindings = this.getFeedChannelBindings(document);
+    this.runtimeFeedChannelBindings.clear();
+    bindings.forEach(({ channel, element }) => {
+      this.runtimeFeedChannelBindings.set(channel.id, element);
+    });
+
+    const channels = bindings.map(({ channel }) => channel);
+    const signature = JSON.stringify(channels);
+    if (signature === this.feedChannelsSignature) return;
+    this.feedChannelsSignature = signature;
+    this.feedChannels = channels;
+    this.feedChannelsListener?.(this.getFeedChannels());
   }
 
   private processCards(context: FeedPageContext): { parsed: number; added: number } {

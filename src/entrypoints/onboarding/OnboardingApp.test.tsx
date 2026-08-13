@@ -7,6 +7,7 @@ describe('OnboardingApp', () => {
   it('explains installation, product purpose, usage and privacy', () => {
     const markup = renderToStaticMarkup(<OnboardingApp />);
 
+    expect(markup).toContain('background-clip:text');
     expect(markup).toContain('OneFeed 已安装成功');
     expect(markup).toContain('让信息流回到');
     expect(markup).toContain('打开 Hacker News 立即体验');
@@ -15,6 +16,7 @@ describe('OnboardingApp', () => {
     expect(markup).toContain('建议将 OneFeed 固定到工具栏');
     expect(markup).toContain('不上传浏览内容');
     expect(markup).toContain('提交反馈');
+    expect(markup.match(/class="platform-icon"/g)).toHaveLength(8);
   });
 
   it('links every currently supported platform from the shared catalog', () => {

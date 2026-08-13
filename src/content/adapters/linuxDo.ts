@@ -1,6 +1,11 @@
 import { LINUX_DO_PLATFORM } from '../../config/platforms';
 import type { FeedItem } from '../../types/feed';
-import { BaseAdapter, type AdapterDefinition } from './base';
+import {
+  BaseAdapter,
+  collectFeedChannelBindings,
+  type AdapterDefinition,
+  type RuntimeFeedChannelBinding,
+} from './base';
 
 const CARD_SELECTOR = '.topic-list-item';
 export const LINUX_DO_SOURCE = LINUX_DO_PLATFORM;
@@ -139,6 +144,14 @@ export function triggerLinuxDoAction(element: Element | undefined, actionId: str
 
 export class LinuxDoAdapter extends BaseAdapter {
   protected readonly cardSelector = CARD_SELECTOR;
+
+  protected override getFeedChannelBindings(root: ParentNode): RuntimeFeedChannelBinding[] {
+    return collectFeedChannelBindings(
+      root,
+      '#navigation-bar > li > a, .navigation-container .nav-pills > li > a',
+      new URL(window.location.href),
+    );
+  }
 
   parseCard(element: Element): FeedItem | null {
     return parseLinuxDoCard(element);

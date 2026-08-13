@@ -30,6 +30,9 @@ function activeSurface(surface: 'feed' | 'article' | 'thread') {
       init: vi.fn(),
       disconnect: vi.fn(),
       triggerAction: vi.fn(() => false),
+      triggerFeedChannel: vi.fn(() => false),
+      setFeedChannelsListener: vi.fn((listener) => listener([])),
+      requestMore: vi.fn(async () => ({ kind: 'exhausted' as const })),
     },
   };
 }

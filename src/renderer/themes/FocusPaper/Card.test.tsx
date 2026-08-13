@@ -21,6 +21,16 @@ const shortReply: FeedItem = {
 };
 
 describe('Card', () => {
+  it('renders a quiet seen marker without changing the feed item protocol', () => {
+    const markup = renderToStaticMarkup(
+      <Card item={shortReply} index={0} isSeen onAction={vi.fn()} />,
+    );
+
+    expect(markup).toContain('feed-card-seen');
+    expect(markup).toContain('card-seen-marker');
+    expect(markup).toContain('已看过');
+  });
+
   it('renders short plain text as a compact card with author metadata but no avatar', () => {
     const markup = renderToStaticMarkup(
       <Card item={shortReply} index={0} onAction={vi.fn()} />,

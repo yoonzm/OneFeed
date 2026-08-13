@@ -163,6 +163,13 @@ export interface FeedSource extends FeedSourceRef {
   homeUrl: string;
 }
 
+/** 从当前原站 DOM 动态发现的信息流频道；点击能力由 Adapter 在运行时代理。 */
+export interface FeedChannel {
+  id: string;
+  label: string;
+  active: boolean;
+}
+
 /** Feed Surface 请求下一批内容后的结果；Renderer 只消费状态，不感知站点加载机制。 */
 export type FeedLoadResult =
   | { kind: 'loaded'; added: number; hasMore: boolean }

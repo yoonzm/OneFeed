@@ -106,6 +106,25 @@ a { color: inherit; }
   line-height: 1.4;
   letter-spacing: .02em;
 }
+.card-seen-marker {
+  position: absolute;
+  top: 18px;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--color-onefeed-subtle);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+.feed-card-seen.feed-card-titled .card-title-row { padding-right: 72px; }
+.feed-card-seen.feed-card-untitled .card-main { padding-top: 28px; }
+.feed-card-seen .card-title-row h2 a,
+.feed-card-seen .content { color: var(--muted); }
 .card-author { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-weight: 600; text-decoration: none; }
 .card-author-avatar { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; background: var(--blue-soft); }
 .card-author:hover { color: var(--blue); }
@@ -117,6 +136,8 @@ a { color: inherit; }
 .card-meta-row .card-actions { margin: 0 0 0 auto; }
 .card-meta-row .card-actions button,
 .card-meta-row .card-actions a { min-height: 28px; padding-top: 2px; padding-bottom: 2px; }
+.card-detail-link { margin-left: auto; color: var(--blue); text-decoration: none; }
+.card-detail-link:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 .context-row {
   display: flex;

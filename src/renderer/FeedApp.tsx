@@ -1,12 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ColorScheme } from '../theme/useColorScheme';
-import type { FeedActionDescriptor, FeedItem, FeedLoadResult } from '../types/feed';
+import type {
+  FeedActionDescriptor,
+  FeedChannel,
+  FeedItem,
+  FeedLoadResult,
+} from '../types/feed';
 import { OneFeedShell } from './OneFeedShell';
 import { useFeedStore } from './store/useFeedStore';
 import { Card } from './themes/FocusPaper/Card';
+import { getSeenFeedItemKey, useSeenFeedItems } from './useSeenFeedItems';
 
 interface FeedAppProps {
   activePlatformId: string;
+  channels?: readonly FeedChannel[];
+  onFeedChannelSelect?: (channelId: string) => boolean;
   scrollElement: HTMLElement;
   initialColorScheme?: ColorScheme;
   onAction: (itemId: string, actionId: string) => boolean;
@@ -20,6 +28,8 @@ type FeedLoadState =
 /** Feed Surface 外壳：连接状态库、阅读进度和原页面的无限加载。 */
 export default function FeedApp({
   activePlatformId,
+  channels,
+  onFeedChannelSelect,
   scrollElement,
   initialColorScheme,
   onAction,
@@ -34,6 +44,7 @@ export default function FeedApp({
   const autoLoadBlockedRef = useRef(false);
   const exhaustedRef = useRef(false);
   const mountedRef = useRef(true);
+  const { markSeen, seenItemKeys } = useSeenFeedItems();
 
   useEffect(() => {
     mountedRef.current = true;
@@ -121,6 +132,8 @@ export default function FeedApp({
   return (
     <OneFeedShell
       activePlatformId={activePlatformId}
+      channels={channels}
+      onFeedChannelSelect={onFeedChannelSelect}
       surface="feed"
       scrollElement={scrollElement}
       initialColorScheme={initialColorScheme}
@@ -134,14 +147,19 @@ export default function FeedApp({
 
         <main>
           {hasItems ? (
-            items.map((item, index) => (
-              <Card
-                key={item.id}
-                item={item}
-                index={index}
-                onAction={handleAction}
-              />
-            ))
+            items.map((item, index) => {
+              const seenItemKey = getSeenFeedItemKey(item);
+              return (
+                <Card
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  isSeen={seenItemKeys.has(seenItemKey)}
+                  onSeen={() => markSeen(seenItemKey)}
+                  onAction={handleAction}
+                />
+              );
+            })
           ) : (
             <section className="empty-state" aria-live="polite">
               <span className="scan-mark" aria-hidden="true" />

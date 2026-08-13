@@ -93,25 +93,28 @@ describe('toolbar action state', () => {
     vi.unstubAllGlobals();
   });
 
-  it('shows an OFF badge and resume title when OneFeed is paused', async () => {
+  it('shows an OFF badge and paused status in the launch-center title', async () => {
     const chromeMock = createChromeMock(false);
 
     await startBackground();
 
     expect(chromeMock.setTitle).toHaveBeenLastCalledWith({
-      title: 'OneFeed 已暂停，点击开启',
+      title: '打开 OneFeed 启动中心（已暂停）',
     });
     expect(chromeMock.setBadgeText).toHaveBeenLastCalledWith({ text: 'OFF' });
     expect(chromeMock.setBadgeBackgroundColor).toHaveBeenCalledWith({ color: '#5f6b7e' });
   });
 
-  it('toggles the global enabled setting when the toolbar icon is clicked', async () => {
+  it('opens the launch center when the toolbar icon is clicked', async () => {
     const chromeMock = createChromeMock(true);
     await startBackground();
 
     chromeMock.actionClick();
 
-    expect(chromeMock.set).toHaveBeenCalledWith({ enabled: false });
+    expect(chromeMock.createTab).toHaveBeenCalledWith({
+      url: 'chrome-extension://onefeed/board.html',
+    });
+    expect(chromeMock.set).not.toHaveBeenCalledWith({ enabled: false });
   });
 
   it('keeps toolbar feedback in sync with the page toggle', async () => {
@@ -121,7 +124,7 @@ describe('toolbar action state', () => {
     chromeMock.storageChange(true);
 
     expect(chromeMock.setTitle).toHaveBeenLastCalledWith({
-      title: 'OneFeed 已开启，点击暂停',
+      title: '打开 OneFeed 启动中心（已开启）',
     });
     expect(chromeMock.setBadgeText).toHaveBeenLastCalledWith({ text: '' });
   });

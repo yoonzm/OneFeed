@@ -643,10 +643,17 @@ a:focus-visible {
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid #445269;
+  border: 1px solid color-mix(in srgb, var(--platform-accent) 32%, #445269);
   border-radius: 6px;
-  color: white;
-  font: 700 12px/1 var(--utility);
+  background: #fff;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 16%);
+}
+
+.platform-icon {
+  display: block;
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
 }
 
 .platform-copy strong,

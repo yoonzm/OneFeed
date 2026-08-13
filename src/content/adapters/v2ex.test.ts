@@ -1,9 +1,30 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  V2exAdapter,
   parseV2exCard,
   parseV2exCount,
   triggerV2exAction,
 } from './v2ex';
+
+describe('V2exAdapter feed channels', () => {
+  it('reads the current tab list from the site DOM without a predefined catalog', () => {
+    document.body.innerHTML = `
+      <nav id="Tabs">
+        <a class="tab_current" href="/?tab=tech">技术</a>
+        <a class="tab" href="/?tab=creative">创意</a>
+        <a class="tab" href="/?tab=labs">实验室</a>
+      </nav>`;
+    const adapter = new V2exAdapter(vi.fn());
+    adapter.init();
+
+    expect(adapter.getFeedChannels().map(({ label, active }) => ({ label, active }))).toEqual([
+      { label: '技术', active: true },
+      { label: '创意', active: false },
+      { label: '实验室', active: false },
+    ]);
+    adapter.disconnect();
+  });
+});
 
 describe('parseV2exCount', () => {
   it('parses plain and compact counts', () => {
@@ -60,6 +81,29 @@ describe('parseV2exCard', () => {
   it('ignores non-topic cells', () => {
     document.body.innerHTML = '<div class="cell item">普通内容</div>';
     expect(parseV2exCard(document.querySelector('.cell.item')!)).toBeNull();
+  });
+
+  it('normalizes a VXNA entry as an external article', () => {
+    document.body.innerHTML = `
+      <article class="xna-entry">
+        <a href="/member/V2EX"><img class="avatar" alt="V2EX" src="/avatar.png" /></a>
+        <div class="xna-entry-title">
+          <a class="topic-link" href="https://example.com/post">外部文章</a>
+        </div>
+        <div class="xna-entry-info">
+          <span class="xna-entry-source"><a class="node" href="https://example.com/">示例博客</a></span>
+        </div>
+      </article>`;
+
+    expect(parseV2exCard(document.querySelector('.xna-entry')!)).toMatchObject({
+      kind: 'article',
+      role: 'article',
+      title: '外部文章',
+      originalUrl: 'https://example.com/post',
+      context: { community: { name: '示例博客' } },
+      metrics: [],
+      actions: [{ kind: 'open' }],
+    });
   });
 });
 

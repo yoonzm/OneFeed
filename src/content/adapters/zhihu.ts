@@ -8,7 +8,12 @@ import type {
   FeedItem,
   FeedMetric,
 } from '../../types/feed';
-import { BaseAdapter, type AdapterDefinition } from './base';
+import {
+  BaseAdapter,
+  collectFeedChannelBindings,
+  type AdapterDefinition,
+  type RuntimeFeedChannelBinding,
+} from './base';
 
 const CARD_SELECTOR = [
   '.TopstoryItem',
@@ -367,6 +372,19 @@ export function triggerZhihuAction(element: Element | undefined, actionId: strin
 
 export class ZhihuAdapter extends BaseAdapter {
   protected readonly cardSelector = CARD_SELECTOR;
+
+  protected override getFeedChannelBindings(root: ParentNode): RuntimeFeedChannelBinding[] {
+    return collectFeedChannelBindings(
+      root,
+      [
+        '.TopstoryTabs-link',
+        '.TopstoryTabs a',
+        '.TopstoryTabs button',
+        '[class*="TopstoryTabs"] [role="tab"]',
+      ].join(', '),
+      new URL(window.location.href),
+    );
+  }
 
   parseCard(element: Element): FeedItem | null {
     return parseZhihuCard(element);

@@ -44,6 +44,10 @@ describe('createAdapter', () => {
       adapter: expect.any(V2exAdapter),
       source: { id: 'v2ex', name: 'V2EX' },
     });
+    expect(createAdapter(new URL('https://www.v2ex.com/xna'), listeners())).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(V2exAdapter),
+    });
     expect(createAdapter(new URL('https://linux.do/latest'), listeners())).toMatchObject({
       surface: 'feed',
       adapter: expect.any(LinuxDoAdapter),
