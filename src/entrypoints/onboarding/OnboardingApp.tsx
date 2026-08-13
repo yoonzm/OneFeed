@@ -1,6 +1,7 @@
 import { PLATFORM_PRESENTATIONS } from '../../config/platformPresentation';
 import { getPlatformById } from '../../config/platforms';
 import { DiaTextReveal } from '../../components/DiaTextReveal';
+import { PlatformIcon } from '../../components/PlatformIcon';
 import type { CSSProperties } from 'react';
 
 const GITHUB_URL = 'https://github.com/yoonzm/OneFeed';
@@ -178,7 +179,9 @@ export function OnboardingApp() {
                   rel="noreferrer"
                   style={{ '--platform-accent': intro.accent } as CSSProperties}
                 >
-                  <span className="platform-mark" aria-hidden="true">{intro.mark}</span>
+                  <span className="platform-mark" aria-hidden="true">
+                    <PlatformIcon platformId={intro.id} />
+                  </span>
                   <span className="platform-copy">
                     <strong>{platform.name}</strong>
                     <small>{intro.scope}</small>

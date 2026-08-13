@@ -16,6 +16,7 @@ import {
   type PlatformId,
 } from '../../config/platforms';
 import { DiaTextReveal } from '../../components/DiaTextReveal';
+import { PlatformIcon } from '../../components/PlatformIcon';
 import { useColorScheme } from '../../theme/useColorScheme';
 import {
   DEFAULT_RECENT_PLATFORM_IDS,
@@ -172,7 +173,7 @@ export function BoardApp() {
                 '--platform-accent': getPlatformPresentation(primaryPlatform.id as PlatformId).accent,
               } as CSSProperties}
             >
-              {getPlatformPresentation(primaryPlatform.id as PlatformId).mark}
+              <PlatformIcon platformId={primaryPlatform.id as PlatformId} />
             </span>
             <span className="resume-copy">
               <strong>{primaryPlatform.name}</strong>
@@ -211,7 +212,9 @@ export function BoardApp() {
                   onClick={() => rememberPlatform(platform.id as PlatformId)}
                   style={{ '--platform-accent': presentation.accent } as CSSProperties}
                 >
-                  <span className="platform-mark" aria-hidden="true">{presentation.mark}</span>
+                  <span className="platform-mark" aria-hidden="true">
+                    <PlatformIcon platformId={platform.id as PlatformId} />
+                  </span>
                   <span>
                     <strong>{platform.name}</strong>
                     <small>{presentation.scope}</small>
@@ -236,7 +239,9 @@ export function BoardApp() {
                   onClick={() => rememberPlatform(platform.id as PlatformId)}
                   style={{ '--platform-accent': presentation.accent } as CSSProperties}
                 >
-                  <span className="platform-mark" aria-hidden="true">{presentation.mark}</span>
+                  <span className="platform-mark" aria-hidden="true">
+                    <PlatformIcon platformId={platform.id as PlatformId} />
+                  </span>
                   <span>
                     <strong>{platform.name}</strong>
                     <small>{presentation.scope}</small>

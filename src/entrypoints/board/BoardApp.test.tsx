@@ -43,6 +43,7 @@ describe('launch center', () => {
     expect(brandText?.style.backgroundClip).toBe('text');
     expect(container.querySelector('h1')?.textContent).toBe('继续上次的阅读。');
     expect(container.querySelector('.resume-platform strong')?.textContent).toBe('知乎');
+    expect(container.querySelectorAll('.platform-mark .platform-icon')).toHaveLength(8);
     expect(container.querySelectorAll('.recent-row')).toHaveLength(2);
     expect(container.querySelectorAll('.more-card')).toHaveLength(5);
     expect(container.textContent).toContain('即将支持：哔哩哔哩 · YouTube');

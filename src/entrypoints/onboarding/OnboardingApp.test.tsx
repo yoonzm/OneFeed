@@ -16,6 +16,7 @@ describe('OnboardingApp', () => {
     expect(markup).toContain('建议将 OneFeed 固定到工具栏');
     expect(markup).toContain('不上传浏览内容');
     expect(markup).toContain('提交反馈');
+    expect(markup.match(/class="platform-icon"/g)).toHaveLength(8);
   });
 
   it('links every currently supported platform from the shared catalog', () => {

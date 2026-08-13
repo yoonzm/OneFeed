@@ -246,21 +246,23 @@ button:focus-visible {
   place-items: center;
   border: 1px solid color-mix(in srgb, var(--platform-accent) 28%, var(--color-onefeed-line));
   border-radius: 10px;
-  background: color-mix(in srgb, var(--platform-accent) 10%, var(--color-onefeed-surface));
-  color: var(--platform-accent);
-  font-family: var(--font-onefeed-brand);
-  font-size: 16px;
-  font-weight: 700;
+  background: #fff;
+  box-shadow: 0 3px 10px rgb(15 22 34 / 8%);
+}
+
+.platform-icon {
+  display: block;
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
 }
 
 .resume-mark {
   width: 59px;
   height: 59px;
-  border-color: transparent;
+  border-color: color-mix(in srgb, var(--platform-accent) 28%, var(--color-onefeed-line));
   border-radius: 8px;
-  background: var(--platform-accent);
-  color: white;
-  font-size: 25px;
+  background: #fff;
 }
 
 .resume-copy {
@@ -422,11 +424,9 @@ button:focus-visible {
   width: 45px;
   height: 45px;
   flex-basis: 45px;
-  border-color: transparent;
+  border-color: color-mix(in srgb, var(--platform-accent) 28%, var(--color-onefeed-line));
   border-radius: 7px;
-  background: var(--platform-accent);
-  color: white;
-  font-size: 16px;
+  background: #fff;
 }
 
 .more-card .card-arrow {
@@ -436,21 +436,6 @@ button:focus-visible {
 .more-card:hover .card-arrow,
 .more-card:focus-visible .card-arrow {
   opacity: 1;
-}
-
-.recent-row.platform-hacker-news .platform-mark {
-  border-color: transparent;
-  background: #ff6600;
-  color: white;
-}
-
-.more-card.platform-linux-do .platform-mark {
-  background: #111827;
-}
-
-.more-card.platform-weibo .platform-mark {
-  background: #111827;
-  color: #ff633d;
 }
 
 .board-footer {
