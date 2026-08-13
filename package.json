@@ -1,6 +1,6 @@
 {
   "name": "onefeed",
-  "description": "将各网站信息流重新排版为专注、统一、可控的阅读体验。",
+  "description": "把不同网站的信息流统一成你喜欢的阅读体验，让你重新掌握信息流的界面、内容密度与阅读方式。",
   "private": true,
   "version": "0.1.4",
   "type": "module",

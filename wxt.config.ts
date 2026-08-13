@@ -12,8 +12,8 @@ export default defineConfig({
   }),
   manifest: {
     ...(extensionVersion ? { version: extensionVersion } : {}),
-    name: 'OneFeed',
-    description: '将各网站信息流重新排版为专注、统一、可控的阅读体验。',
+    name: 'OneFeed — One way to read your feeds',
+    description: '把不同网站的信息流统一成你喜欢的阅读体验，让你重新掌握信息流的界面、内容密度与阅读方式。',
     permissions: ['storage'],
     icons: {
       16: 'icons/icon-16.png',
