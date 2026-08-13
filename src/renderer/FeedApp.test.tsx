@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { FeedItem, FeedLoadResult } from '../types/feed';
 import FeedApp from './FeedApp';
 import { useFeedStore } from './store/useFeedStore';
+import { getSeenFeedItemStorageKey } from './useSeenFeedItems';
 
 function feedItem(): FeedItem {
   return {
@@ -20,17 +21,21 @@ function feedItem(): FeedItem {
   };
 }
 
-describe('FeedApp loading state', () => {
+describe('FeedApp', () => {
   let root: Root | undefined;
+  let storedValues: Record<string, unknown>;
 
   beforeEach(() => {
+    storedValues = {};
     useFeedStore.getState().addFeedItems([feedItem()]);
     vi.stubGlobal('IntersectionObserver', undefined);
     vi.stubGlobal('chrome', {
       storage: {
         local: {
-          get: vi.fn((_defaults, callback) => callback({ colorScheme: 'light' })),
-          set: vi.fn(),
+          get: vi.fn((defaults, callback) => callback(
+            defaults === null ? storedValues : { ...defaults, ...storedValues },
+          )),
+          set: vi.fn((values) => Object.assign(storedValues, values)),
         },
         onChanged: {
           addListener: vi.fn(),
@@ -91,5 +96,30 @@ describe('FeedApp loading state', () => {
 
     expect(onLoadMore).toHaveBeenCalledTimes(2);
     expect(container.textContent).toContain('已加载全部内容');
+  });
+
+  it('restores a persisted seen marker', async () => {
+    storedValues[getSeenFeedItemStorageKey(feedItem())] = true;
+    const container = await renderFeed(async () => ({ kind: 'exhausted' }));
+
+    expect(container.querySelector('.feed-card')?.getAttribute('data-seen')).toBe('true');
+    expect(container.textContent).toContain('已看过');
+  });
+
+  it('marks a card only when the user opens its detail', async () => {
+    const container = await renderFeed(async () => ({ kind: 'exhausted' }));
+    const card = container.querySelector('.feed-card');
+    const detailLink = container.querySelector<HTMLAnchorElement>('.card-detail-link');
+
+    expect(chrome.storage.local.set).not.toHaveBeenCalledWith({
+      [getSeenFeedItemStorageKey(feedItem())]: true,
+    });
+
+    await act(async () => detailLink?.click());
+    expect(chrome.storage.local.set).toHaveBeenCalledWith({
+      [getSeenFeedItemStorageKey(feedItem())]: true,
+    });
+    expect(card?.getAttribute('data-seen')).toBe('true');
+    expect(container.textContent).toContain('已看过');
   });
 });

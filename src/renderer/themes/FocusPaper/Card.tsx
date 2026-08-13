@@ -1,3 +1,4 @@
+import { Check } from '@phosphor-icons/react';
 import { useState } from 'react';
 import type { FeedActionDescriptor, FeedImage, FeedItem } from '../../../types/feed';
 import { ActionBar } from '../../components/ActionBar';
@@ -6,6 +7,8 @@ import { BlockRenderer } from '../../components/BlockRenderer';
 interface CardProps {
   item: FeedItem;
   index: number;
+  isSeen?: boolean;
+  onSeen?: () => void;
   onAction: (item: FeedItem, action: FeedActionDescriptor) => void;
 }
 
@@ -44,7 +47,13 @@ function formatPublishedAt(value: string | number): string {
 }
 
 /** Focus Paper 的通用列表卡片；平台差异应在 Adapter 归一化阶段消化。 */
-export function Card({ item, index, onAction }: CardProps) {
+export function Card({
+  item,
+  index,
+  isSeen = false,
+  onSeen,
+  onAction,
+}: CardProps) {
   const [expanded, setExpanded] = useState(false);
   const [preview, setPreview] = useState<FeedImage>();
   // 260 字是交互阈值，不等于固定行数；实际折叠高度由主题 CSS 控制。
@@ -59,13 +68,16 @@ export function Card({ item, index, onAction }: CardProps) {
 
   return (
     <article
-      className={`feed-card feed-card-${item.kind} feed-card-${item.role} ${densityClassName}`.trim()}
+      className={`feed-card feed-card-${item.kind} feed-card-${item.role} ${item.title ? 'feed-card-titled' : 'feed-card-untitled'} ${densityClassName} ${isSeen ? 'feed-card-seen' : ''}`.trim()}
+      data-seen={isSeen ? 'true' : undefined}
     >
       <div className="card-main">
         {item.title && (
           <div className="card-title-row">
             <h2>
-              <a href={item.originalUrl} target="_blank" rel="noreferrer">{item.title}</a>
+              <a href={item.originalUrl} target="_blank" rel="noreferrer" onClick={onSeen}>
+                {item.title}
+              </a>
             </h2>
           </div>
         )}
@@ -133,12 +145,28 @@ export function Card({ item, index, onAction }: CardProps) {
           )}
 
           {expandable && (
-            <button className="text-action" type="button" onClick={() => setExpanded(!expanded)}>
+            <button
+              className="text-action"
+              type="button"
+              onClick={() => setExpanded(!expanded)}
+            >
               {expanded ? '收起' : '展开全文'}
             </button>
           )}
 
-          {/* 列表标题已承担原文跳转，Card 不再重复显示 open 操作。 */}
+          {!item.title && (
+            <a
+              className="card-detail-link"
+              href={item.originalUrl}
+              target="_blank"
+              rel="noreferrer"
+              onClick={onSeen}
+            >
+              查看详情 ↗
+            </a>
+          )}
+
+          {/* 有标题时由标题承担详情跳转；无标题条目使用上方的统一详情入口。 */}
           <ActionBar
             originalUrl={item.originalUrl}
             metrics={item.metrics}
@@ -147,6 +175,13 @@ export function Card({ item, index, onAction }: CardProps) {
           />
         </div>
       </div>
+
+      {isSeen && (
+        <span className="card-seen-marker">
+          <Check size={10} weight="bold" aria-hidden="true" />
+          已看过
+        </span>
+      )}
 
       {/* 预览状态属于单张 Card，关闭后不会影响其他卡片的媒体状态。 */}
       {preview && (

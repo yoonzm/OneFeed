@@ -9,6 +9,7 @@ import type {
 import { OneFeedShell } from './OneFeedShell';
 import { useFeedStore } from './store/useFeedStore';
 import { Card } from './themes/FocusPaper/Card';
+import { getSeenFeedItemKey, useSeenFeedItems } from './useSeenFeedItems';
 
 interface FeedAppProps {
   activePlatformId: string;
@@ -43,6 +44,7 @@ export default function FeedApp({
   const autoLoadBlockedRef = useRef(false);
   const exhaustedRef = useRef(false);
   const mountedRef = useRef(true);
+  const { markSeen, seenItemKeys } = useSeenFeedItems();
 
   useEffect(() => {
     mountedRef.current = true;
@@ -145,14 +147,19 @@ export default function FeedApp({
 
         <main>
           {hasItems ? (
-            items.map((item, index) => (
-              <Card
-                key={item.id}
-                item={item}
-                index={index}
-                onAction={handleAction}
-              />
-            ))
+            items.map((item, index) => {
+              const seenItemKey = getSeenFeedItemKey(item);
+              return (
+                <Card
+                  key={item.id}
+                  item={item}
+                  index={index}
+                  isSeen={seenItemKeys.has(seenItemKey)}
+                  onSeen={() => markSeen(seenItemKey)}
+                  onAction={handleAction}
+                />
+              );
+            })
           ) : (
             <section className="empty-state" aria-live="polite">
               <span className="scan-mark" aria-hidden="true" />
