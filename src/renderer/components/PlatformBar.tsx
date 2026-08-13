@@ -6,6 +6,7 @@ import {
   type PlatformDefinition,
 } from '../../config/platforms';
 import type { ColorScheme } from '../../theme/useColorScheme';
+import type { FeedChannel } from '../../types/feed';
 import { GitHubLink } from './GitHubLink';
 import { ThemeSwitch } from './ThemeSwitch';
 
@@ -16,6 +17,8 @@ const mobileItemClass = 'flex min-h-12 w-full items-center justify-between borde
 
 interface PlatformBarProps {
   activePlatformId: string;
+  channels: readonly FeedChannel[];
+  onFeedChannelSelect?: (channelId: string) => boolean;
   surface: ReaderSurface;
   scrollElement: HTMLElement;
   colorScheme: ColorScheme;
@@ -25,6 +28,8 @@ interface PlatformBarProps {
 
 export function PlatformBar({
   activePlatformId,
+  channels,
+  onFeedChannelSelect,
   surface,
   scrollElement,
   colorScheme,
@@ -34,9 +39,13 @@ export function PlatformBar({
   const supportedPlatforms = getSupportedPlatforms();
   const plannedPlatforms = getPlannedPlatforms();
   const activePlatform = getPlatformById(activePlatformId);
+  const activeChannel = channels.find((channel) => channel.active);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [channelMenuOpen, setChannelMenuOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const channelButtonRef = useRef<HTMLButtonElement>(null);
+  const channelMenuRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     if (!menuOpen) return undefined;
@@ -50,6 +59,26 @@ export function PlatformBar({
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [menuOpen]);
+
+  useEffect(() => {
+    if (!channelMenuOpen) return undefined;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (channelMenuRef.current && event.composedPath().includes(channelMenuRef.current)) return;
+      setChannelMenuOpen(false);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setChannelMenuOpen(false);
+      channelButtonRef.current?.focus();
+    };
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [channelMenuOpen]);
 
   const closeMenu = () => {
     setMenuOpen(false);
@@ -75,11 +104,20 @@ export function PlatformBar({
     }
   };
 
+  const handleChannelSelect = (channel: FeedChannel, mobile = false) => {
+    if (channel.active) {
+      scrollElement.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      onFeedChannelSelect?.(channel.id);
+    }
+    setChannelMenuOpen(false);
+    if (mobile) setMenuOpen(false);
+  };
+
   const renderSupportedLinks = (mobile = false) => supportedPlatforms.map((platform) => {
     const active = platform.id === activePlatformId;
-    return (
+    const platformLink = (
       <a
-        key={platform.id}
         className={`${mobile ? mobileItemClass : desktopItemClass} ${
           active
             ? mobile
@@ -91,8 +129,66 @@ export function PlatformBar({
         aria-current={active ? 'page' : undefined}
         onClick={(event) => handleSupportedClick(event, platform)}
       >
-        {platform.name}
+        <span>{platform.name}</span>
+        {mobile && active && activeChannel && (
+          <span className="text-[10px] font-normal text-onefeed-muted">
+            {activeChannel.label}
+          </span>
+        )}
       </a>
+    );
+
+    if (!active || mobile || channels.length <= 1) {
+      return <span key={platform.id} className="contents">{platformLink}</span>;
+    }
+
+    return (
+      <span
+        ref={channelMenuRef}
+        key={platform.id}
+        className="relative inline-flex items-stretch"
+      >
+        {platformLink}
+        <button
+          ref={channelButtonRef}
+          className="my-auto mr-1 -ml-1 inline-flex h-6 max-w-[82px] cursor-pointer items-center gap-1 rounded-[3px] border border-onefeed-line bg-onefeed-surface px-1.5 text-[9px] leading-none text-onefeed-muted hover:border-onefeed-line-strong hover:text-onefeed-blue focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-onefeed-focus"
+          type="button"
+          aria-label={`切换${platform.name}频道，当前${activeChannel?.label || '未识别'}`}
+          aria-haspopup="menu"
+          aria-expanded={channelMenuOpen}
+          aria-controls="onefeed-channel-menu"
+          onClick={() => setChannelMenuOpen((open) => !open)}
+        >
+          <span className="truncate">{activeChannel?.label || '频道'}</span>
+          <span className="text-[8px]" aria-hidden="true">⌄</span>
+        </button>
+        {channelMenuOpen && (
+          <span
+            id="onefeed-channel-menu"
+            className="absolute top-[46px] left-1/2 z-30 grid min-w-36 -translate-x-1/2 overflow-hidden rounded-[4px] border border-onefeed-line bg-onefeed-surface p-1 shadow-[0_12px_32px_rgb(15_22_34_/_16%)]"
+            role="menu"
+            aria-label={`${platform.name}信息流频道`}
+          >
+            {channels.map((channel) => (
+              <button
+                key={channel.id}
+                className={`flex min-h-9 cursor-pointer items-center justify-between gap-4 rounded-[2px] border-0 px-2.5 text-left text-[11px] focus-visible:outline-3 focus-visible:outline-offset-[-2px] focus-visible:outline-onefeed-focus ${
+                  channel.active
+                    ? 'bg-onefeed-blue-soft font-onefeed-emphasis text-onefeed-blue'
+                    : 'bg-transparent text-onefeed-muted hover:bg-onefeed-paper hover:text-onefeed-blue'
+                }`}
+                type="button"
+                role="menuitemradio"
+                aria-checked={channel.active}
+                onClick={() => handleChannelSelect(channel)}
+              >
+                <span>{channel.label}</span>
+                {channel.active && <span aria-hidden="true">•</span>}
+              </button>
+            ))}
+          </span>
+        )}
+      </span>
     );
   });
 
@@ -139,7 +235,10 @@ export function PlatformBar({
             type="button"
             aria-expanded={menuOpen}
             aria-controls="onefeed-platform-menu"
-            onClick={() => setMenuOpen(true)}
+            onClick={() => {
+              setChannelMenuOpen(false);
+              setMenuOpen(true);
+            }}
           >
             <span className="text-onefeed-muted max-[420px]:hidden">
               当前：{activePlatform?.name || '未识别'}
@@ -188,6 +287,30 @@ export function PlatformBar({
             <nav className="grid" aria-label="已支持平台">
               {renderSupportedLinks(true)}
             </nav>
+            {channels.length > 1 && (
+              <>
+                <p className="mt-[18px] mb-[8px] text-[10px] tracking-[.08em] text-onefeed-muted">
+                  {activePlatform?.name || '当前网站'}频道
+                </p>
+                <div className="grid grid-cols-2 gap-2" role="group" aria-label="切换信息流频道">
+                  {channels.map((channel) => (
+                    <button
+                      key={channel.id}
+                      className={`min-h-10 cursor-pointer rounded-[3px] border px-3 text-left text-xs focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-onefeed-focus ${
+                        channel.active
+                          ? 'border-onefeed-blue bg-onefeed-blue-soft font-onefeed-emphasis text-onefeed-blue'
+                          : 'border-onefeed-line bg-transparent text-onefeed-muted'
+                      }`}
+                      type="button"
+                      aria-pressed={channel.active}
+                      onClick={() => handleChannelSelect(channel, true)}
+                    >
+                      {channel.label}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
             <p className="mt-[18px] mb-[5px] text-[10px] tracking-[.08em] text-onefeed-muted">
               待支持
             </p>

@@ -1,8 +1,13 @@
 import { V2EX_PLATFORM } from '../../config/platforms';
 import type { FeedItem } from '../../types/feed';
-import { BaseAdapter, type AdapterDefinition } from './base';
+import {
+  BaseAdapter,
+  collectFeedChannelBindings,
+  type AdapterDefinition,
+  type RuntimeFeedChannelBinding,
+} from './base';
 
-const CARD_SELECTOR = '.cell.item';
+const CARD_SELECTOR = '.cell.item, .xna-entry';
 export const V2EX_SOURCE = V2EX_PLATFORM;
 
 function absoluteUrl(value: string): string {
@@ -40,6 +45,7 @@ export function parseV2exCount(value: string): number {
 }
 
 export function parseV2exCard(element: Element): FeedItem | null {
+  const isXnaEntry = element.matches('.xna-entry');
   const titleLink = element.querySelector<HTMLAnchorElement>(
     '.topic-link, .item_title a[href^="/t/"]',
   );
@@ -67,8 +73,8 @@ export function parseV2exCard(element: Element): FeedItem | null {
     platform: 'v2ex',
     source: V2EX_SOURCE,
     originalUrl: originalUrl || window.location.href,
-    kind: 'discussion',
-    role: 'topic',
+    kind: isXnaEntry ? 'article' : 'discussion',
+    role: isXnaEntry ? 'article' : 'topic',
     title,
     author: {
       name: authorName,
@@ -85,16 +91,16 @@ export function parseV2exCard(element: Element): FeedItem | null {
     } : undefined,
     publishedAt: element.querySelector('.topic_info [title]')?.getAttribute('title') || undefined,
     previewBlocks: [],
-    metrics: [{ kind: 'replies', value: replies, label: '回复' }],
+    metrics: isXnaEntry ? [] : [{ kind: 'replies', value: replies, label: '回复' }],
     actions: [
-      {
+      ...(!isXnaEntry ? [{
         id: 'reply',
-        kind: 'reply',
+        kind: 'reply' as const,
         label: '回复',
         count: replies,
         enabled: true,
-        fallback: 'openOriginal',
-      },
+        fallback: 'openOriginal' as const,
+      }] : []),
       { id: 'open', kind: 'open', label: '查看原文', enabled: true },
     ],
   };
@@ -113,6 +119,14 @@ export function triggerV2exAction(element: Element | undefined, actionId: string
 export class V2exAdapter extends BaseAdapter {
   protected readonly cardSelector = CARD_SELECTOR;
 
+  protected override getFeedChannelBindings(root: ParentNode): RuntimeFeedChannelBinding[] {
+    return collectFeedChannelBindings(
+      root,
+      '#Tabs > a.tab, #Tabs > a.tab_current',
+      new URL(window.location.href),
+    );
+  }
+
   parseCard(element: Element): FeedItem | null {
     return parseV2exCard(element);
   }
@@ -126,6 +140,6 @@ export const v2exAdapterDefinition: AdapterDefinition = {
   source: V2EX_SOURCE,
   matches: (url) => (
     url.hostname === 'v2ex.com' || url.hostname.endsWith('.v2ex.com')
-  ) && ['/', '/recent'].includes(url.pathname),
+  ) && ['/', '/recent', '/xna'].includes(url.pathname),
   create: (onItems) => new V2exAdapter(onItems),
 };

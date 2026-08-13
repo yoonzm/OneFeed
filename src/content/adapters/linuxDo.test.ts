@@ -1,9 +1,30 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  LinuxDoAdapter,
   parseLinuxDoCard,
   parseLinuxDoCount,
   triggerLinuxDoAction,
 } from './linuxDo';
+
+describe('LinuxDoAdapter feed channels', () => {
+  it('reads Discourse navigation items and their selected state from the site DOM', () => {
+    document.body.innerHTML = `
+      <ul id="navigation-bar">
+        <li class="active"><a href="/latest">最新</a></li>
+        <li><a href="/top">热门</a></li>
+        <li><a href="/custom-feed">我的频道</a></li>
+      </ul>`;
+    const adapter = new LinuxDoAdapter(vi.fn());
+    adapter.init();
+
+    expect(adapter.getFeedChannels().map(({ label, active }) => ({ label, active }))).toEqual([
+      { label: '最新', active: true },
+      { label: '热门', active: false },
+      { label: '我的频道', active: false },
+    ]);
+    adapter.disconnect();
+  });
+});
 
 describe('parseLinuxDoCount', () => {
   it('parses plain and compact Discourse counts', () => {

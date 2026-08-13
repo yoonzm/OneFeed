@@ -55,4 +55,23 @@ describe('reader app shells', () => {
     expect(markup).not.toContain('页面内容出现后');
     expect(markup).not.toContain('已读到这里');
   });
+
+  it('places the current site channel control beside the active platform name', () => {
+    const markup = renderToStaticMarkup(
+      <FeedApp
+        activePlatformId="zhihu"
+        channels={[
+          { id: 'recommend', label: '推荐', active: true },
+          { id: 'hot', label: '热榜', active: false },
+        ]}
+        scrollElement={document.createElement('div')}
+        onAction={vi.fn(() => false)}
+        onFeedChannelSelect={vi.fn(() => true)}
+        onLoadMore={vi.fn(async () => ({ kind: 'exhausted' as const }))}
+      />,
+    );
+
+    expect(markup).toContain('切换知乎频道，当前推荐');
+    expect(markup).not.toContain('href="https://www.zhihu.com/hot"');
+  });
 });

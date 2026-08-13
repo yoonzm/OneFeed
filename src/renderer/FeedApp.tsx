@@ -1,12 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ColorScheme } from '../theme/useColorScheme';
-import type { FeedActionDescriptor, FeedItem, FeedLoadResult } from '../types/feed';
+import type {
+  FeedActionDescriptor,
+  FeedChannel,
+  FeedItem,
+  FeedLoadResult,
+} from '../types/feed';
 import { OneFeedShell } from './OneFeedShell';
 import { useFeedStore } from './store/useFeedStore';
 import { Card } from './themes/FocusPaper/Card';
 
 interface FeedAppProps {
   activePlatformId: string;
+  channels?: readonly FeedChannel[];
+  onFeedChannelSelect?: (channelId: string) => boolean;
   scrollElement: HTMLElement;
   initialColorScheme?: ColorScheme;
   onAction: (itemId: string, actionId: string) => boolean;
@@ -20,6 +27,8 @@ type FeedLoadState =
 /** Feed Surface 外壳：连接状态库、阅读进度和原页面的无限加载。 */
 export default function FeedApp({
   activePlatformId,
+  channels,
+  onFeedChannelSelect,
   scrollElement,
   initialColorScheme,
   onAction,
@@ -121,6 +130,8 @@ export default function FeedApp({
   return (
     <OneFeedShell
       activePlatformId={activePlatformId}
+      channels={channels}
+      onFeedChannelSelect={onFeedChannelSelect}
       surface="feed"
       scrollElement={scrollElement}
       initialColorScheme={initialColorScheme}

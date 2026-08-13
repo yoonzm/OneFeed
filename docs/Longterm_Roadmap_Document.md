@@ -110,6 +110,7 @@ Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准。微博、小红�
 
 #### 4. 架构优化与交互代理
 * **SPA Surface 生命周期**：使用 WXT 路由事件按完整 URL 识别页面，依次销毁旧 Adapter/Store/Renderer、恢复原 DOM，再挂载新 Surface；hash-only 跳转不重建页面。Article/Thread Detail 只有在 URL 对应的目标节点解析成功后才遮罩原页，避免 DOM 延迟或规则失效造成空白详情。
+* **原站频道代理**：Feed Adapter 从当前页面的原生导航容器动态发现频道名称、顺序与选中态，Renderer 只展示轻量描述；用户选择频道时回调原 DOM 控件，不复制站点 URL 清单或排序规则。站点在同一导航结构中增加频道后可自动进入 OneFeed，只有导航结构或 Feed 卡片结构变化时才需要更新 Adapter。
 * **视频播放器节点搬运 (Portal)**：对于 B站/YouTube 视频，通过 DOM `appendChild` 将原平台的播放器节点无缝“移驾”到新 UI 卡片中，保留原生播放状态与清晰度选项。
 * **统一触底加载 (Feed Loading)**：Feed Surface 接近底部时统一向 Adapter 请求下一批内容；Adapter 可驱动被隐藏的原页面滚动、点击同文档加载控件，或抓取并离线解析同源 HTML 下一页。文档分页使用单请求锁、稳定 ID 去重、失败重试和卸载终止，避免整页导航清空当前阅读进度。
 

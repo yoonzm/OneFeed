@@ -9,6 +9,7 @@ import {
   normalizeColorScheme,
   type ColorScheme,
 } from '../theme/useColorScheme';
+import type { FeedChannel } from '../types/feed';
 import { createAdapter, isSupportedUrl } from './adapters/registry';
 import { FloatingToggle } from './FloatingToggle';
 import toggleStyles from './floatingToggle.css?inline';
@@ -131,26 +132,47 @@ function mount(
         hideOriginal = hideOriginalPage(new URL(window.location.href));
       }
     };
-    if (activeAdapter.surface === 'feed') revealSurface();
-    // 已存在的卡片先进入 Store，让 React 首次绘制可以直接展示信息流。
-    activeAdapter.adapter.init();
-    root.render(
-      activeAdapter.surface === 'feed'
-        ? (
-            <FeedApp
-              {...sharedProps}
-              activePlatformId={activeAdapter.source.id}
-              onLoadMore={() => activeAdapter.adapter.requestMore()}
-            />
-          )
-        : (
-            <DetailApp
-              {...sharedProps}
-              activePlatformId={activeAdapter.source.id}
-              surface={activeAdapter.surface}
-            />
-          ),
-    );
+    if (activeAdapter.surface === 'feed') {
+      revealSurface();
+      let channels: FeedChannel[] = [];
+      let initialized = false;
+      let channelRevision = 0;
+      const renderFeed = () => root?.render(
+        <FeedApp
+          key={`feed-channel-${channelRevision}`}
+          {...sharedProps}
+          activePlatformId={activeAdapter.source.id}
+          channels={channels}
+          onFeedChannelSelect={(channelId) => {
+            const handled = activeAdapter.adapter.triggerFeedChannel(channelId);
+            if (handled) {
+              useFeedStore.getState().clear();
+              channelRevision += 1;
+              renderFeed();
+            }
+            return handled;
+          }}
+          onLoadMore={() => activeAdapter.adapter.requestMore()}
+        />,
+      );
+      activeAdapter.adapter.setFeedChannelsListener((nextChannels) => {
+        channels = nextChannels;
+        if (initialized) renderFeed();
+      });
+      // 已存在的卡片和原站频道先进入状态，让 React 首次绘制可以直接展示。
+      activeAdapter.adapter.init();
+      initialized = true;
+      renderFeed();
+    } else {
+      activeAdapter.adapter.init();
+      root.render(
+        <DetailApp
+          {...sharedProps}
+          activePlatformId={activeAdapter.source.id}
+          surface={activeAdapter.surface}
+        />,
+      );
+    }
 
     return cleanup;
   } catch (error) {

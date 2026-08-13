@@ -27,7 +27,7 @@ export const PLATFORM_PRESENTATIONS: PlatformPresentation[] = [
   {
     id: 'v2ex',
     mark: 'V2',
-    scope: '首页、最近主题与主题详情',
+    scope: '首页分类、最近主题、VXNA 与主题详情',
     access: '无需登录即可体验',
     accent: '#77889a',
   },
