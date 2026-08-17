@@ -158,8 +158,6 @@ describe('content surface lifecycle', () => {
           role: 'article',
           author: { name: '测试作者', avatar: '' },
           body: [],
-          metrics: [],
-          actions: [],
         });
       });
       return detail;

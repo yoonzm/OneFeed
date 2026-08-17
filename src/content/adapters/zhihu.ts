@@ -20,7 +20,10 @@ const CARD_SELECTOR = [
   '.AnswerItem',
   '.ArticleItem',
   '.ContentItem',
+  '.HotItem',
 ].join(', ');
+
+const FEED_CHANNEL_PATHS = new Set(['/', '/follow', '/hot', '/recommend']);
 
 const BODY_SELECTOR = [
   '.RichContent-inner',
@@ -342,6 +345,43 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
 }
 
 export function parseZhihuCard(element: Element): FeedItem | null {
+  // 热榜条目没有回答流的 RichContent 与作者字段，需要按问题摘要单独归一化。
+  if (element.matches('.HotItem')) {
+    const titleLink = element.querySelector<HTMLAnchorElement>(
+      '.HotItem-content > a[href], a[href*="/question/"]',
+    );
+    const title = firstText(element, ['.HotItem-title']);
+    if (!titleLink || !title) return null;
+
+    const originalUrl = absoluteUrl(titleLink.getAttribute('href') || '');
+    const originId = originalUrl.match(/\/question\/(\d+)/)?.[1] ||
+      stableHash(`${originalUrl}|${title}`);
+    const excerpt = element.querySelector('.HotItem-excerpt');
+    const previewBlocks = excerpt ? parseZhihuBlocks(excerpt) : [];
+    const images = extractMedia(element);
+    if (images.length) previewBlocks.push({ type: 'gallery', items: images });
+
+    return {
+      id: `zhihu_question_${originId}`,
+      platform: 'zhihu',
+      source: ZHIHU_SOURCE,
+      originalUrl: originalUrl || window.location.href,
+      kind: 'discussion',
+      role: 'question',
+      title,
+      author: { name: '知乎用户', avatar: '' },
+      sequence: parseCount(firstText(element, ['.HotItem-index'])) || undefined,
+      context: { reason: { type: 'recommended', label: '热榜' } },
+      previewBlocks,
+      metrics: [{
+        kind: 'score',
+        value: parseCount(firstText(element, ['.HotItem-metrics'])),
+        label: '热度',
+      }],
+      actions: [{ id: 'open', kind: 'open', label: '查看原文', enabled: true }],
+    };
+  }
+
   const content = parseZhihuContent(element);
   if (!content) return null;
 
@@ -377,13 +417,21 @@ export class ZhihuAdapter extends BaseAdapter {
     return collectFeedChannelBindings(
       root,
       [
+        // 新版页眉的子级 class 是构建哈希，只依赖稳定的 AppHeader 与链接结构。
+        'header.AppHeader nav > a[href]',
         '.TopstoryTabs-link',
         '.TopstoryTabs a',
         '.TopstoryTabs button',
         '[class*="TopstoryTabs"] [role="tab"]',
       ].join(', '),
       new URL(window.location.href),
-    );
+    ).filter(({ channel }) => {
+      try {
+        return FEED_CHANNEL_PATHS.has(new URL(channel.id, window.location.href).pathname);
+      } catch {
+        return false;
+      }
+    });
   }
 
   parseCard(element: Element): FeedItem | null {

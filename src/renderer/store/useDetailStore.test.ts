@@ -12,8 +12,6 @@ const content: ArticleDetail = {
   author: { name: '林一', avatar: '' },
   title: '如何保持专注？',
   body: [{ type: 'richText', html: '<p>正文</p>', plainText: '正文' }],
-  metrics: [],
-  actions: [],
 };
 
 describe('useDetailStore', () => {

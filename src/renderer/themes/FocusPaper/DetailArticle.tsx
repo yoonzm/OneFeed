@@ -37,6 +37,31 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
         </div>
       )}
 
+      {content.title && <h1>{content.title}</h1>}
+
+      {content.context && (
+        !!content.context.body.length || content.context.navigation
+      ) && (
+        <div className="detail-context detail-body block-stack">
+          {content.context.body.map((block, blockIndex) => (
+            <BlockRenderer
+              block={block}
+              expanded
+              onPreview={setPreview}
+              key={`${block.type}-${blockIndex}`}
+            />
+          ))}
+          {content.context.navigation && (
+            <a
+              className="detail-context-navigation"
+              href={content.context.navigation.url}
+            >
+              {content.context.navigation.label} →
+            </a>
+          )}
+        </div>
+      )}
+
       <div className="author-row">
         {content.author.avatar ? (
           <img className="avatar" src={content.author.avatar} alt="" />
@@ -57,9 +82,15 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
             </span>
           )}
         </div>
+        {content.actionSlots?.author && (
+          <ActionBar
+            originalUrl={content.originalUrl}
+            metrics={content.actionSlots.author.metrics}
+            actions={content.actionSlots.author.actions}
+            onAction={onAction}
+          />
+        )}
       </div>
-
-      {content.title && <h1>{content.title}</h1>}
 
       {/* 详情正文不复用 Feed Card 的预览折叠规则。 */}
       <div className="detail-body block-stack">
@@ -73,14 +104,14 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
         ))}
       </div>
 
-      {/* 详情态统一隐藏重复的原文、回复和赞同入口，仅保留其他辅助操作与只读统计。 */}
-      <ActionBar
-        originalUrl={content.originalUrl}
-        metrics={content.metrics}
-        actions={content.actions}
-        onAction={onAction}
-        surface="detail"
-      />
+      {content.actionSlots?.footer && (
+        <ActionBar
+          originalUrl={content.originalUrl}
+          metrics={content.actionSlots.footer.metrics}
+          actions={content.actionSlots.footer.actions}
+          onAction={onAction}
+        />
+      )}
 
       {preview && (
         <button

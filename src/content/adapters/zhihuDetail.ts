@@ -1,6 +1,7 @@
 import type { ArticleDetail } from '../../types/detail';
 import type { DetailAdapterDefinition, DetailListener } from './detail';
 import {
+  parseZhihuBlocks,
   parseZhihuContent,
   triggerZhihuAction,
   ZHIHU_SOURCE,
@@ -8,6 +9,7 @@ import {
 
 const ANSWER_SELECTOR = '.ContentItem.AnswerItem, .AnswerItem';
 const ARTICLE_SELECTOR = '.Post-content, .Post-Main';
+const AUTHOR_ACTION_IDS = new Set(['react', 'reply', 'bookmark', 'like']);
 
 interface ZhihuDetailMetadata {
   itemId?: string | number;
@@ -71,6 +73,50 @@ function metricValue(value: number | undefined, fallback: number): number {
   return Number.isFinite(value) ? value! : fallback;
 }
 
+function questionNavigation(
+  root: ParentNode,
+  url: URL,
+  questionId: string,
+): NonNullable<ArticleDetail['context']>['navigation'] {
+  const questionPath = `/question/${questionId}`;
+  const originalLink = Array.from(root.querySelectorAll<HTMLAnchorElement>('a[href]'))
+    .find((link) => {
+      const label = link.textContent?.replace(/\s+/g, ' ').trim() || '';
+      if (!/^查看全部.*回答$/.test(label)) return false;
+
+      try {
+        // 仅采纳当前问题的入口，避免误用页面中其他问题或回答链接。
+        return new URL(link.getAttribute('href') || '', url.href).pathname.replace(/\/$/, '') ===
+          questionPath;
+      } catch {
+        return false;
+      }
+    });
+
+  return {
+    label: originalLink?.textContent?.replace(/\s+/g, ' ').trim() || '查看全部回答',
+    url: new URL(questionPath, url.origin).href,
+  };
+}
+
+function questionContext(root: ParentNode, url: URL): ArticleDetail['context'] {
+  const questionId = url.pathname.match(/^\/question\/(\d+)\/answer\/\d+/)?.[1];
+  if (!questionId) return undefined;
+
+  const element = root.querySelector([
+    '.QuestionHeader-detail .RichContent-inner',
+    '.QuestionHeader-detail .RichText',
+    '.QuestionRichText .RichContent-inner',
+    '.QuestionRichText .RichText',
+    '.QuestionRichText',
+  ].join(', '));
+
+  return {
+    body: element ? parseZhihuBlocks(element) : [],
+    navigation: questionNavigation(root, url, questionId),
+  };
+}
+
 export function parseZhihuDetail(
   element: Element,
   url = new URL(window.location.href),
@@ -97,27 +143,42 @@ export function parseZhihuDetail(
     publishedAt: metadata.dateCreated ?? metadata.datePublished,
     updatedAt: metadata.dateModified,
     title: pageTitle(root) || parsed.title,
+    context: questionContext(root, url),
     body: parsed.blocks,
-    metrics: [
-      {
-        kind: 'reactions',
-        value: metricValue(metadata.upvoteCount, reactions),
-        label: '赞同',
+    actionSlots: {
+      author: {
+        metrics: [
+          {
+            kind: 'reactions',
+            value: metricValue(metadata.upvoteCount, reactions),
+            label: '赞同',
+          },
+          {
+            kind: 'replies',
+            value: metricValue(metadata.commentCount, replies),
+            label: '评论',
+          },
+        ],
+        actions: parsed.actions
+          .filter((action) => AUTHOR_ACTION_IDS.has(action.id))
+          .map((action) => ({
+            ...action,
+            fallback: undefined,
+          })),
       },
-      {
-        kind: 'replies',
-        value: metricValue(metadata.commentCount, replies),
-        label: '评论',
-      },
-    ],
-    actions: parsed.actions
-      .filter((action) => action.kind !== 'open')
-      .map((action) => ({
-        ...action,
-        enabled: action.kind === 'reply' ? false : action.enabled,
-        fallback: undefined,
-      })),
+    },
   };
+}
+
+function expandCollapsedQuestionContext(root: ParentNode): boolean {
+  const control = root.querySelector<HTMLElement>(
+    '.QuestionRichText.QuestionRichText--collapsed .QuestionRichText-more',
+  );
+  if (!control) return false;
+
+  // 折叠态只有占位 DOM；先交给知乎展开，待其补齐内容后再解析。
+  control.click();
+  return true;
 }
 
 export class ZhihuDetailAdapter {
@@ -125,11 +186,11 @@ export class ZhihuDetailAdapter {
   private timer?: number;
   private runtimeElement?: Element;
   private itemId?: string;
+  private questionContextExpansionRequested = false;
 
   constructor(private readonly onDetail: DetailListener) {}
 
   init(): void {
-    this.processDetail();
     this.observer = new MutationObserver(() => {
       window.clearTimeout(this.timer);
       this.timer = window.setTimeout(() => this.processDetail(), 120);
@@ -140,6 +201,7 @@ export class ZhihuDetailAdapter {
       attributes: true,
       characterData: true,
     });
+    this.processDetail();
   }
 
   disconnect(): void {
@@ -147,6 +209,7 @@ export class ZhihuDetailAdapter {
     window.clearTimeout(this.timer);
     this.runtimeElement = undefined;
     this.itemId = undefined;
+    this.questionContextExpansionRequested = false;
   }
 
   triggerAction(itemId: string, actionId: string): boolean {
@@ -158,6 +221,15 @@ export class ZhihuDetailAdapter {
     const url = new URL(window.location.href);
     const element = findZhihuDetailRoot(document, url);
     if (!element) return;
+    if (
+      !this.questionContextExpansionRequested &&
+      expandCollapsedQuestionContext(document)
+    ) {
+      this.questionContextExpansionRequested = true;
+      window.clearTimeout(this.timer);
+      this.timer = window.setTimeout(() => this.processDetail(), 120);
+      return;
+    }
     const content = parseZhihuDetail(element, url);
     if (!content) return;
     this.runtimeElement = element;
