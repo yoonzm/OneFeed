@@ -18,6 +18,12 @@ export interface ArticleContext {
   };
 }
 
+/** Article 详情中的命名操作区域；由 Adapter 决定内容，Renderer 只负责落位。 */
+export interface ArticleActionSlot {
+  metrics: FeedMetric[];
+  actions: FeedActionDescriptor[];
+}
+
 /**
  * 单篇正文 Surface，例如知乎回答详情或专栏文章。
  * 它与 FeedItem 分开建模，确保详情正文不会被列表预览截断规则影响。
@@ -35,8 +41,10 @@ export interface ArticleDetail {
   title?: string;
   context?: ArticleContext;
   body: FeedBlock[];
-  metrics: FeedMetric[];
-  actions: FeedActionDescriptor[];
+  actionSlots?: {
+    author?: ArticleActionSlot;
+    footer?: ArticleActionSlot;
+  };
   flags?: FeedFlags;
 }
 

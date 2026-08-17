@@ -9,6 +9,7 @@ import {
 
 const ANSWER_SELECTOR = '.ContentItem.AnswerItem, .AnswerItem';
 const ARTICLE_SELECTOR = '.Post-content, .Post-Main';
+const AUTHOR_ACTION_IDS = new Set(['react', 'reply', 'bookmark', 'like']);
 
 interface ZhihuDetailMetadata {
   itemId?: string | number;
@@ -144,25 +145,28 @@ export function parseZhihuDetail(
     title: pageTitle(root) || parsed.title,
     context: questionContext(root, url),
     body: parsed.blocks,
-    metrics: [
-      {
-        kind: 'reactions',
-        value: metricValue(metadata.upvoteCount, reactions),
-        label: '赞同',
+    actionSlots: {
+      author: {
+        metrics: [
+          {
+            kind: 'reactions',
+            value: metricValue(metadata.upvoteCount, reactions),
+            label: '赞同',
+          },
+          {
+            kind: 'replies',
+            value: metricValue(metadata.commentCount, replies),
+            label: '评论',
+          },
+        ],
+        actions: parsed.actions
+          .filter((action) => AUTHOR_ACTION_IDS.has(action.id))
+          .map((action) => ({
+            ...action,
+            fallback: undefined,
+          })),
       },
-      {
-        kind: 'replies',
-        value: metricValue(metadata.commentCount, replies),
-        label: '评论',
-      },
-    ],
-    actions: parsed.actions
-      .filter((action) => action.kind !== 'open')
-      .map((action) => ({
-        ...action,
-        enabled: action.kind === 'reply' ? false : action.enabled,
-        fallback: undefined,
-      })),
+    },
   };
 }
 

@@ -29,15 +29,24 @@ const content: ArticleDetail = {
     html: '<p>超过列表摘要长度的完整正文。</p>',
     plainText: '超过列表摘要长度的完整正文。',
   }],
-  metrics: [
-    { kind: 'reactions', value: 8, label: '赞同' },
-    { kind: 'replies', value: 3, label: '评论' },
-  ],
-  actions: [
-    { id: 'react', kind: 'react', label: '赞同', enabled: true },
-    { id: 'reply', kind: 'reply', label: '评论', enabled: true },
-    { id: 'open', kind: 'open', label: '查看原文', enabled: true },
-  ],
+  actionSlots: {
+    author: {
+      metrics: [
+        { kind: 'reactions', value: 8, label: '赞同' },
+        { kind: 'replies', value: 3, label: '评论' },
+      ],
+      actions: [
+        { id: 'react', kind: 'react', variant: 'agree', label: '赞同', count: 8, enabled: true },
+        { id: 'reply', kind: 'reply', label: '评论', count: 3, enabled: true },
+        { id: 'bookmark', kind: 'bookmark', label: '收藏', count: 2, enabled: true },
+        { id: 'like', kind: 'react', variant: 'like', label: '喜欢', count: 4, enabled: true },
+      ],
+    },
+    footer: {
+      metrics: [{ kind: 'views', value: 1200, label: '浏览' }],
+      actions: [{ id: 'share', kind: 'share', label: '分享', enabled: true }],
+    },
+  },
 };
 
 describe('DetailArticle', () => {
@@ -59,9 +68,16 @@ describe('DetailArticle', () => {
     expect(markup).toContain('<time>');
     expect(markup).not.toContain(content.source.name);
     expect(markup).not.toContain('展开全文');
-    expect(markup).not.toContain('赞同');
-    expect(markup).not.toContain('评论');
     expect(markup).not.toContain('查看原文');
+
+    const container = document.createElement('div');
+    container.innerHTML = markup;
+    expect(container.querySelector('.author-row .card-actions')?.textContent).toBe(
+      '赞同 8评论 3收藏 2喜欢 4',
+    );
+    expect(container.querySelector('.detail-article > .card-actions')?.textContent).toBe(
+      '浏览 1,200分享',
+    );
 
     expect(markup.indexOf('如何保持专注？')).toBeLessThan(
       markup.indexOf('先明确真正要解决的问题。'),

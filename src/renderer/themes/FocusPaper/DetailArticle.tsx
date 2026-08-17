@@ -82,6 +82,14 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
             </span>
           )}
         </div>
+        {content.actionSlots?.author && (
+          <ActionBar
+            originalUrl={content.originalUrl}
+            metrics={content.actionSlots.author.metrics}
+            actions={content.actionSlots.author.actions}
+            onAction={onAction}
+          />
+        )}
       </div>
 
       {/* 详情正文不复用 Feed Card 的预览折叠规则。 */}
@@ -96,14 +104,14 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
         ))}
       </div>
 
-      {/* 详情态统一隐藏重复的原文、回复和赞同入口，仅保留其他辅助操作与只读统计。 */}
-      <ActionBar
-        originalUrl={content.originalUrl}
-        metrics={content.metrics}
-        actions={content.actions}
-        onAction={onAction}
-        surface="detail"
-      />
+      {content.actionSlots?.footer && (
+        <ActionBar
+          originalUrl={content.originalUrl}
+          metrics={content.actionSlots.footer.metrics}
+          actions={content.actionSlots.footer.actions}
+          onAction={onAction}
+        />
+      )}
 
       {preview && (
         <button

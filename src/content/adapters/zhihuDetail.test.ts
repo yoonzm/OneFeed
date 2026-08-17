@@ -42,6 +42,8 @@ describe('Zhihu answer detail', () => {
         </div>
         <button class="VoteButton">赞同 1.2 万</button>
         <button class="ContentItem-action">18 条评论</button>
+        <button class="ContentItem-action" aria-label="收藏 8">收藏</button>
+        <button class="ContentItem-action" aria-label="喜欢 6">喜欢</button>
       </article>`;
 
     const url = new URL('https://www.zhihu.com/question/1/answer/42');
@@ -57,10 +59,14 @@ describe('Zhihu answer detail', () => {
       author: { name: '林一' },
       publishedAt: '2026-08-01T10:00:00Z',
       updatedAt: '2026-08-02T10:00:00Z',
-      metrics: [
-        { kind: 'reactions', value: 12000, label: '赞同' },
-        { kind: 'replies', value: 18, label: '评论' },
-      ],
+      actionSlots: {
+        author: {
+          metrics: [
+            { kind: 'reactions', value: 12000, label: '赞同' },
+            { kind: 'replies', value: 18, label: '评论' },
+          ],
+        },
+      },
     });
     expect(detail?.originalUrl).toBe(url.href);
     expect(detail?.context).toMatchObject({
@@ -79,8 +85,21 @@ describe('Zhihu answer detail', () => {
     expect(text?.html).not.toContain('script');
     expect(text?.html).not.toContain('style=');
     expect(gallery?.items).toEqual([{ url: 'https://pic.example/answer.jpg', alt: '书桌' }]);
-    expect(detail?.actions.find((action) => action.kind === 'reply')?.enabled).toBe(false);
-    expect(detail?.actions.some((action) => action.kind === 'open')).toBe(false);
+    expect(detail?.actionSlots?.author?.actions.find(
+      (action) => action.kind === 'reply',
+    )?.enabled).toBe(true);
+    expect(detail?.actionSlots?.author?.actions).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'react', label: '赞同', count: 12000 }),
+      expect.objectContaining({ id: 'reply', label: '评论', count: 18 }),
+      expect.objectContaining({ id: 'bookmark', label: '收藏', count: 8 }),
+      expect.objectContaining({ id: 'like', label: '喜欢', count: 6 }),
+    ]));
+    expect(detail?.actionSlots?.author?.actions.map((action) => action.id)).toEqual([
+      'react',
+      'reply',
+      'bookmark',
+      'like',
+    ]);
   });
 
   it('keeps the question navigation when the background is absent', () => {
