@@ -25,6 +25,7 @@ describe('Zhihu answer detail', () => {
           <p style="color:red">先明确要解决的问题。<script>alert(1)</script></p>
         </div>
       </div>
+      <a href="/question/1">查看全部 2 个回答</a>
       <article class="ContentItem AnswerItem" data-zop='{"type":"answer","itemId":"7"}'>
         <div class="RichContent-inner"><p>其他回答。</p></div>
       </article>
@@ -64,6 +65,10 @@ describe('Zhihu answer detail', () => {
     expect(detail?.originalUrl).toBe(url.href);
     expect(detail?.context).toMatchObject({
       body: [{ type: 'richText', plainText: '先明确要解决的问题。' }],
+      navigation: {
+        label: '查看全部 2 个回答',
+        url: 'https://www.zhihu.com/question/1',
+      },
     });
     expect(detail?.context?.body[0]).not.toMatchObject({
       html: expect.stringContaining('script'),
@@ -76,6 +81,27 @@ describe('Zhihu answer detail', () => {
     expect(gallery?.items).toEqual([{ url: 'https://pic.example/answer.jpg', alt: '书桌' }]);
     expect(detail?.actions.find((action) => action.kind === 'reply')?.enabled).toBe(false);
     expect(detail?.actions.some((action) => action.kind === 'open')).toBe(false);
+  });
+
+  it('keeps the question navigation when the background is absent', () => {
+    document.body.innerHTML = `
+      <h1 class="QuestionHeader-title">如何保持专注？</h1>
+      <article class="ContentItem AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+        <a class="UserLink-link" href="/people/reader">林一</a>
+        <div class="RichContent-inner"><p>回答正文。</p></div>
+      </article>`;
+
+    const url = new URL('https://www.zhihu.com/question/1/answer/42');
+    const root = findZhihuDetailRoot(document, url);
+    const detail = root ? parseZhihuDetail(root, url) : null;
+
+    expect(detail?.context).toEqual({
+      body: [],
+      navigation: {
+        label: '查看全部回答',
+        url: 'https://www.zhihu.com/question/1',
+      },
+    });
   });
 
   it('returns no root when the URL answer is absent from the DOM', () => {

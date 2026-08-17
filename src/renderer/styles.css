@@ -193,6 +193,19 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 /* 问题说明沿用正文排版，仅用间距与后续回答作者区分。 */
 .detail-context { margin-bottom: 28px; }
 
+.detail-context-navigation {
+  justify-self: start;
+  color: var(--blue);
+  font-family: var(--font-onefeed-sans);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.detail-context-navigation:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .thread-header {
   padding: 44px 0 32px;
   border-bottom: 1px solid var(--line);

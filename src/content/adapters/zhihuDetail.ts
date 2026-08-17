@@ -72,6 +72,32 @@ function metricValue(value: number | undefined, fallback: number): number {
   return Number.isFinite(value) ? value! : fallback;
 }
 
+function questionNavigation(
+  root: ParentNode,
+  url: URL,
+  questionId: string,
+): NonNullable<ArticleDetail['context']>['navigation'] {
+  const questionPath = `/question/${questionId}`;
+  const originalLink = Array.from(root.querySelectorAll<HTMLAnchorElement>('a[href]'))
+    .find((link) => {
+      const label = link.textContent?.replace(/\s+/g, ' ').trim() || '';
+      if (!/^查看全部.*回答$/.test(label)) return false;
+
+      try {
+        // 仅采纳当前问题的入口，避免误用页面中其他问题或回答链接。
+        return new URL(link.getAttribute('href') || '', url.href).pathname.replace(/\/$/, '') ===
+          questionPath;
+      } catch {
+        return false;
+      }
+    });
+
+  return {
+    label: originalLink?.textContent?.replace(/\s+/g, ' ').trim() || '查看全部回答',
+    url: new URL(questionPath, url.origin).href,
+  };
+}
+
 function questionContext(root: ParentNode, url: URL): ArticleDetail['context'] {
   const questionId = url.pathname.match(/^\/question\/(\d+)\/answer\/\d+/)?.[1];
   if (!questionId) return undefined;
@@ -83,13 +109,10 @@ function questionContext(root: ParentNode, url: URL): ArticleDetail['context'] {
     '.QuestionRichText .RichText',
     '.QuestionRichText',
   ].join(', '));
-  if (!element) return undefined;
-
-  const body = parseZhihuBlocks(element);
-  if (!body.length) return undefined;
 
   return {
-    body,
+    body: element ? parseZhihuBlocks(element) : [],
+    navigation: questionNavigation(root, url, questionId),
   };
 }
 

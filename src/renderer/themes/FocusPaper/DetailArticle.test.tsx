@@ -19,6 +19,10 @@ const content: ArticleDetail = {
       html: '<p>先明确真正要解决的问题。</p>',
       plainText: '先明确真正要解决的问题。',
     }],
+    navigation: {
+      label: '查看全部 12 个回答',
+      url: 'https://www.zhihu.com/question/1',
+    },
   },
   body: [{
     type: 'richText',
@@ -47,6 +51,9 @@ describe('DetailArticle', () => {
     expect(markup).toContain('先明确真正要解决的问题。');
     expect(markup).not.toContain('问题背景');
     expect(markup).not.toContain('查看问题');
+    expect(markup).toContain('查看全部 12 个回答 →');
+    expect(markup).toContain('href="https://www.zhihu.com/question/1"');
+    expect(markup).not.toContain('target="_blank"');
     expect(markup).toContain('超过列表摘要长度的完整正文。');
     expect(markup).toContain('avatar-fallback');
     expect(markup).toContain('<time>');
@@ -59,7 +66,10 @@ describe('DetailArticle', () => {
     expect(markup.indexOf('如何保持专注？')).toBeLessThan(
       markup.indexOf('先明确真正要解决的问题。'),
     );
-    expect(markup.indexOf('先明确真正要解决的问题。')).toBeLessThan(markup.indexOf('林一'));
+    expect(markup.indexOf('先明确真正要解决的问题。')).toBeLessThan(
+      markup.indexOf('查看全部 12 个回答'),
+    );
+    expect(markup.indexOf('查看全部 12 个回答')).toBeLessThan(markup.indexOf('林一'));
     expect(markup.indexOf('林一')).toBeLessThan(markup.indexOf('超过列表摘要长度的完整正文。'));
   });
 });

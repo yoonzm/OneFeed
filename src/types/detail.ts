@@ -12,6 +12,10 @@ import type {
 /** 单篇正文所属的上级内容摘要，例如回答对应的问题背景。 */
 export interface ArticleContext {
   body: FeedBlock[];
+  navigation?: {
+    label: string;
+    url: string;
+  };
 }
 
 /**

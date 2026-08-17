@@ -39,7 +39,9 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
 
       {content.title && <h1>{content.title}</h1>}
 
-      {content.context && !!content.context.body.length && (
+      {content.context && (
+        !!content.context.body.length || content.context.navigation
+      ) && (
         <div className="detail-context detail-body block-stack">
           {content.context.body.map((block, blockIndex) => (
             <BlockRenderer
@@ -49,6 +51,14 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
               key={`${block.type}-${blockIndex}`}
             />
           ))}
+          {content.context.navigation && (
+            <a
+              className="detail-context-navigation"
+              href={content.context.navigation.url}
+            >
+              {content.context.navigation.label} →
+            </a>
+          )}
         </div>
       )}
 
