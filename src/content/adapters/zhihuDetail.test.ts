@@ -123,6 +123,45 @@ describe('Zhihu answer detail', () => {
     });
   });
 
+  it('expands a collapsed question background before publishing the detail', async () => {
+    document.body.innerHTML = `
+      <h1 class="QuestionHeader-title">如何保持专注？</h1>
+      <div class="QuestionRichText QuestionRichText--expandable QuestionRichText--collapsed">
+        <div>
+          <span itemprop="text">折叠占位内容</span>
+          <button class="QuestionRichText-more" type="button">显示全部</button>
+        </div>
+      </div>
+      <article class="ContentItem AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+        <a class="UserLink-link" href="/people/reader">林一</a>
+        <div class="RichContent-inner"><p>回答正文。</p></div>
+      </article>`;
+
+    const question = document.querySelector<HTMLElement>('.QuestionRichText')!;
+    const button = document.querySelector<HTMLButtonElement>('.QuestionRichText-more')!;
+    const click = vi.spyOn(button, 'click');
+    button.addEventListener('click', () => {
+      question.classList.remove('QuestionRichText--collapsed');
+      question.innerHTML = `
+        <div class="RichContent-inner"><p>完整问题背景。</p></div>
+      `;
+    });
+    const onDetail = vi.fn();
+    const adapter = new ZhihuDetailAdapter(onDetail);
+
+    window.history.replaceState({}, '', '/question/1/answer/42');
+    adapter.init();
+
+    expect(click).toHaveBeenCalledOnce();
+    expect(onDetail).not.toHaveBeenCalled();
+    await vi.waitFor(() => expect(onDetail).toHaveBeenCalled());
+    expect(onDetail.mock.lastCall?.[0].context?.body[0]).toMatchObject({
+      type: 'richText',
+      plainText: '完整问题背景。',
+    });
+    adapter.disconnect();
+  });
+
   it('returns no root when the URL answer is absent from the DOM', () => {
     document.body.innerHTML = `
       <article class="AnswerItem" data-zop='{"type":"answer","itemId":"7"}'>
