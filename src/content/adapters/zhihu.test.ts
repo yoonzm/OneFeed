@@ -7,20 +7,24 @@ import {
 } from './zhihu';
 
 describe('ZhihuAdapter feed channels', () => {
-  it('reads top-story tabs, including tabs added by the site', () => {
+  it('reads the current header channels and ignores unrelated navigation', () => {
     document.body.innerHTML = `
-      <nav class="TopstoryTabs">
-        <button class="TopstoryTabs-link is-active" aria-selected="true">推荐</button>
-        <button class="TopstoryTabs-link">热榜</button>
-        <button class="TopstoryTabs-link">圆桌</button>
-      </nav>`;
+      <header class="AppHeader" role="banner">
+        <nav>
+          <a href="/follow">关注</a>
+          <a class="is-active" href="/" aria-current="page">推荐</a>
+          <a href="/hot">热榜</a>
+          <a href="/column">专栏</a>
+          <a href="/roundtable">圆桌</a>
+        </nav>
+      </header>`;
     const adapter = new ZhihuAdapter(vi.fn());
     adapter.init();
 
     expect(adapter.getFeedChannels().map(({ label, active }) => ({ label, active }))).toEqual([
+      { label: '关注', active: false },
       { label: '推荐', active: true },
       { label: '热榜', active: false },
-      { label: '圆桌', active: false },
     ]);
     adapter.disconnect();
   });
@@ -35,6 +39,48 @@ describe('parseCount', () => {
 });
 
 describe('parseZhihuCard', () => {
+  it('normalizes a Zhihu hot-list question', () => {
+    document.body.innerHTML = `
+      <section class="HotItem">
+        <div class="HotItem-index">3</div>
+        <div class="HotItem-content">
+          <a href="/question/2072481373085028433">
+            <h2 class="HotItem-title">如何评价新的模型套餐？</h2>
+            <p class="HotItem-excerpt">调用量发生了明显变化。<script>alert(1)</script></p>
+          </a>
+          <div class="HotItem-metrics">590 万热度</div>
+        </div>
+        <a class="HotItem-img" href="/question/2072481373085028433">
+          <img src="https://pic.example/hot.png" alt="热榜配图" />
+        </a>
+      </section>`;
+
+    const item = parseZhihuCard(document.querySelector('.HotItem')!);
+
+    expect(item).toMatchObject({
+      id: 'zhihu_question_2072481373085028433',
+      kind: 'discussion',
+      role: 'question',
+      title: '如何评价新的模型套餐？',
+      sequence: 3,
+      context: { reason: { type: 'recommended', label: '热榜' } },
+      metrics: [{ kind: 'score', value: 5900000, label: '热度' }],
+      actions: [{ id: 'open', kind: 'open', label: '查看原文' }],
+    });
+    expect(item?.originalUrl).toBe('http://localhost:3000/question/2072481373085028433');
+    expect(item?.previewBlocks).toEqual([
+      {
+        type: 'richText',
+        html: '调用量发生了明显变化。',
+        plainText: '调用量发生了明显变化。',
+      },
+      {
+        type: 'gallery',
+        items: [{ url: 'https://pic.example/hot.png', alt: '热榜配图' }],
+      },
+    ]);
+  });
+
   it('normalizes a Zhihu card and sanitizes content', () => {
     document.body.innerHTML = `
       <article class="TopstoryItem" data-id="answer-42">
