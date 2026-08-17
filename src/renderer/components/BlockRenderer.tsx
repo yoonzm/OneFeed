@@ -5,6 +5,7 @@ interface BlockComponentProps {
   block: FeedBlock;
   expanded: boolean;
   onPreview: (image: FeedImage) => void;
+  compactGallery?: boolean;
 }
 
 function RichTextBlock({ block, expanded }: BlockComponentProps) {
@@ -13,27 +14,44 @@ function RichTextBlock({ block, expanded }: BlockComponentProps) {
   // FeedBlock 契约要求 Adapter 先清洗 html；Renderer 只负责保持富文本结构。
   return (
     <div
-      className={`content ${expanded ? 'content-expanded' : ''}`}
+      className={expanded ? 'content content-expanded' : 'content'}
       dangerouslySetInnerHTML={{ __html: block.html }}
     />
   );
 }
 
-function GalleryBlock({ block, onPreview }: BlockComponentProps) {
+function GalleryBlock({ block, onPreview, compactGallery = false }: BlockComponentProps) {
   if (block.type !== 'gallery') return null;
 
+  const visibleItems = block.items.slice(0, compactGallery ? 4 : 6);
+  const remainingCount = compactGallery ? block.items.length - visibleItems.length : 0;
+  const layoutCount = compactGallery
+    ? Math.min(visibleItems.length, 4)
+    : Math.min(visibleItems.length, 3);
+
   return (
-    <div className={`media-grid media-count-${Math.min(block.items.length, 3)}`}>
+    <div className={`media-grid media-count-${layoutCount}`}>
       {/* 限制单卡资源数量，防止异常页面一次挂载过多图片节点。 */}
-      {block.items.slice(0, 6).map((image, index) => (
+      {visibleItems.map((image, index) => (
         <button
           className="media-button"
           type="button"
           key={`${image.url}-${index}`}
           onClick={() => onPreview(image)}
-          aria-label={`预览图片 ${index + 1}`}
+          aria-label={remainingCount > 0 && index === visibleItems.length - 1
+            ? `预览图片 ${index + 1}，共 ${block.items.length} 张`
+            : `预览图片 ${index + 1}`}
         >
-          <img src={image.url} alt={image.alt} loading="lazy" />
+          <img
+            src={image.url}
+            alt={image.alt}
+            width={image.width}
+            height={image.height}
+            loading="lazy"
+          />
+          {remainingCount > 0 && index === visibleItems.length - 1 && (
+            <span className="media-overflow-count" aria-hidden="true">+{remainingCount}</span>
+          )}
         </button>
       ))}
     </div>
@@ -128,8 +146,20 @@ interface BlockRendererProps extends Omit<BlockComponentProps, 'block'> {
   block: FeedBlock;
 }
 
-export function BlockRenderer({ block, expanded, onPreview }: BlockRendererProps) {
+export function BlockRenderer({
+  block,
+  expanded,
+  onPreview,
+  compactGallery,
+}: BlockRendererProps) {
   // 注册表让新增标准 Block 保持集中且穷尽，避免在主题组件中加入平台判断。
   const Renderer = blockRegistry[block.type];
-  return <Renderer block={block} expanded={expanded} onPreview={onPreview} />;
+  return (
+    <Renderer
+      block={block}
+      expanded={expanded}
+      onPreview={onPreview}
+      compactGallery={compactGallery}
+    />
+  );
 }

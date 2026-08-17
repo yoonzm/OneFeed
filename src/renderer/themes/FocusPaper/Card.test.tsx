@@ -37,7 +37,8 @@ describe('Card', () => {
     );
 
     expect(markup).toContain('feed-card-compact');
-    expect(markup).toContain('class="content content-expanded"');
+    expect(markup).toContain('class="content"');
+    expect(markup).not.toContain('content-expanded');
     expect(markup).toContain('class="card-meta-row"');
     expect(markup).toContain('class="card-author">Alice</span>');
     expect(markup).not.toContain('author-row');
@@ -164,5 +165,85 @@ describe('Card', () => {
     );
 
     expect(markup).not.toContain('feed-card-compact');
+  });
+
+  it('places a supplementary single image in the side-media region', () => {
+    const markup = renderToStaticMarkup(
+      <Card
+        item={{
+          ...shortReply,
+          title: '带配图的正文',
+          previewBlocks: [
+            {
+              type: 'richText',
+              html: '<p>正文摘要</p>',
+              plainText: '正文摘要',
+            },
+            {
+              type: 'gallery',
+              items: [{
+                url: 'https://example.com/cover.jpg',
+                alt: '正文配图',
+                aspectRatio: 1.5,
+              }],
+            },
+          ],
+        }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain('feed-card-side-media');
+    expect(markup).toContain('class="card-media-aside"');
+    expect(markup.indexOf('card-body-row')).toBeLessThan(markup.indexOf('card-media-aside'));
+    expect(markup.indexOf('card-media-aside')).toBeLessThan(markup.indexOf('card-meta-row'));
+  });
+
+  it('keeps image-led and extreme-ratio media in the main content flow', () => {
+    const imageLedMarkup = renderToStaticMarkup(
+      <Card
+        item={{
+          ...shortReply,
+          title: '图片内容',
+          previewBlocks: [{
+            type: 'gallery',
+            items: [{ url: 'https://example.com/cover.jpg', alt: '主图片' }],
+          }],
+        }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+    const portraitMarkup = renderToStaticMarkup(
+      <Card
+        item={{
+          ...shortReply,
+          previewBlocks: [
+            {
+              type: 'richText',
+              html: '<p>正文摘要</p>',
+              plainText: '正文摘要',
+            },
+            {
+              type: 'gallery',
+              items: [{
+                url: 'https://example.com/poster.jpg',
+                alt: '竖版长图',
+                width: 600,
+                height: 1200,
+              }],
+            },
+          ],
+        }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(imageLedMarkup).not.toContain('feed-card-side-media');
+    expect(imageLedMarkup).not.toContain('card-media-aside');
+    expect(portraitMarkup).not.toContain('feed-card-side-media');
+    expect(portraitMarkup).not.toContain('card-media-aside');
   });
 });

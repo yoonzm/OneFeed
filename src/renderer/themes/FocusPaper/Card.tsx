@@ -34,6 +34,27 @@ function getDensityClassName(item: FeedItem): string {
   return 'feed-card-compact';
 }
 
+/** 文字与单张常规比例图片组合时，图片作为辅助信息收敛到卡片右侧。 */
+function getSideGallery(item: FeedItem) {
+  const galleryBlocks = item.previewBlocks.filter((block) => block.type === 'gallery');
+  const hasRichText = item.previewBlocks.some((block) => block.type === 'richText');
+  const hasOtherBlocks = item.previewBlocks.some(
+    (block) => block.type !== 'richText' && block.type !== 'gallery',
+  );
+  const gallery = galleryBlocks[0];
+
+  if (!hasRichText || hasOtherBlocks || galleryBlocks.length !== 1 || gallery?.items.length !== 1) {
+    return undefined;
+  }
+
+  const image = gallery.items[0];
+  const aspectRatio = image?.aspectRatio
+    || (image?.width && image.height ? image.width / image.height : undefined);
+  if (aspectRatio && (aspectRatio < 0.75 || aspectRatio > 2.2)) return undefined;
+
+  return gallery;
+}
+
 function formatPublishedAt(value: string | number): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value);
@@ -56,19 +77,23 @@ export function Card({
 }: CardProps) {
   const [expanded, setExpanded] = useState(false);
   const [preview, setPreview] = useState<FeedImage>();
-  // 260 字是交互阈值，不等于固定行数；实际折叠高度由主题 CSS 控制。
+  // 260 字仅决定是否提供展开操作；所有列表正文默认由主题 CSS 收敛到两行。
   const expandable = item.previewBlocks.some(
     (block) => block.type === 'richText' && block.plainText.length > 260,
   );
-  const contentExpanded = expanded || !expandable;
+  const contentExpanded = expanded;
   const densityClassName = getDensityClassName(item);
+  const sideGallery = getSideGallery(item);
+  const contentBlocks = sideGallery
+    ? item.previewBlocks.filter((block) => block !== sideGallery)
+    : item.previewBlocks;
   const authorAvatar = item.author.avatar ? (
     <img className="card-author-avatar" src={item.author.avatar} alt="" loading="lazy" />
   ) : null;
 
   return (
     <article
-      className={`feed-card feed-card-${item.kind} feed-card-${item.role} ${item.title ? 'feed-card-titled' : 'feed-card-untitled'} ${densityClassName} ${isSeen ? 'feed-card-seen' : ''}`.trim()}
+      className={`feed-card feed-card-${item.kind} feed-card-${item.role} ${item.title ? 'feed-card-titled' : 'feed-card-untitled'} ${sideGallery ? 'feed-card-side-media' : ''} ${densityClassName} ${isSeen ? 'feed-card-seen' : ''}`.trim()}
       data-seen={isSeen ? 'true' : undefined}
     >
       <div className="card-main">
@@ -82,20 +107,32 @@ export function Card({
           </div>
         )}
 
-        {!!item.previewBlocks.length && (
+        {!!contentBlocks.length && (
           <div className="card-body-row block-stack">
-            {item.previewBlocks.map((block, blockIndex) => (
+            {contentBlocks.map((block, blockIndex) => (
               <BlockRenderer
                 block={block}
                 expanded={contentExpanded}
                 onPreview={setPreview}
+                compactGallery
                 key={`${block.type}-${blockIndex}`}
               />
             ))}
           </div>
         )}
 
-        {/* 作者、上下文、状态和操作统一收敛到第三行；头像仅在源站提供时显示。 */}
+        {sideGallery && (
+          <div className="card-media-aside">
+            <BlockRenderer
+              block={sideGallery}
+              expanded={contentExpanded}
+              onPreview={setPreview}
+              compactGallery
+            />
+          </div>
+        )}
+
+        {/* 作者、上下文、状态和操作统一收敛到最后一行；头像仅在源站提供时显示。 */}
         <div className="card-meta-row">
           <span className="card-index" aria-label={`第 ${item.sequence || index + 1} 条`}>
             {String(item.sequence || index + 1).padStart(2, '0')}
