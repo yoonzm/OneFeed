@@ -9,6 +9,11 @@ import type {
   FeedSourceRef,
 } from './feed';
 
+/** 单篇正文所属的上级内容摘要，例如回答对应的问题背景。 */
+export interface ArticleContext {
+  body: FeedBlock[];
+}
+
 /**
  * 单篇正文 Surface，例如知乎回答详情或专栏文章。
  * 它与 FeedItem 分开建模，确保详情正文不会被列表预览截断规则影响。
@@ -24,6 +29,7 @@ export interface ArticleDetail {
   publishedAt?: string | number;
   updatedAt?: string | number;
   title?: string;
+  context?: ArticleContext;
   body: FeedBlock[];
   metrics: FeedMetric[];
   actions: FeedActionDescriptor[];

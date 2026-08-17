@@ -20,6 +20,11 @@ describe('Zhihu answer detail', () => {
   it('selects the answer from the URL instead of the first answer on the page', () => {
     document.body.innerHTML = `
       <h1 class="QuestionHeader-title">如何保持专注？</h1>
+      <div class="QuestionRichText">
+        <div class="RichContent-inner">
+          <p style="color:red">先明确要解决的问题。<script>alert(1)</script></p>
+        </div>
+      </div>
       <article class="ContentItem AnswerItem" data-zop='{"type":"answer","itemId":"7"}'>
         <div class="RichContent-inner"><p>其他回答。</p></div>
       </article>
@@ -57,6 +62,12 @@ describe('Zhihu answer detail', () => {
       ],
     });
     expect(detail?.originalUrl).toBe(url.href);
+    expect(detail?.context).toMatchObject({
+      body: [{ type: 'richText', plainText: '先明确要解决的问题。' }],
+    });
+    expect(detail?.context?.body[0]).not.toMatchObject({
+      html: expect.stringContaining('script'),
+    });
     const text = detail?.body.find((block) => block.type === 'richText');
     const gallery = detail?.body.find((block) => block.type === 'gallery');
     expect(text?.html).toContain('<h2>先减少输入</h2>');

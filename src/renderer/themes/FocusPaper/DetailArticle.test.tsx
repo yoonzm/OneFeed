@@ -13,6 +13,13 @@ const content: ArticleDetail = {
   author: { name: '林一', avatar: '' },
   publishedAt: '2026-08-12T09:00:00+08:00',
   title: '如何保持专注？',
+  context: {
+    body: [{
+      type: 'richText',
+      html: '<p>先明确真正要解决的问题。</p>',
+      plainText: '先明确真正要解决的问题。',
+    }],
+  },
   body: [{
     type: 'richText',
     html: '<p>超过列表摘要长度的完整正文。</p>',
@@ -37,6 +44,9 @@ describe('DetailArticle', () => {
 
     expect(markup).toContain('<h1>如何保持专注？</h1>');
     expect(markup).toContain('content content-expanded');
+    expect(markup).toContain('先明确真正要解决的问题。');
+    expect(markup).not.toContain('问题背景');
+    expect(markup).not.toContain('查看问题');
     expect(markup).toContain('超过列表摘要长度的完整正文。');
     expect(markup).toContain('avatar-fallback');
     expect(markup).toContain('<time>');
@@ -45,5 +55,11 @@ describe('DetailArticle', () => {
     expect(markup).not.toContain('赞同');
     expect(markup).not.toContain('评论');
     expect(markup).not.toContain('查看原文');
+
+    expect(markup.indexOf('如何保持专注？')).toBeLessThan(
+      markup.indexOf('先明确真正要解决的问题。'),
+    );
+    expect(markup.indexOf('先明确真正要解决的问题。')).toBeLessThan(markup.indexOf('林一'));
+    expect(markup.indexOf('林一')).toBeLessThan(markup.indexOf('超过列表摘要长度的完整正文。'));
   });
 });

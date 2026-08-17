@@ -37,6 +37,21 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
         </div>
       )}
 
+      {content.title && <h1>{content.title}</h1>}
+
+      {content.context && !!content.context.body.length && (
+        <div className="detail-context detail-body block-stack">
+          {content.context.body.map((block, blockIndex) => (
+            <BlockRenderer
+              block={block}
+              expanded
+              onPreview={setPreview}
+              key={`${block.type}-${blockIndex}`}
+            />
+          ))}
+        </div>
+      )}
+
       <div className="author-row">
         {content.author.avatar ? (
           <img className="avatar" src={content.author.avatar} alt="" />
@@ -58,8 +73,6 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
           )}
         </div>
       </div>
-
-      {content.title && <h1>{content.title}</h1>}
 
       {/* 详情正文不复用 Feed Card 的预览折叠规则。 */}
       <div className="detail-body block-stack">

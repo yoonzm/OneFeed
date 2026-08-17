@@ -1,6 +1,7 @@
 import type { ArticleDetail } from '../../types/detail';
 import type { DetailAdapterDefinition, DetailListener } from './detail';
 import {
+  parseZhihuBlocks,
   parseZhihuContent,
   triggerZhihuAction,
   ZHIHU_SOURCE,
@@ -71,6 +72,27 @@ function metricValue(value: number | undefined, fallback: number): number {
   return Number.isFinite(value) ? value! : fallback;
 }
 
+function questionContext(root: ParentNode, url: URL): ArticleDetail['context'] {
+  const questionId = url.pathname.match(/^\/question\/(\d+)\/answer\/\d+/)?.[1];
+  if (!questionId) return undefined;
+
+  const element = root.querySelector([
+    '.QuestionHeader-detail .RichContent-inner',
+    '.QuestionHeader-detail .RichText',
+    '.QuestionRichText .RichContent-inner',
+    '.QuestionRichText .RichText',
+    '.QuestionRichText',
+  ].join(', '));
+  if (!element) return undefined;
+
+  const body = parseZhihuBlocks(element);
+  if (!body.length) return undefined;
+
+  return {
+    body,
+  };
+}
+
 export function parseZhihuDetail(
   element: Element,
   url = new URL(window.location.href),
@@ -97,6 +119,7 @@ export function parseZhihuDetail(
     publishedAt: metadata.dateCreated ?? metadata.datePublished,
     updatedAt: metadata.dateModified,
     title: pageTitle(root) || parsed.title,
+    context: questionContext(root, url),
     body: parsed.blocks,
     metrics: [
       {
