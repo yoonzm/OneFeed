@@ -8,6 +8,7 @@ interface CardProps {
   item: FeedItem;
   index: number;
   isSeen?: boolean;
+  mediaMode?: 'preview' | 'content';
   onSeen?: () => void;
   showDetailLink?: boolean;
   onAction: (item: FeedItem, action: FeedActionDescriptor) => void;
@@ -73,6 +74,7 @@ export function Card({
   item,
   index,
   isSeen = false,
+  mediaMode = 'preview',
   onSeen,
   showDetailLink = true,
   onAction,
@@ -85,17 +87,18 @@ export function Card({
   );
   const contentExpanded = expanded;
   const densityClassName = getDensityClassName(item);
-  const sideGallery = getSideGallery(item);
-  const contentBlocks = sideGallery
-    ? item.previewBlocks.filter((block) => block !== sideGallery)
-    : item.previewBlocks;
+  const sideGallery = mediaMode === 'preview' ? getSideGallery(item) : undefined;
+  const hideCollapsedContentMedia = mediaMode === 'content' && expandable && !expanded;
+  const contentBlocks = item.previewBlocks.filter((block) =>
+    block !== sideGallery && !(hideCollapsedContentMedia && block.type === 'gallery'),
+  );
   const authorAvatar = item.author.avatar ? (
     <img className="card-author-avatar" src={item.author.avatar} alt="" loading="lazy" />
   ) : null;
 
   return (
     <article
-      className={`feed-card feed-card-${item.kind} feed-card-${item.role} ${item.title ? 'feed-card-titled' : 'feed-card-untitled'} ${sideGallery ? 'feed-card-side-media' : ''} ${densityClassName} ${isSeen ? 'feed-card-seen' : ''}`.trim()}
+      className={`feed-card feed-card-${item.kind} feed-card-${item.role} ${item.title ? 'feed-card-titled' : 'feed-card-untitled'} ${mediaMode === 'content' ? 'feed-card-media-content' : ''} ${sideGallery ? 'feed-card-side-media' : ''} ${densityClassName} ${isSeen ? 'feed-card-seen' : ''}`.trim()}
       data-seen={isSeen ? 'true' : undefined}
     >
       <div className="card-main">

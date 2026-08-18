@@ -34,11 +34,17 @@ const content: ThreadDetailContent = {
     kind: 'article',
     role: 'answer',
     author: { name: '林一', avatar: '' },
-    previewBlocks: [{
-      type: 'richText',
-      html: `<p>${'长回答。'.repeat(100)}</p>`,
-      plainText: '长回答。'.repeat(100),
-    }],
+    previewBlocks: [
+      {
+        type: 'richText',
+        html: `<p>${'长回答。'.repeat(100)}</p>`,
+        plainText: '长回答。'.repeat(100),
+      },
+      {
+        type: 'gallery',
+        items: [{ url: 'https://example.com/answer.jpg', alt: '回答配图' }],
+      },
+    ],
     metrics: [],
     actions: [{ id: 'open', kind: 'open', label: '查看回答', enabled: true }],
   }],
@@ -59,6 +65,8 @@ describe('ThreadDetail', () => {
     expect(markup).toContain('<time>');
     expect(markup).not.toContain(content.source.name);
     expect(markup).toContain('展开全文');
+    expect(markup).not.toContain('feed-card-side-media');
+    expect(markup).not.toContain('https://example.com/answer.jpg');
     expect(markup).not.toContain('查看详情');
     expect(markup).not.toContain('查看原问题');
     expect(markup).not.toContain('>赞同');

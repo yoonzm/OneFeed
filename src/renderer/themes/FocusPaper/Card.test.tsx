@@ -1,5 +1,7 @@
+import { act } from 'react';
+import { createRoot, type Root } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { FeedItem } from '../../../types/feed';
 import { Card } from './Card';
 
@@ -21,6 +23,13 @@ const shortReply: FeedItem = {
 };
 
 describe('Card', () => {
+  let root: Root | undefined;
+
+  afterEach(async () => {
+    if (root) await act(async () => root?.unmount());
+    root = undefined;
+  });
+
   it('renders a quiet seen marker without changing the feed item protocol', () => {
     const markup = renderToStaticMarkup(
       <Card item={shortReply} index={0} isSeen onAction={vi.fn()} />,
@@ -198,6 +207,71 @@ describe('Card', () => {
     expect(markup).toContain('class="card-media-aside"');
     expect(markup.indexOf('card-body-row')).toBeLessThan(markup.indexOf('card-media-aside'));
     expect(markup.indexOf('card-media-aside')).toBeLessThan(markup.indexOf('card-meta-row'));
+  });
+
+  it('keeps short content media in the body instead of the side-media region', () => {
+    const markup = renderToStaticMarkup(
+      <Card
+        item={{
+          ...shortReply,
+          previewBlocks: [
+            ...shortReply.previewBlocks,
+            {
+              type: 'gallery',
+              items: [{ url: 'https://example.com/answer.jpg', alt: '回答配图' }],
+            },
+          ],
+        }}
+        index={0}
+        mediaMode="content"
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain('feed-card-media-content');
+    expect(markup).not.toContain('feed-card-side-media');
+    expect(markup).not.toContain('card-media-aside');
+    expect(markup).toContain('src="https://example.com/answer.jpg"');
+  });
+
+  it('reveals long-answer media in the body after expanding the text', async () => {
+    const container = document.createElement('div');
+    root = createRoot(container);
+
+    await act(async () => root?.render(
+      <Card
+        item={{
+          ...shortReply,
+          previewBlocks: [
+            {
+              type: 'richText',
+              html: `<p>${'长回答。'.repeat(100)}</p>`,
+              plainText: '长回答。'.repeat(100),
+            },
+            {
+              type: 'gallery',
+              items: [{ url: 'https://example.com/answer.jpg', alt: '回答配图' }],
+            },
+          ],
+        }}
+        index={0}
+        mediaMode="content"
+        onAction={vi.fn()}
+      />,
+    ));
+
+    expect(container.querySelector('.card-media-aside')).toBeNull();
+    expect(container.querySelector('img[src="https://example.com/answer.jpg"]')).toBeNull();
+
+    const expand = Array.from(container.querySelectorAll('button'))
+      .find((button) => button.textContent === '展开全文');
+    await act(async () => expand?.click());
+
+    expect(container.querySelector('img[src="https://example.com/answer.jpg"]')).not.toBeNull();
+    const preview = container.querySelector<HTMLButtonElement>('.media-button');
+    await act(async () => preview?.click());
+    expect(container.querySelector('.lightbox img[src="https://example.com/answer.jpg"]'))
+      .not.toBeNull();
   });
 
   it('keeps image-led and extreme-ratio media in the main content flow', () => {

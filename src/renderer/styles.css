@@ -321,6 +321,19 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .media-count-4 .media-button { height: 106px; }
 .media-button img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 240ms ease; }
 .media-button:hover img { transform: scale(1.018); }
+/* 单图回答收敛到接近折叠卡片的高度，完整构图交给点击后的大图预览。 */
+.feed-card-media-content .media-count-1 .media-button {
+  display: grid;
+  height: 144px;
+  place-items: center;
+}
+.feed-card-media-content .media-count-1 .media-button img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+}
 .media-overflow-count {
   position: absolute;
   inset: 0;
