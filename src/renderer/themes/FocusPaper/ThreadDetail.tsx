@@ -114,12 +114,13 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
           <h2>{content.entryLabel}</h2>
           <span>{totalEntries.toLocaleString('zh-CN')} 条</span>
         </header>
-        {/* 回答和回复复用 Feed Card，保证折叠、操作代理和媒体行为一致。 */}
+        {/* 回答和回复已处于完整讨论页：复用 Card 的展开能力，但不再重复提供详情跳转。 */}
         {content.entries.length ? content.entries.map((item, index) => (
           <Card
             item={item}
             index={index}
             key={item.id}
+            showDetailLink={false}
             onAction={(entry, action) => onAction(entry.id, entry.originalUrl, action)}
           />
         )) : (

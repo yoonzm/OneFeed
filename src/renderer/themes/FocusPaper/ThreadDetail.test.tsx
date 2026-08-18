@@ -59,6 +59,7 @@ describe('ThreadDetail', () => {
     expect(markup).toContain('<time>');
     expect(markup).not.toContain(content.source.name);
     expect(markup).toContain('展开全文');
+    expect(markup).not.toContain('查看详情');
     expect(markup).not.toContain('查看原问题');
     expect(markup).not.toContain('>赞同');
     expect(markup).not.toContain('查看回答');

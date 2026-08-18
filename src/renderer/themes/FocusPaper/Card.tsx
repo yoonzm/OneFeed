@@ -9,6 +9,7 @@ interface CardProps {
   index: number;
   isSeen?: boolean;
   onSeen?: () => void;
+  showDetailLink?: boolean;
   onAction: (item: FeedItem, action: FeedActionDescriptor) => void;
 }
 
@@ -73,6 +74,7 @@ export function Card({
   index,
   isSeen = false,
   onSeen,
+  showDetailLink = true,
   onAction,
 }: CardProps) {
   const [expanded, setExpanded] = useState(false);
@@ -191,7 +193,7 @@ export function Card({
             </button>
           )}
 
-          {!item.title && (
+          {showDetailLink && !item.title && (
             <a
               className="card-detail-link"
               href={item.originalUrl}
@@ -203,7 +205,7 @@ export function Card({
             </a>
           )}
 
-          {/* 有标题时由标题承担详情跳转；无标题条目使用上方的统一详情入口。 */}
+          {/* 信息流中有标题时由标题承担跳转，无标题条目使用上方的统一详情入口。 */}
           <ActionBar
             originalUrl={item.originalUrl}
             metrics={item.metrics}
