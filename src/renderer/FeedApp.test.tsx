@@ -1,6 +1,10 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import {
+  DEFAULT_FEED_FILTER_SETTINGS,
+  FEED_FILTER_SETTINGS_KEY,
+} from '../filters/feedFilters';
 import type { FeedItem, FeedLoadResult } from '../types/feed';
 import FeedApp from './FeedApp';
 import { useFeedStore } from './store/useFeedStore';
@@ -121,5 +125,27 @@ describe('FeedApp', () => {
     });
     expect(card?.getAttribute('data-seen')).toBe('true');
     expect(container.textContent).toContain('已看过');
+  });
+
+  it('shows only a quiet hidden count without auto-loading when every item is filtered', async () => {
+    storedValues[FEED_FILTER_SETTINGS_KEY] = {
+      ...DEFAULT_FEED_FILTER_SETTINGS,
+      rules: [{
+        id: 'author-rule',
+        name: '测试作者',
+        enabled: true,
+        conditions: [{ type: 'author', operator: 'equals', value: '测试用户' }],
+        action: 'hide',
+      }],
+    };
+    const onLoadMore = vi.fn(async () => ({ kind: 'exhausted' as const }));
+    const container = await renderFeed(onLoadMore);
+
+    expect(container.querySelector('.feed-card')).toBeNull();
+    const hiddenStatus = container.querySelector('[role="status"][aria-label="已隐藏 1 条内容"]');
+    expect(hiddenStatus?.querySelector('svg')).not.toBeNull();
+    expect(hiddenStatus?.textContent).toBe('1');
+    expect(container.textContent).not.toContain('临时显示');
+    expect(onLoadMore).not.toHaveBeenCalled();
   });
 });

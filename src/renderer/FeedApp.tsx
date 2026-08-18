@@ -1,4 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { filterFeedItems } from '../filters/feedFilters';
+import { useFeedFilters } from '../filters/useFeedFilters';
 import type { ColorScheme } from '../theme/useColorScheme';
 import type {
   FeedActionDescriptor,
@@ -45,6 +47,12 @@ export default function FeedApp({
   const exhaustedRef = useRef(false);
   const mountedRef = useRef(true);
   const { markSeen, seenItemKeys } = useSeenFeedItems();
+  const { settings: filterSettings, ready: filtersReady } = useFeedFilters();
+  const filterResult = useMemo(() => filterFeedItems(items, filterSettings, {
+    isSeen: (item) => seenItemKeys.has(getSeenFeedItemKey(item)),
+  }), [filterSettings, items, seenItemKeys]);
+  const visibleItems = filterResult.visibleItems;
+  const hasVisibleItems = filtersReady && visibleItems.length > 0;
 
   useEffect(() => {
     mountedRef.current = true;
@@ -98,7 +106,7 @@ export default function FeedApp({
 
   useEffect(() => {
     const sentinel = loadSentinelRef.current;
-    if (!hasItems || !sentinel) return undefined;
+    if (!filtersReady || !hasVisibleItems || !sentinel) return undefined;
 
     if (typeof IntersectionObserver === 'undefined') {
       const handleLoadScroll = () => {
@@ -120,7 +128,7 @@ export default function FeedApp({
     });
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasItems, requestMore, scrollElement]);
+  }, [filtersReady, hasVisibleItems, requestMore, scrollElement]);
 
   const handleAction = (item: FeedItem, action: FeedActionDescriptor) => {
     // Adapter 返回 false 表示无法代理原站操作；仅显式声明回退的动作才打开原文。
@@ -137,6 +145,7 @@ export default function FeedApp({
       surface="feed"
       scrollElement={scrollElement}
       initialColorScheme={initialColorScheme}
+      hiddenItemCount={filtersReady ? filterResult.hiddenItems.length : 0}
     >
       <div className="reader-app">
         <div className="reading-rail" aria-hidden="true">
@@ -146,8 +155,12 @@ export default function FeedApp({
         </div>
 
         <main>
-          {hasItems ? (
-            items.map((item, index) => {
+          {!hasItems || !filtersReady ? (
+            <section className="empty-state" aria-live="polite">
+              <span className="scan-mark" aria-hidden="true" />
+            </section>
+          ) : (
+            visibleItems.map((item, index) => {
               const seenItemKey = getSeenFeedItemKey(item);
               return (
                 <Card
@@ -160,13 +173,9 @@ export default function FeedApp({
                 />
               );
             })
-          ) : (
-            <section className="empty-state" aria-live="polite">
-              <span className="scan-mark" aria-hidden="true" />
-            </section>
           )}
         </main>
-        {hasItems && (
+        {hasVisibleItems && (
           <footer className="reader-footer" aria-live="polite">
             {loadState.phase === 'loading' && '正在加载更多内容…'}
             {loadState.phase === 'idle' && '已读到这里 · 继续滚动加载更多'}

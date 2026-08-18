@@ -43,6 +43,6 @@ OneFeed 从统一不同网站的阅读体验开始，并将逐步探索：
 
 ## 当前阶段
 
-OneFeed 仍处于早期阶段。目前已在知乎、X、V2EX、Linux DO、微博、小红书、Hacker News 和 Reddit 上验证统一阅读体验，并会在本地记录信息流中已经看过的内容，为后续的已看内容筛选打下基础。项目将继续扩展更多平台。
+OneFeed 仍处于早期阶段。目前已在知乎、X、V2EX、Linux DO、微博、小红书、Hacker News 和 Reddit 上验证统一阅读体验，并支持在本地按已读状态、关键词、作者、平台和内容类型配置展示过滤规则。项目将继续扩展更多平台。
 
 更完整的方向与阶段规划请参阅[长期产品路线图](docs/Longterm_Roadmap_Document.md)。

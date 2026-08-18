@@ -95,8 +95,8 @@ function useRecentPlatforms() {
 }
 
 function openExtensionSettings() {
-  if (typeof chrome === 'undefined' || !chrome.tabs || !chrome.runtime?.id) return;
-  void chrome.tabs.create({ url: `chrome://extensions/?id=${chrome.runtime.id}` });
+  if (typeof chrome === 'undefined' || !chrome.runtime?.openOptionsPage) return;
+  void chrome.runtime.openOptionsPage();
 }
 
 export function BoardApp() {

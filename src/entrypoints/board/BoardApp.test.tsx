@@ -9,7 +9,7 @@ describe('launch center', () => {
 
   beforeEach(() => {
     vi.stubGlobal('chrome', {
-      runtime: { id: 'onefeed' },
+      runtime: { id: 'onefeed', openOptionsPage: vi.fn() },
       tabs: { create: vi.fn() },
       storage: {
         local: {
@@ -69,5 +69,18 @@ describe('launch center', () => {
     expect(enabledSwitch?.getAttribute('aria-checked')).toBe('false');
     expect(set).toHaveBeenCalledWith({ enabled: false });
     expect(container.textContent).toContain('OneFeed 已暂停，打开网站后将显示原页面。');
+  });
+
+  it('opens the OneFeed settings page from the header action', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+
+    await act(async () => root?.render(<BoardApp />));
+    const settings = Array.from(container.querySelectorAll('button'))
+      .find((button) => button.textContent?.includes('设置'));
+    await act(async () => settings?.click());
+
+    expect(chrome.runtime.openOptionsPage).toHaveBeenCalledOnce();
   });
 });
