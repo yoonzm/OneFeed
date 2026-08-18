@@ -236,6 +236,16 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
   if (!body) return null;
 
   const metadata = getMetadata(element);
+  // 新版回答列表不再把日期写入 data-zop，但仍保留 Schema.org 时间元数据。
+  const structuredPublishedAt = firstAttribute(element, [
+    'meta[itemprop="dateCreated"]',
+    'meta[itemprop="datePublished"]',
+  ], 'content');
+  const structuredUpdatedAt = firstAttribute(
+    element,
+    ['meta[itemprop="dateModified"]'],
+    'content',
+  );
   const title = firstText(element, [
     '.ContentItem-title',
     '.QuestionItem-title',
@@ -333,8 +343,10 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
       avatar,
       link: absoluteUrl(firstAttribute(element, ['.AuthorInfo-name a', '.UserLink-link'], 'href')) || undefined,
     },
-    publishedAt: metadata.dateCreated ?? metadata.datePublished,
-    updatedAt: metadata.dateModified,
+    publishedAt: metadata.dateCreated ??
+      metadata.datePublished ??
+      (structuredPublishedAt || undefined),
+    updatedAt: metadata.dateModified ?? (structuredUpdatedAt || undefined),
     blocks,
     metrics: [
       { kind: 'reactions', value: agrees, label: '赞同' },

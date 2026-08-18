@@ -31,6 +31,8 @@ describe('Zhihu question thread', () => {
       </div>
       <div class="List-item">
         <article class="AnswerItem" data-zop='{"type":"answer","itemId":"43","authorName":"周二","title":"如何保持专注？"}'>
+          <meta itemprop="dateCreated" content="2026-08-02T11:00:00Z" />
+          <meta itemprop="dateModified" content="2026-08-03T12:00:00Z" />
           <a href="/question/1/answer/43">发布于昨天</a>
           <div class="RichContent-inner"><p>第二个回答。</p></div>
           <button class="ContentItem-action">0 条评论</button>
@@ -67,6 +69,10 @@ describe('Zhihu question thread', () => {
       publishedAt: '2026-08-01T10:00:00Z',
     });
     expect(thread?.entries[0]).not.toHaveProperty('title');
+    expect(thread?.entries[1]).toMatchObject({
+      publishedAt: '2026-08-02T11:00:00Z',
+      updatedAt: '2026-08-03T12:00:00Z',
+    });
     expect(thread?.entries[0]?.actions.find((action) => action.kind === 'reply')).toMatchObject({
       enabled: false,
     });
