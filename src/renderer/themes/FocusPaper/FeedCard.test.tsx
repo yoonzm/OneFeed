@@ -1,7 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { FeedItem } from '../../../types/feed';
 import { FeedCard } from './FeedCard';
+
+const readerStyles = readFileSync(resolve('src/renderer/styles.css'), 'utf8');
 
 const shortReply: FeedItem = {
   id: 'v2ex_reply_1',
@@ -195,9 +199,11 @@ describe('FeedCard', () => {
     );
 
     expect(markup).toContain('feed-card-side-media');
+    expect(markup).toContain('item-card-titled');
     expect(markup).toContain('class="card-media-aside"');
     expect(markup.indexOf('card-body-row')).toBeLessThan(markup.indexOf('card-media-aside'));
     expect(markup.indexOf('card-media-aside')).toBeLessThan(markup.indexOf('card-meta-row'));
+    expect(readerStyles).toContain('.feed-card-side-media.item-card-titled .card-main');
   });
 
   it('keeps image-led and extreme-ratio media in the main content flow', () => {

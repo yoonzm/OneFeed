@@ -261,6 +261,18 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
     firstAttribute(element, ['.Avatar', '.AuthorInfo-avatar img'], 'src'),
   );
   const blocks = parseZhihuBlocks(body);
+  // 折叠信息流的封面是正文容器的兄弟节点，需要单独并入图库且避免与正文图片重复。
+  const cover = element.querySelector('.RichContent-cover, .RichContent-cover-inner');
+  const coverImages = cover ? extractMedia(cover) : [];
+  if (coverImages.length) {
+    const gallery = blocks.find((block) => block.type === 'gallery');
+    if (gallery) {
+      const knownUrls = new Set(gallery.items.map((image) => image.url));
+      gallery.items.push(...coverImages.filter((image) => !knownUrls.has(image.url)));
+    } else {
+      blocks.push({ type: 'gallery', items: coverImages });
+    }
+  }
   const contentText = blocks.find((block) => block.type === 'richText')?.plainText || '';
   if (!title && !contentText) return null;
 

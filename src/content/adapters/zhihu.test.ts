@@ -129,6 +129,31 @@ describe('parseZhihuCard', () => {
     expect(item).not.toHaveProperty('rawElementRef');
   });
 
+  it('includes a collapsed feed cover outside the rich-text body', () => {
+    document.body.innerHTML = `
+      <article class="TopstoryItem">
+        <div class="ContentItem AnswerItem" data-id="answer-43">
+          <h2 class="ContentItem-title"><a href="/question/1/answer/43">如何整理书桌？</a></h2>
+          <div class="RichContent is-collapsed">
+            <div class="RichContent-cover">
+              <div class="RichContent-cover-inner RichContent-cover--normal">
+                <img src="https://pic.example/cover.jpg" alt="整理后的书桌" />
+              </div>
+            </div>
+            <div class="RichContent-inner"><p>先清空桌面，再分类收纳。</p></div>
+          </div>
+        </div>
+      </article>`;
+
+    const item = parseZhihuCard(document.querySelector('.AnswerItem')!);
+    const gallery = item?.previewBlocks.find((block) => block.type === 'gallery');
+
+    expect(gallery?.items).toEqual([{
+      url: 'https://pic.example/cover.jpg',
+      alt: '整理后的书桌',
+    }]);
+  });
+
   it.each([
     ['缺失', ''],
     ['为 0', '<button class="VoteButton VoteButton--down">踩 0</button>'],

@@ -287,7 +287,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
     column-gap: 20px;
     row-gap: 10px;
   }
-  .feed-card-side-media.feed-card-titled .card-main {
+  .feed-card-side-media.item-card-titled .card-main {
     grid-template-areas:
       "title media"
       "body media"
