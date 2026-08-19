@@ -10,20 +10,20 @@ describe('platform catalog', () => {
   it('keeps supported and planned platforms in product order', () => {
     expect(getSupportedPlatforms().map((platform) => platform.name)).toEqual([
       '知乎',
-      'X',
       'V2EX',
       'Linux DO',
-      '微博',
-      '小红书',
       'Hacker News',
-      'Reddit',
     ]);
     expect(getPlannedPlatforms().map((platform) => [
       platform.name,
       platform.plannedOrder,
     ])).toEqual([
-      ['哔哩哔哩', 1],
-      ['YouTube', 2],
+      ['X', 1],
+      ['微博', 2],
+      ['小红书', 3],
+      ['Reddit', 4],
+      ['哔哩哔哩', 5],
+      ['YouTube', 6],
     ]);
   });
 
@@ -34,7 +34,7 @@ describe('platform catalog', () => {
       .toBe(PLATFORM_CATALOG.length);
   });
 
-  it('recognizes supported host aliases without matching lookalike domains', () => {
+  it('recognizes catalog host aliases without matching lookalike domains', () => {
     expect(getPlatformForUrl('https://zhuanlan.zhihu.com/p/1')?.id).toBe('zhihu');
     expect(getPlatformForUrl('https://mobile.twitter.com/home')?.id).toBe('twitter');
     expect(getPlatformForUrl('https://www.v2ex.com/')?.id).toBe('v2ex');

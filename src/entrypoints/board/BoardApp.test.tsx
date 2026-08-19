@@ -43,16 +43,18 @@ describe('launch center', () => {
     expect(brandText?.style.backgroundClip).toBe('text');
     expect(container.querySelector('h1')?.textContent).toBe('继续上次的阅读。');
     expect(container.querySelector('.resume-platform strong')?.textContent).toBe('知乎');
-    expect(container.querySelectorAll('.platform-mark .platform-icon')).toHaveLength(8);
+    expect(container.querySelectorAll('.platform-mark .platform-icon')).toHaveLength(4);
     expect(container.querySelectorAll('.recent-row')).toHaveLength(2);
-    expect(container.querySelectorAll('.more-card')).toHaveLength(5);
-    expect(container.textContent).toContain('即将支持：哔哩哔哩 · YouTube');
+    expect(container.querySelectorAll('.more-card')).toHaveLength(1);
+    expect(container.textContent).toContain(
+      '即将支持：X · 微博 · 小红书 · Reddit · 哔哩哔哩 · YouTube',
+    );
 
     const platformLinks = [...container.querySelectorAll<HTMLAnchorElement>(
       '.resume-action, .recent-row, .more-card',
     )];
-    expect(platformLinks).toHaveLength(8);
-    expect(new Set(platformLinks.map((link) => link.href)).size).toBe(8);
+    expect(platformLinks).toHaveLength(4);
+    expect(new Set(platformLinks.map((link) => link.href)).size).toBe(4);
   });
 
   it('persists the global enabled state from the header switch', async () => {

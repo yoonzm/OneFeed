@@ -4,12 +4,8 @@ import { createAdapter, getRegisteredPlatformIds, isSupportedUrl } from './regis
 import { HackerNewsAdapter } from './hackerNews';
 import { LinuxDoAdapter } from './linuxDo';
 import { LinuxDoThreadAdapter } from './linuxDoThread';
-import { RedditAdapter } from './reddit';
-import { TwitterAdapter } from './twitter';
 import { V2exAdapter } from './v2ex';
 import { V2exThreadAdapter } from './v2exThread';
-import { WeiboAdapter } from './weibo';
-import { XiaohongshuAdapter } from './xiaohongshu';
 import { ZhihuAdapter } from './zhihu';
 import { ZhihuDetailAdapter } from './zhihuDetail';
 import { ZhihuThreadAdapter } from './zhihuThread';
@@ -34,11 +30,6 @@ describe('createAdapter', () => {
       adapter: expect.any(ZhihuAdapter),
       source: { id: 'zhihu', name: '知乎' },
     });
-    expect(createAdapter(new URL('https://x.com/home'), listeners())).toMatchObject({
-      surface: 'feed',
-      adapter: expect.any(TwitterAdapter),
-      source: { id: 'twitter', name: 'X' },
-    });
     expect(createAdapter(new URL('https://www.v2ex.com/?tab=hot'), listeners())).toMatchObject({
       surface: 'feed',
       adapter: expect.any(V2exAdapter),
@@ -53,38 +44,11 @@ describe('createAdapter', () => {
       adapter: expect.any(LinuxDoAdapter),
       source: { id: 'linux-do', name: 'Linux DO' },
     });
-    expect(createAdapter(new URL('https://weibo.com/hot/weibo/102803'), listeners())).toMatchObject({
-      surface: 'feed',
-      adapter: expect.any(WeiboAdapter),
-      source: { id: 'weibo', name: '微博' },
-    });
-    expect(createAdapter(
-      new URL('https://weibo.com/newlogin?tabtype=weibo&gid=102803&openLoginLayer=0&url=https://weibo.com/'),
-      listeners(),
-    )).toMatchObject({
-      surface: 'feed',
-      adapter: expect.any(WeiboAdapter),
-      source: { id: 'weibo', name: '微博' },
-    });
-    expect(createAdapter(
-      new URL('https://www.xiaohongshu.com/explore?channel_id=homefeed_recommend'),
-      listeners(),
-    )).toMatchObject({
-      surface: 'feed',
-      adapter: expect.any(XiaohongshuAdapter),
-      source: { id: 'xiaohongshu', name: '小红书' },
-    });
     expect(createAdapter(new URL('https://news.ycombinator.com/best'), listeners())).toMatchObject({
       surface: 'feed',
       adapter: expect.any(HackerNewsAdapter),
       source: { id: 'hacker-news', name: 'Hacker News' },
     });
-    expect(createAdapter(new URL('https://www.reddit.com/r/typescript/top/'), listeners()))
-      .toMatchObject({
-        surface: 'feed',
-        adapter: expect.any(RedditAdapter),
-        source: { id: 'reddit', name: 'Reddit' },
-      });
   });
 
   it('prioritizes supported Zhihu detail routes', () => {
@@ -131,24 +95,15 @@ describe('createAdapter', () => {
   });
 
   it('leaves unsupported site pages untouched', () => {
-    expect(createAdapter(new URL('https://x.com/reader/status/123'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://x.com/home'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do/settings/account'), listeners())).toBeNull();
-    expect(createAdapter(new URL('https://weibo.com/newlogin'), listeners())).toBeNull();
-    expect(createAdapter(
-      new URL('https://weibo.com/newlogin?tabtype=weibo&url=https://example.com/'),
-      listeners(),
-    )).toBeNull();
-    expect(createAdapter(new URL('https://m.weibo.com/'), listeners())).toBeNull();
-    expect(createAdapter(
-      new URL('https://www.xiaohongshu.com/explore/note-id'),
-      listeners(),
-    )).toBeNull();
-    expect(createAdapter(new URL('https://creator.xiaohongshu.com/'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://weibo.com/'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://www.xiaohongshu.com/explore'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://www.zhihu.com/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://news.ycombinator.com/item?id=43876543'), listeners())).toBeNull();
     expect(createAdapter(
-      new URL('https://www.reddit.com/r/typescript/comments/abc123/post/'),
+      new URL('https://www.reddit.com/'),
       listeners(),
     )).toBeNull();
     expect(createAdapter(new URL('https://news.ycombinator.com.example.com/news'), listeners())).toBeNull();
@@ -160,14 +115,11 @@ describe('createAdapter', () => {
     expect(isSupportedUrl(new URL('https://www.zhihu.com/'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.zhihu.com/question/1/answer/42'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.zhihu.com/settings/account'))).toBe(false);
-    expect(isSupportedUrl(new URL('https://weibo.com/mygroups?gid=11000'))).toBe(true);
-    expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore'))).toBe(true);
-    expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore/note-id'))).toBe(false);
+    expect(isSupportedUrl(new URL('https://x.com/home'))).toBe(false);
+    expect(isSupportedUrl(new URL('https://weibo.com/'))).toBe(false);
+    expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore'))).toBe(false);
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/news'))).toBe(true);
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/item?id=43876543'))).toBe(false);
-    expect(isSupportedUrl(new URL('https://www.reddit.com/'))).toBe(true);
-    expect(isSupportedUrl(
-      new URL('https://www.reddit.com/r/typescript/comments/abc123/post/'),
-    )).toBe(false);
+    expect(isSupportedUrl(new URL('https://www.reddit.com/'))).toBe(false);
   });
 });

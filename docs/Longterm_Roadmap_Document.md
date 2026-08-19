@@ -27,12 +27,12 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 ### Phase 1: 核心能力与架构基线 (已完成)
 * **核心目标**：验证“完全隐藏原 DOM，在 Shadow DOM 中接管全局渲染”的工程可行性。
-* **覆盖平台**：知乎、Twitter/X、V2EX、Linux DO。
+* **覆盖平台**：知乎、V2EX、Linux DO、Hacker News。
 * **核心交付**：1 款 Notion 风格基础主题，打通 Feed Surface，并以知乎回答/专栏验证 Article Detail，以知乎问题、V2EX 主题和 Linux DO 话题验证 Thread Detail。
 * **安全回退**：浏览器工具栏图标打开启动中心，启动中心总开关与页面右侧常驻悬浮开关共同切换全局接管状态。暂停后立即卸载接管层并恢复原页面，初始化异常时自动回退，用户可随时重新开启；该状态不会在 Chrome 中禁用扩展本身。
 * **首次激活**：首次安装后自动打开扩展内欢迎页，通过安装成功反馈、产品愿景、可点击的平台目录、三步使用说明、核心能力和本地隐私承诺，引导用户前往无需登录的 Hacker News 立即体验。欢迎页只在首次安装时出现，扩展升级不主动打断用户。
 * **日常启动**：独立启动中心承接工具栏入口，按“继续阅读、最近使用、更多网站”组织已支持平台，并提供全局状态、明暗外观、使用指南和反馈入口；最近使用只保存在本地。
-* **交付顺序**：`0.1.0` 先交付知乎完整链路，后续迭代已通过统一 Adapter 注册契约接入 Twitter/X、V2EX 与 Linux DO，并将 V2EX、Linux DO 社区主题纳入 Thread Detail；单平台首发用于降低同时调试多个动态 DOM 的风险，社区列表与详情适配继续验证该契约的扩展能力。
+* **交付顺序**：`0.1.0` 先交付知乎完整链路，后续迭代通过统一 Adapter 注册契约接入 V2EX、Linux DO 与 Hacker News，并将 V2EX、Linux DO 社区主题纳入 Thread Detail；前期只保留以文字阅读为主的平台，以降低动态 DOM、富媒体与复杂互动同时带来的维护成本。
 * **工程基础**：使用 WXT 的文件式入口、Manifest 生成、开发加载和发布打包能力承载扩展工程，为后续按浏览器生成独立构建保留统一入口。
 * **扩展边界**：Feed、Article Detail 与 Thread Detail 共享 Block、内容角色、作者、指标和操作描述，但使用独立顶层模型与 Renderer。新增路由通过完整 URL 注册到对应 Surface；未支持路由不得被域名级兜底接管。
 
@@ -81,17 +81,12 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 | 迭代 | 目标 | 平台交付 | 验收重点 |
 | :--- | :--- | :--- | :--- |
-| **基础能力（已完成）** | 完成 Schema、Surface 与 Renderer 解耦 | 知乎、Twitter/X、V2EX、Linux DO | `FeedItem`/`ArticleDetail`/`ThreadDetail` 可序列化；URL 路由互斥；SPA 切换清理旧 Surface；Block Registry 与 Action Bar 跨 Surface 复用 |
-| **2.1 微博适配（已完成）** | 扩展国内开放社交覆盖 | 微博 | 图文、视频、引用、转发原因、互动数据、原站操作代理与无限加载 |
-| **2.2 小红书适配（已完成）** | 验证高密度视觉内容 | 小红书 | 发现页图文/视频封面、媒体比例、点赞代理、收藏/原文回退与非标准卡片降级 |
-| **2.3 Hacker News 适配（已完成）** | 验证轻量社区列表与 HTML 文档分页 | Hacker News | News/Newest/Front/Best/Ask/Show/Jobs 列表、More 连续分页、分数与评论、赞同代理和详情原页回退 |
-| **2.4 Reddit 适配（已完成）** | 验证海外社区 Feed 与 Shreddit Web Component | Reddit | 首页与社区 Feed、文本/外链/图片/视频封面、社区和作者上下文、分数与评论、赞同代理；帖子详情分阶段接入 |
-| **2.5 哔哩哔哩适配** | 验证媒体 Block 与播放器代理 | 哔哩哔哩 | 首页与动态 Feed、封面、时长、播放量、原生播放器 Portal 与回退 |
-| **2.6 YouTube 适配** | 验证海外视频 Feed 与播放器代理 | YouTube | 首页 Home Feed、封面、时长、观看量、原生播放器 Portal 与回退 |
-| **2.7 社区与开放社交扩展** | 继续验证 `discussion` 与复杂 `post` 通用性 | Mastodon、Bluesky、Reddit 帖子详情 | 标签、回复、内容警告、可见范围、链接卡片与 Thread Detail |
-| **2.8 内容订阅扩展** | 验证文章与开放订阅源 | RSS/Atom、Medium、Substack、WordPress | Feed 摘要与 Detail/RSS 全文独立解析；作者与来源、发布时间、已读/稍后读和重复文章处理 |
+| **基础能力（已完成）** | 完成 Schema、Surface 与 Renderer 解耦 | 知乎、V2EX、Linux DO、Hacker News | `FeedItem`/`ArticleDetail`/`ThreadDetail` 可序列化；URL 路由互斥；SPA 切换清理旧 Surface；Block Registry 与 Action Bar 跨 Surface 复用 |
+| **2.1 开放订阅扩展** | 优先扩展近乎纯文字的信息源 | RSS/Atom | Feed 摘要与全文解析；作者与来源、发布时间、已读/稍后读和重复文章处理 |
+| **2.2 长文平台扩展** | 验证不同长文站点的正文与列表结构 | Medium、Substack、WordPress | 文章列表、正文、作者、发布时间与原文回退，避免引入播放器和复杂社交操作 |
+| **后续待排期** | 文字型平台稳定后再评估开放社交与富媒体 | X、微博、小红书、Reddit、哔哩哔哩、YouTube | 根据真实用户需求、目标站点政策、DOM 稳定性和互动代理成本确定顺序 |
 
-Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准。微博、小红书、Hacker News 与 Reddit 列表 Feed 已完成首轮适配，剩余计划平台依次为哔哩哔哩、YouTube；其他平台按真实用户需求、目标站点政策和 Adapter 维护成本逐步进入正式支持，不以 Schema 理论覆盖数冒充已交付平台数。平台支持状态和适配进度以 README 为准。
+Phase 2 前期不以 Adapter 数量为 KPI，而以文字阅读链路的稳定性为先。当前正式支持知乎、V2EX、Linux DO 与 Hacker News；X、微博、小红书、Reddit、哔哩哔哩和 YouTube 均为待支持平台。Schema 理论上能够表达某个平台，不代表已经交付该平台适配；平台支持状态和适配进度以 README 为准。
 
 建模依据包括 [ActivityStreams 2.0](https://www.w3.org/TR/activitystreams-core/)、[Mastodon Status](https://docs.joinmastodon.org/entities/Status/)、[Bluesky Posts](https://docs.bsky.app/docs/advanced-guides/posts)、[Reddit Post](https://developers.reddit.com/docs/api/redditapi/models/classes/Post)、[Hacker News API](https://github.com/HackerNews/API)、[LinkedIn Posts API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api)、[YouTube Video](https://developers.google.com/youtube/v3/docs/videos)、[Twitch API](https://dev.twitch.tv/docs/api/reference/) 与 [Atom RFC 4287](https://www.rfc-editor.org/rfc/rfc4287)。
 
@@ -175,7 +170,7 @@ Phase 2 的正式 KPI 仍以至少 8 个稳定 Adapter 为准。微博、小红�
 
 | 阶段 | 目标节点 | 关键 KPI 指标 |
 | :--- | :--- | :--- |
-| **Phase 1** | 已完成 | 建立核心架构基线，知乎/Twitter/V2EX/Linux DO 渲染成功率 > 95%，卡片解析延迟 < 100ms。 |
-| **Phase 2** | M3 - M6 | 交付至少 8 个稳定 Adapter，Schema 可表达 20 余个主流产品的基础 Feed，内置 6 款主题，获得 10,000+ 活跃用户 (WAU)。 |
+| **Phase 1** | 已完成 | 建立核心架构基线，知乎/V2EX/Linux DO/Hacker News 渲染成功率 > 95%，卡片解析延迟 < 100ms。 |
+| **Phase 2** | M3 - M6 | 优先扩展近乎纯文字的信息源并稳定阅读链路，Schema 可表达 20 余个主流产品的基础 Feed，内置 6 款主题，获得 10,000+ 活跃用户 (WAU)。 |
 | **Phase 3** | M7 - M10 | 上线 AI 摘要与过滤功能，端到端解析修复成功率 > 90%，留存率 (D30) > 35%。 |
 | **Phase 4** | M11 - M12 | 推出 Pro 订阅，转化率达到 3% - 5%，开放 Theme Marketplace 开发者社区。 |

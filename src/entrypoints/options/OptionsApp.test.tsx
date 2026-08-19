@@ -56,7 +56,7 @@ describe('filter settings page', () => {
     const selectedScope = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="radio"]'))
       .find((input) => !input.checked);
     await act(async () => selectedScope?.click());
-    expect(container.querySelectorAll('.platform-checks .platform-icon')).toHaveLength(8);
+    expect(container.querySelectorAll('.platform-checks .platform-icon')).toHaveLength(4);
   });
 
   it('persists the quick seen filter immediately', async () => {
