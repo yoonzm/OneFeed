@@ -172,6 +172,60 @@ describe('Zhihu answer detail', () => {
     expect(detail?.body[0]).not.toMatchObject({ html: expect.stringContaining('script') });
   });
 
+  it('reads the complete question background from initial data without clicking', () => {
+    const initialData = {
+      initialState: {
+        entities: {
+          questions: {
+            1: {
+              id: '1',
+              detail: [
+                '<p style="color:red" onclick="alert(1)">完整问题背景。</p>',
+                '<img src="https://pic.example/question.jpg" alt="问题配图" />',
+              ].join(''),
+            },
+          },
+        },
+      },
+    };
+    document.body.innerHTML = `
+      <script id="js-initialData" type="text/json">${JSON.stringify(initialData)}</script>
+      <h1 class="QuestionHeader-title">如何保持专注？</h1>
+      <div class="QuestionRichText QuestionRichText--expandable QuestionRichText--collapsed">
+        <div>
+          <span itemprop="text">折叠占位内容</span>
+          <button class="QuestionRichText-more" type="button">显示全部</button>
+        </div>
+      </div>
+      <article class="ContentItem AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+        <a class="UserLink-link" href="/people/reader">林一</a>
+        <div class="RichContent-inner"><p>回答正文。</p></div>
+      </article>`;
+
+    const button = document.querySelector<HTMLButtonElement>('.QuestionRichText-more')!;
+    const click = vi.spyOn(button, 'click');
+    const onDetail = vi.fn();
+    const adapter = new ZhihuDetailAdapter(onDetail);
+
+    window.history.replaceState({}, '', '/question/1/answer/42');
+    adapter.init();
+
+    expect(click).not.toHaveBeenCalled();
+    expect(onDetail).toHaveBeenCalledOnce();
+    expect(onDetail.mock.lastCall?.[0].context?.body).toEqual([
+      {
+        type: 'richText',
+        html: '<p>完整问题背景。</p>',
+        plainText: '完整问题背景。',
+      },
+      {
+        type: 'gallery',
+        items: [{ url: 'https://pic.example/question.jpg', alt: '问题配图' }],
+      },
+    ]);
+    adapter.disconnect();
+  });
+
   it('expands a collapsed question background before publishing the detail', async () => {
     document.body.innerHTML = `
       <h1 class="QuestionHeader-title">如何保持专注？</h1>

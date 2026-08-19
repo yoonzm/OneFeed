@@ -23,6 +23,14 @@ interface ZhihuDetailMetadata {
   commentCount?: number;
 }
 
+interface ZhihuInitialData {
+  initialState?: {
+    entities?: {
+      questions?: Record<string, { detail?: unknown }>;
+    };
+  };
+}
+
 function readMetadata(element: Element): ZhihuDetailMetadata {
   const value = element.getAttribute('data-zop') ||
     element.querySelector('[data-zop]')?.getAttribute('data-zop');
@@ -101,6 +109,19 @@ function questionNavigation(
   };
 }
 
+function initialQuestionDetail(root: ParentNode, questionId: string): string | undefined {
+  const value = root.querySelector('#js-initialData')?.textContent;
+  if (!value) return undefined;
+
+  try {
+    const data = JSON.parse(value) as ZhihuInitialData;
+    const detail = data.initialState?.entities?.questions?.[questionId]?.detail;
+    return typeof detail === 'string' && detail.trim() ? detail : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function questionContext(root: ParentNode, url: URL): ArticleDetail['context'] {
   const questionId = url.pathname.match(/^\/question\/(\d+)\/answer\/\d+/)?.[1];
   if (!questionId) return undefined;
@@ -112,9 +133,22 @@ function questionContext(root: ParentNode, url: URL): ArticleDetail['context'] {
     '.QuestionRichText .RichText',
     '.QuestionRichText',
   ].join(', '));
+  const collapsed = Boolean(root.querySelector(
+    '.QuestionRichText.QuestionRichText--collapsed',
+  ));
+  const initialDetail = collapsed || !element
+    ? initialQuestionDetail(root, questionId)
+    : undefined;
+  const initialDetailElement = initialDetail ? document.createElement('div') : undefined;
+  if (initialDetailElement && initialDetail) {
+    // 初始数据已包含完整问题 HTML；仍通过统一解析器清洗后再交给 Renderer。
+    initialDetailElement.innerHTML = initialDetail;
+  }
 
   return {
-    body: element ? parseZhihuBlocks(element) : [],
+    body: initialDetailElement
+      ? parseZhihuBlocks(initialDetailElement)
+      : element ? parseZhihuBlocks(element) : [],
     navigation: questionNavigation(root, url, questionId),
   };
 }
@@ -227,7 +261,12 @@ export class ZhihuDetailAdapter {
     const url = new URL(window.location.href);
     const element = findZhihuDetailRoot(document, url);
     if (!element) return;
+    const questionId = url.pathname.match(/^\/question\/(\d+)\/answer\/\d+/)?.[1];
+    const hasInitialQuestionDetail = questionId
+      ? initialQuestionDetail(document, questionId) !== undefined
+      : false;
     if (
+      !hasInitialQuestionDetail &&
       !this.questionContextExpansionRequested &&
       expandCollapsedQuestionContext(document)
     ) {
