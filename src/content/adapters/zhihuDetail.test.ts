@@ -123,6 +123,55 @@ describe('Zhihu answer detail', () => {
     });
   });
 
+  it('preserves interleaved images in the answer body DOM order', () => {
+    document.body.innerHTML = `
+      <h1 class="QuestionHeader-title">如何组织图文回答？</h1>
+      <article class="ContentItem AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+        <a class="UserLink-link" href="/people/reader">林一</a>
+        <div class="RichContent-inner">
+          <div class="css-wrapper">
+            <span class="RichText ztext CopyrightRichText-richText">
+              <p>图片前的正文。<script>alert(1)</script></p>
+              <figure>
+                <div class="RichText-ConditionalImagePortal">
+                  <img data-original="https://pic.example/first.jpg" alt="第一张图" />
+                </div>
+              </figure>
+              <p>两张图片之间的正文。</p>
+              <img data-actualsrc="https://pic.example/second.jpg" alt="第二张图" />
+              <p>图片后的正文。</p>
+            </span>
+          </div>
+        </div>
+      </article>`;
+
+    const url = new URL('https://www.zhihu.com/question/1/answer/42');
+    const root = findZhihuDetailRoot(document, url);
+    const detail = root ? parseZhihuDetail(root, url) : null;
+
+    expect(detail?.body.map((block) => block.type)).toEqual([
+      'richText',
+      'gallery',
+      'richText',
+      'gallery',
+      'richText',
+    ]);
+    expect(detail?.body).toMatchObject([
+      { type: 'richText', plainText: '图片前的正文。' },
+      {
+        type: 'gallery',
+        items: [{ url: 'https://pic.example/first.jpg', alt: '第一张图' }],
+      },
+      { type: 'richText', plainText: '两张图片之间的正文。' },
+      {
+        type: 'gallery',
+        items: [{ url: 'https://pic.example/second.jpg', alt: '第二张图' }],
+      },
+      { type: 'richText', plainText: '图片后的正文。' },
+    ]);
+    expect(detail?.body[0]).not.toMatchObject({ html: expect.stringContaining('script') });
+  });
+
   it('expands a collapsed question background before publishing the detail', async () => {
     document.body.innerHTML = `
       <h1 class="QuestionHeader-title">如何保持专注？</h1>

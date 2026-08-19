@@ -1,6 +1,8 @@
 import type { ArticleDetail } from '../../types/detail';
 import type { DetailAdapterDefinition, DetailListener } from './detail';
 import {
+  findZhihuContentBody,
+  parseOrderedZhihuBlocks,
   parseZhihuBlocks,
   parseZhihuContent,
   triggerZhihuAction,
@@ -125,6 +127,10 @@ export function parseZhihuDetail(
   const parsed = parseZhihuContent(element);
   if (!parsed) return null;
 
+  // 单篇详情保留正文中的图文顺序；Feed 与问题 Thread 继续使用原有预览解析路径。
+  const body = findZhihuContentBody(element);
+  const orderedBody = body ? parseOrderedZhihuBlocks(body) : parsed.blocks;
+
   const metadata = readMetadata(element);
   const answerId = url.pathname.match(/^\/question\/\d+\/answer\/(\d+)/)?.[1];
   const articleId = url.pathname.match(/^\/p\/(\d+)/)?.[1];
@@ -144,7 +150,7 @@ export function parseZhihuDetail(
     updatedAt: metadata.dateModified,
     title: pageTitle(root) || parsed.title,
     context: questionContext(root, url),
-    body: parsed.blocks,
+    body: orderedBody,
     actionSlots: {
       author: {
         metrics: [

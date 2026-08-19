@@ -106,4 +106,34 @@ describe('Zhihu question thread', () => {
     expect(click).toHaveBeenCalledOnce();
     adapter.disconnect();
   });
+
+  it('keeps the existing question-detail projection for interleaved images', () => {
+    document.body.innerHTML = `
+      <h1 class="QuestionHeader-title">如何组织图文回答？</h1>
+      <div class="List-item">
+        <article class="AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+          <a href="/question/1/answer/42">发布时间</a>
+          <div class="RichContent-inner">
+            <p>图片前。</p>
+            <img src="https://pic.example/thread.jpg" alt="问题详情配图" />
+            <p>图片后。</p>
+          </div>
+        </article>
+      </div>`;
+
+    const thread = parseZhihuThread(
+      document,
+      new URL('https://www.zhihu.com/question/1'),
+    );
+
+    expect(thread?.entries[0]?.body.map((block) => block.type)).toEqual([
+      'richText',
+      'gallery',
+    ]);
+    expect(thread?.entries[0]?.body[0]).toMatchObject({ type: 'richText' });
+    const firstBlock = thread?.entries[0]?.body[0];
+    expect(firstBlock?.type === 'richText'
+      ? firstBlock.plainText.replace(/\s+/g, '')
+      : '').toBe('图片前。图片后。');
+  });
 });

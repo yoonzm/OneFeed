@@ -321,6 +321,9 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .media-count-4 .media-button { height: 106px; }
 .media-button img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 240ms ease; }
 .media-button:hover img { transform: scale(1.018); }
+/* 单篇正文按原始内容流展示图片，并保留完整构图；列表和 Thread 仍使用紧凑媒体样式。 */
+.detail-body .media-button { height: auto; background: transparent; }
+.detail-body .media-button img { height: auto; object-fit: contain; }
 /* 单图回答收敛到接近折叠卡片的高度，完整构图交给点击后的大图预览。 */
 .thread-entry .media-count-1 .media-button {
   display: grid;

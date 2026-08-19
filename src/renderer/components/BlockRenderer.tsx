@@ -23,7 +23,7 @@ function RichTextBlock({ block, expanded }: BlockComponentProps) {
 function GalleryBlock({ block, onPreview, compactGallery = false }: BlockComponentProps) {
   if (block.type !== 'gallery') return null;
 
-  const visibleItems = block.items.slice(0, compactGallery ? 4 : 6);
+  const visibleItems = compactGallery ? block.items.slice(0, 4) : block.items;
   const remainingCount = compactGallery ? block.items.length - visibleItems.length : 0;
   const layoutCount = compactGallery
     ? Math.min(visibleItems.length, 4)

@@ -154,6 +154,30 @@ describe('parseZhihuCard', () => {
     }]);
   });
 
+  it('keeps the existing feed preview projection for interleaved images', () => {
+    document.body.innerHTML = `
+      <article class="TopstoryItem" data-id="answer-44">
+        <h2 class="ContentItem-title"><a href="/question/1/answer/44">图文回答</a></h2>
+        <div class="RichContent-inner">
+          <p>图片前。</p>
+          <img src="https://pic.example/feed.jpg" alt="信息流配图" />
+          <p>图片后。</p>
+        </div>
+      </article>`;
+
+    const item = parseZhihuCard(document.querySelector('.TopstoryItem')!);
+
+    expect(item?.previewBlocks.map((block) => block.type)).toEqual(['richText', 'gallery']);
+    expect(item?.previewBlocks[0]).toMatchObject({ type: 'richText' });
+    expect(item?.previewBlocks[0]?.type === 'richText'
+      ? item.previewBlocks[0].plainText.replace(/\s+/g, '')
+      : '').toBe('图片前。图片后。');
+    expect(item?.previewBlocks[1]).toMatchObject({
+      type: 'gallery',
+      items: [{ url: 'https://pic.example/feed.jpg', alt: '信息流配图' }],
+    });
+  });
+
   it.each([
     ['缺失', ''],
     ['为 0', '<button class="VoteButton VoteButton--down">踩 0</button>'],
