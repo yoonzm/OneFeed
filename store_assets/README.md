@@ -4,7 +4,7 @@
 
 | 文件 | 用途 | 尺寸 |
 | :--- | :--- | :--- |
-| `store_icon_128.png` | 商店图标 | 128×128 PNG，含透明安全边距 |
+| `store_icon_128.png` | 商店图标 | 128×128 PNG |
 | `screenshot_1280x800.png` | 商店功能截图 | 1280×800 PNG |
 | `promo_440x280.png` | Small promo tile | 440×280 PNG |
 | `store_listing_zh-CN.md` | 商店文案、权限说明、测试说明 | Markdown |
@@ -15,7 +15,8 @@
 
 | 文件 | 用途 |
 | :--- | :--- |
-| `logo.svg` | 用户提供的 Logo 源文件 |
+| `logo.png` | 方形 Logo 源图（766×766 PNG） |
+| `logo_full.png` | 带 OneFeed 字标的横版 Logo |
 | `screenshot-demo.html` | 可重复生成商店截图的静态演示页 |
 | `promo-demo.html` | 可重复生成宣传图的静态演示页 |
 
