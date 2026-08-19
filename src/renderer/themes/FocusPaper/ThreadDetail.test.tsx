@@ -34,7 +34,7 @@ const content: ThreadDetailContent = {
     kind: 'article',
     role: 'answer',
     author: { name: '林一', avatar: '' },
-    previewBlocks: [
+    body: [
       {
         type: 'richText',
         html: `<p>${'长回答。'.repeat(100)}</p>`,
@@ -65,6 +65,8 @@ describe('ThreadDetail', () => {
     expect(markup).toContain('<time>');
     expect(markup).not.toContain(content.source.name);
     expect(markup).toContain('展开全文');
+    expect(markup).toContain('thread-entry');
+    expect(markup).not.toContain('feed-card');
     expect(markup).not.toContain('feed-card-side-media');
     expect(markup).not.toContain('https://example.com/answer.jpg');
     expect(markup).not.toContain('查看详情');

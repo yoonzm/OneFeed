@@ -113,6 +113,11 @@ describe('V2EX topic thread', () => {
         author: { name: 'Carol' },
       },
     ]);
+    expect(thread?.entries[0]?.body[0]).toMatchObject({
+      type: 'richText',
+      plainText: '第一条回复。',
+    });
+    expect(thread?.entries[0]).not.toHaveProperty('previewBlocks');
     expect(thread?.entries.every((entry) => entry.actions.length === 0)).toBe(true);
   });
 

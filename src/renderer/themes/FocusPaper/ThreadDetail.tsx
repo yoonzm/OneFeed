@@ -3,7 +3,7 @@ import type { ThreadDetail as ThreadDetailContent } from '../../../types/detail'
 import type { FeedActionDescriptor, FeedImage } from '../../../types/feed';
 import { ActionBar } from '../../components/ActionBar';
 import { BlockRenderer } from '../../components/BlockRenderer';
-import { Card } from './Card';
+import { ThreadEntry } from './ThreadEntry';
 
 interface ThreadDetailProps {
   content: ThreadDetailContent;
@@ -27,7 +27,7 @@ function formatPublishedAt(value: string | number): string {
   }).format(date);
 }
 
-/** 讨论详情由独立主题头、标准 Card 条目和可选分页三部分组成。 */
+/** 讨论详情由独立主题头、Thread 条目和可选分页三部分组成。 */
 export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
   const [preview, setPreview] = useState<FeedImage>();
   const replyMetric = content.header.metrics.find((metric) => metric.kind === 'replies');
@@ -114,14 +114,12 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
           <h2>{content.entryLabel}</h2>
           <span>{totalEntries.toLocaleString('zh-CN')} 条</span>
         </header>
-        {/* 回答和回复已处于完整讨论页：媒体留在正文流，并不再重复提供详情跳转。 */}
+        {/* 回答和回复已处于完整讨论页：正文与媒体由 ThreadEntry 独立管理。 */}
         {content.entries.length ? content.entries.map((item, index) => (
-          <Card
+          <ThreadEntry
             item={item}
             index={index}
             key={item.id}
-            mediaMode="content"
-            showDetailLink={false}
             onAction={(entry, action) => onAction(entry.id, entry.originalUrl, action)}
           />
         )) : (

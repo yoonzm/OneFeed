@@ -69,6 +69,8 @@ describe('Zhihu question thread', () => {
       publishedAt: '2026-08-01T10:00:00Z',
     });
     expect(thread?.entries[0]).not.toHaveProperty('title');
+    expect(thread?.entries[0]?.body[0]).toMatchObject({ type: 'richText' });
+    expect(thread?.entries[0]).not.toHaveProperty('previewBlocks');
     expect(thread?.entries[1]).toMatchObject({
       publishedAt: '2026-08-02T11:00:00Z',
       updatedAt: '2026-08-03T12:00:00Z',

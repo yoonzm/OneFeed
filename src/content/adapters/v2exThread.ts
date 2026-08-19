@@ -1,6 +1,6 @@
 import DOMPurify from 'dompurify';
 import type { ThreadDetail, ThreadHeader, ThreadPagination } from '../../types/detail';
-import type { FeedBlock, FeedImage, FeedItem } from '../../types/feed';
+import type { FeedBlock, FeedImage, ThreadEntry } from '../../types/feed';
 import type { DetailAdapterDefinition, DetailListener } from './detail';
 import { parseV2exCount, V2EX_SOURCE } from './v2ex';
 
@@ -79,7 +79,7 @@ export function isV2exThreadUrl(url: URL): boolean {
     /^\/t\/\d+\/?$/.test(url.pathname);
 }
 
-export function parseV2exReply(element: Element, url: URL): FeedItem | null {
+export function parseV2exReply(element: Element, url: URL): ThreadEntry | null {
   const body = element.querySelector('.reply_content');
   const replyId = element.id.match(/^r_(\d+)$/)?.[1];
   if (!body || !replyId) return null;
@@ -107,7 +107,7 @@ export function parseV2exReply(element: Element, url: URL): FeedItem | null {
         : undefined,
     },
     publishedAt: element.querySelector('.ago')?.getAttribute('title') || undefined,
-    previewBlocks: parseBlocks(body),
+    body: parseBlocks(body),
     metrics: reactions ? [{ kind: 'reactions', value: reactions, label: '喜欢' }] : [],
     actions: [],
   };
@@ -179,7 +179,7 @@ export function parseV2exThread(
   };
   const entries = Array.from(root.querySelectorAll('#Main .cell[id^="r_"]'))
     .map((element) => parseV2exReply(element, url))
-    .filter((item): item is FeedItem => item !== null);
+    .filter((item): item is ThreadEntry => item !== null);
 
   return {
     id: rootId,

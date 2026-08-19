@@ -1,9 +1,7 @@
-import { act } from 'react';
-import { createRoot, type Root } from 'react-dom/client';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { FeedItem } from '../../../types/feed';
-import { Card } from './Card';
+import { FeedCard } from './FeedCard';
 
 const shortReply: FeedItem = {
   id: 'v2ex_reply_1',
@@ -22,17 +20,10 @@ const shortReply: FeedItem = {
   actions: [],
 };
 
-describe('Card', () => {
-  let root: Root | undefined;
-
-  afterEach(async () => {
-    if (root) await act(async () => root?.unmount());
-    root = undefined;
-  });
-
+describe('FeedCard', () => {
   it('renders a quiet seen marker without changing the feed item protocol', () => {
     const markup = renderToStaticMarkup(
-      <Card item={shortReply} index={0} isSeen onAction={vi.fn()} />,
+      <FeedCard item={shortReply} index={0} isSeen onAction={vi.fn()} />,
     );
 
     expect(markup).toContain('feed-card-seen');
@@ -42,10 +33,10 @@ describe('Card', () => {
 
   it('renders short plain text as a compact card with author metadata but no avatar', () => {
     const markup = renderToStaticMarkup(
-      <Card item={shortReply} index={0} onAction={vi.fn()} />,
+      <FeedCard item={shortReply} index={0} onAction={vi.fn()} />,
     );
 
-    expect(markup).toContain('feed-card-compact');
+    expect(markup).toContain('item-card-compact');
     expect(markup).toContain('class="content"');
     expect(markup).not.toContain('content-expanded');
     expect(markup).toContain('class="card-meta-row"');
@@ -57,7 +48,7 @@ describe('Card', () => {
 
   it('renders a provided avatar beside the linked author name', () => {
     const markup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           author: {
@@ -79,7 +70,7 @@ describe('Card', () => {
 
   it('orders title, body and remaining metadata as three semantic rows', () => {
     const markup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           title: '测试标题',
@@ -118,7 +109,7 @@ describe('Card', () => {
 
   it('keeps contextual short text compact', () => {
     const markup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           context: { community: { name: '分享创造' } },
@@ -128,12 +119,12 @@ describe('Card', () => {
       />,
     );
 
-    expect(markup).toContain('feed-card-compact');
+    expect(markup).toContain('item-card-compact');
   });
 
   it('renders a short title without body blocks as a compact card', () => {
     const markup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           title: '问',
@@ -151,7 +142,7 @@ describe('Card', () => {
       />,
     );
 
-    expect(markup).toContain('feed-card-compact');
+    expect(markup).toContain('item-card-compact');
     expect(markup).toContain('>问</a>');
     expect(markup).not.toContain('查看原文');
   });
@@ -159,7 +150,7 @@ describe('Card', () => {
   it('keeps long text in the comfortable card layout', () => {
     const plainText = '这是一段需要保留完整阅读节奏的较长内容，用于确认通用列表不会把所有纯文本条目都压缩成行内布局。';
     const markup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           previewBlocks: [{
@@ -173,12 +164,12 @@ describe('Card', () => {
       />,
     );
 
-    expect(markup).not.toContain('feed-card-compact');
+    expect(markup).not.toContain('item-card-compact');
   });
 
   it('places a supplementary single image in the side-media region', () => {
     const markup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           title: '带配图的正文',
@@ -209,74 +200,9 @@ describe('Card', () => {
     expect(markup.indexOf('card-media-aside')).toBeLessThan(markup.indexOf('card-meta-row'));
   });
 
-  it('keeps short content media in the body instead of the side-media region', () => {
-    const markup = renderToStaticMarkup(
-      <Card
-        item={{
-          ...shortReply,
-          previewBlocks: [
-            ...shortReply.previewBlocks,
-            {
-              type: 'gallery',
-              items: [{ url: 'https://example.com/answer.jpg', alt: '回答配图' }],
-            },
-          ],
-        }}
-        index={0}
-        mediaMode="content"
-        onAction={vi.fn()}
-      />,
-    );
-
-    expect(markup).toContain('feed-card-media-content');
-    expect(markup).not.toContain('feed-card-side-media');
-    expect(markup).not.toContain('card-media-aside');
-    expect(markup).toContain('src="https://example.com/answer.jpg"');
-  });
-
-  it('reveals long-answer media in the body after expanding the text', async () => {
-    const container = document.createElement('div');
-    root = createRoot(container);
-
-    await act(async () => root?.render(
-      <Card
-        item={{
-          ...shortReply,
-          previewBlocks: [
-            {
-              type: 'richText',
-              html: `<p>${'长回答。'.repeat(100)}</p>`,
-              plainText: '长回答。'.repeat(100),
-            },
-            {
-              type: 'gallery',
-              items: [{ url: 'https://example.com/answer.jpg', alt: '回答配图' }],
-            },
-          ],
-        }}
-        index={0}
-        mediaMode="content"
-        onAction={vi.fn()}
-      />,
-    ));
-
-    expect(container.querySelector('.card-media-aside')).toBeNull();
-    expect(container.querySelector('img[src="https://example.com/answer.jpg"]')).toBeNull();
-
-    const expand = Array.from(container.querySelectorAll('button'))
-      .find((button) => button.textContent === '展开全文');
-    await act(async () => expand?.click());
-
-    expect(container.querySelector('img[src="https://example.com/answer.jpg"]')).not.toBeNull();
-    const preview = container.querySelector<HTMLButtonElement>('.media-button');
-    await act(async () => preview?.click());
-    expect(container.querySelector('.lightbox img[src="https://example.com/answer.jpg"]'))
-      .not.toBeNull();
-  });
-
   it('keeps image-led and extreme-ratio media in the main content flow', () => {
     const imageLedMarkup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           title: '图片内容',
@@ -290,7 +216,7 @@ describe('Card', () => {
       />,
     );
     const portraitMarkup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           previewBlocks: [

@@ -10,7 +10,7 @@ import type {
 } from '../types/feed';
 import { OneFeedShell } from './OneFeedShell';
 import { useFeedStore } from './store/useFeedStore';
-import { Card } from './themes/FocusPaper/Card';
+import { FeedCard } from './themes/FocusPaper/FeedCard';
 import { getSeenFeedItemKey, useSeenFeedItems } from './useSeenFeedItems';
 
 interface FeedAppProps {
@@ -163,7 +163,7 @@ export default function FeedApp({
             visibleItems.map((item, index) => {
               const seenItemKey = getSeenFeedItemKey(item);
               return (
-                <Card
+                <FeedCard
                   key={item.id}
                   item={item}
                   index={index}
