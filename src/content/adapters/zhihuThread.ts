@@ -51,7 +51,7 @@ export function parseZhihuThreadAnswer(element: Element): ThreadEntry | null {
       if (action.kind === 'reply') {
         return { ...action, enabled: false, fallback: undefined };
       }
-      if (action.kind === 'open') return { ...action, label: '查看回答' };
+      if (action.kind === 'open') return { ...action, label: '查看详情' };
       return action;
     }),
   };

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import type { ThreadDetail as ThreadDetailContent } from '../../../types/detail';
 import type { FeedActionDescriptor, FeedImage } from '../../../types/feed';
 import { ActionBar } from '../../components/ActionBar';
 import { BlockRenderer } from '../../components/BlockRenderer';
+import { hasExpandableText } from './contentItemUtils';
 import { ThreadEntry } from './ThreadEntry';
 
 interface ThreadDetailProps {
@@ -30,9 +31,38 @@ function formatPublishedAt(value: string | number): string {
 /** 讨论详情由独立主题头、Thread 条目和可选分页三部分组成。 */
 export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
   const [preview, setPreview] = useState<FeedImage>();
+  const [questionExpanded, setQuestionExpanded] = useState(false);
+  const [questionTextOverflow, setQuestionTextOverflow] = useState(false);
+  const questionBodyRef = useRef<HTMLDivElement>(null);
   const replyMetric = content.header.metrics.find((metric) => metric.kind === 'replies');
   // 原站总数可能大于当前已解析条目数；没有可用统计值时再回退到本地长度。
   const totalEntries = replyMetric?.value || content.entries.length;
+  const isQuestion = content.header.role === 'question';
+  const questionBodyHasKnownOverflow = isQuestion && (
+    hasExpandableText(content.header.body) ||
+    content.header.body.filter((block) => block.type === 'richText').length > 1 ||
+    content.header.body.some((block) => block.type !== 'richText')
+  );
+  const questionBodyExpandable = isQuestion && (
+    questionBodyHasKnownOverflow || questionTextOverflow
+  );
+  const headerBodyExpanded = !isQuestion || questionExpanded;
+  // 问题折叠态只保留第一段文字，主题帖则始终按完整正文渲染。
+  const headerBlocks = headerBodyExpanded
+    ? content.header.body
+    : content.header.body.filter((block) => block.type === 'richText').slice(0, 1);
+
+  useLayoutEffect(() => {
+    if (!isQuestion || questionExpanded || questionBodyHasKnownOverflow) return;
+    const element = questionBodyRef.current?.querySelector<HTMLElement>('.content');
+    const measureOverflow = () => {
+      setQuestionTextOverflow(Boolean(element && element.scrollHeight > element.clientHeight));
+    };
+
+    measureOverflow();
+    window.addEventListener('resize', measureOverflow);
+    return () => window.removeEventListener('resize', measureOverflow);
+  }, [content.header.body, isQuestion, questionBodyHasKnownOverflow, questionExpanded]);
 
   return (
     <>
@@ -84,16 +114,27 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
         )}
 
         {!!content.header.body.length && (
-          <div className="thread-body detail-body block-stack">
-            {content.header.body.map((block, blockIndex) => (
+          <div className="thread-body detail-body block-stack" ref={questionBodyRef}>
+            {headerBlocks.map((block, blockIndex) => (
               <BlockRenderer
                 block={block}
-                expanded
+                expanded={headerBodyExpanded}
                 onPreview={setPreview}
                 key={`${block.type}-${blockIndex}`}
               />
             ))}
           </div>
+        )}
+
+        {questionBodyExpandable && (
+          <button
+            className="text-action thread-question-toggle"
+            type="button"
+            aria-expanded={questionExpanded}
+            onClick={() => setQuestionExpanded(!questionExpanded)}
+          >
+            {questionExpanded ? '收起问题详情' : '展开问题详情'}
+          </button>
         )}
 
         <ActionBar
@@ -114,7 +155,7 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
           <h2>{content.entryLabel}</h2>
           <span>{totalEntries.toLocaleString('zh-CN')} 条</span>
         </header>
-        {/* 回答和回复已处于完整讨论页：正文与媒体由 ThreadEntry 独立管理。 */}
+        {/* Answer 只提供详情预览；Reply 作为讨论组成部分在当前线程内阅读。 */}
         {content.entries.length ? content.entries.map((item, index) => (
           <ThreadEntry
             item={item}

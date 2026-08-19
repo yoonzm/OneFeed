@@ -77,16 +77,14 @@ describe('ThreadEntry', () => {
     expect(markup).toContain('src="https://example.com/reply.jpg"');
   });
 
-  it('reveals long-answer media in the body after expanding the text', async () => {
-    const container = document.createElement('div');
-    root = createRoot(container);
-
-    await act(async () => root?.render(
+  it('keeps a long answer as a two-line preview linked to its detail page', () => {
+    const markup = renderToStaticMarkup(
       <ThreadEntry
         item={{
           ...shortReply,
           kind: 'article',
           role: 'answer',
+          originalUrl: 'https://www.zhihu.com/question/1/answer/42',
           body: [
             {
               type: 'richText',
@@ -98,6 +96,41 @@ describe('ThreadEntry', () => {
               items: [{ url: 'https://example.com/answer.jpg', alt: '回答配图' }],
             },
           ],
+          actions: [{ id: 'open', kind: 'open', label: '查看详情', enabled: true }],
+        }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).not.toContain('content-expanded');
+    expect(markup).not.toContain('https://example.com/answer.jpg');
+    expect(markup).not.toContain('展开全文');
+    expect(markup).toContain('thread-answer-detail-link');
+    expect(markup).toContain('查看详情');
+    expect(markup).not.toContain('查看回答');
+    expect(markup).toContain('href="https://www.zhihu.com/question/1/answer/42"');
+  });
+
+  it('expands a long reply in place without adding a detail link', async () => {
+    const container = document.createElement('div');
+    root = createRoot(container);
+
+    await act(async () => root?.render(
+      <ThreadEntry
+        item={{
+          ...shortReply,
+          body: [
+            {
+              type: 'richText',
+              html: `<p>${'长回复。'.repeat(100)}</p>`,
+              plainText: '长回复。'.repeat(100),
+            },
+            {
+              type: 'gallery',
+              items: [{ url: 'https://example.com/reply.jpg', alt: '回复配图' }],
+            },
+          ],
         }}
         index={0}
         onAction={vi.fn()}
@@ -105,16 +138,17 @@ describe('ThreadEntry', () => {
     ));
 
     expect(container.querySelector('.card-media-aside')).toBeNull();
-    expect(container.querySelector('img[src="https://example.com/answer.jpg"]')).toBeNull();
+    expect(container.querySelector('img[src="https://example.com/reply.jpg"]')).toBeNull();
+    expect(container.querySelector('.card-detail-link')).toBeNull();
 
     const expand = Array.from(container.querySelectorAll('button'))
       .find((button) => button.textContent === '展开全文');
     await act(async () => expand?.click());
 
-    expect(container.querySelector('img[src="https://example.com/answer.jpg"]')).not.toBeNull();
+    expect(container.querySelector('img[src="https://example.com/reply.jpg"]')).not.toBeNull();
     const preview = container.querySelector<HTMLButtonElement>('.media-button');
     await act(async () => preview?.click());
-    expect(container.querySelector('.lightbox img[src="https://example.com/answer.jpg"]'))
+    expect(container.querySelector('.lightbox img[src="https://example.com/reply.jpg"]'))
       .not.toBeNull();
   });
 });

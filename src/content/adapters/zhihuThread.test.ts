@@ -79,7 +79,7 @@ describe('Zhihu question thread', () => {
       enabled: false,
     });
     expect(thread?.entries[0]?.actions.find((action) => action.kind === 'open')).toMatchObject({
-      label: '查看回答',
+      label: '查看详情',
     });
   });
 
