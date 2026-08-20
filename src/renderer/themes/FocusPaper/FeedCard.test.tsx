@@ -208,9 +208,13 @@ describe('FeedCard', () => {
     expect(markup.indexOf('card-body-row')).toBeLessThan(markup.indexOf('card-media-aside'));
     expect(markup.indexOf('card-media-aside')).toBeLessThan(markup.indexOf('card-meta-row'));
     expect(readerStyles).toContain('.feed-card-side-media.item-card-titled .card-main');
+    expect(readerStyles).toContain('grid-template-columns: minmax(0, 1fr) 216px');
+    expect(readerStyles).toContain(
+      '.feed-card-side-media .card-media-aside .media-button { height: 144px; }',
+    );
   });
 
-  it('keeps image-led and extreme-ratio media in the main content flow', () => {
+  it('places image-led and extreme-ratio media in the side-media region', () => {
     const imageLedMarkup = renderToStaticMarkup(
       <FeedCard
         item={{
@@ -251,9 +255,63 @@ describe('FeedCard', () => {
       />,
     );
 
-    expect(imageLedMarkup).not.toContain('feed-card-side-media');
-    expect(imageLedMarkup).not.toContain('card-media-aside');
-    expect(portraitMarkup).not.toContain('feed-card-side-media');
-    expect(portraitMarkup).not.toContain('card-media-aside');
+    expect(imageLedMarkup).toContain('feed-card-side-media');
+    expect(imageLedMarkup).toContain('card-media-aside');
+    expect(portraitMarkup).toContain('feed-card-side-media');
+    expect(portraitMarkup).toContain('card-media-aside');
+  });
+
+  it('renders only the first gallery image in the side-media region', () => {
+    const markup = renderToStaticMarkup(
+      <FeedCard
+        item={{
+          ...shortReply,
+          previewBlocks: [{
+            type: 'gallery',
+            items: [
+              { url: 'https://example.com/first.jpg', alt: '第一张图' },
+              { url: 'https://example.com/second.jpg', alt: '第二张图' },
+            ],
+          }],
+        }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain('feed-card-side-media');
+    expect(markup.match(/class="media-button"/g) ?? []).toHaveLength(1);
+    expect(markup).toContain('first.jpg');
+    expect(markup).not.toContain('second.jpg');
+  });
+
+  it('renders only the first video media block on the side without requiring text', () => {
+    const markup = renderToStaticMarkup(
+      <FeedCard
+        item={{
+          ...shortReply,
+          previewBlocks: [
+            {
+              type: 'video',
+              media: {
+                url: 'https://example.com/clip.mp4',
+                poster: 'https://example.com/poster.jpg',
+              },
+            },
+            {
+              type: 'gallery',
+              items: [{ url: 'https://example.com/later.jpg', alt: '后续图片' }],
+            },
+          ],
+        }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain('feed-card-side-media');
+    expect(markup).toContain('class="video-player"');
+    expect(markup).toContain('clip.mp4');
+    expect(markup).not.toContain('later.jpg');
   });
 });

@@ -1,6 +1,11 @@
 import { Check } from '@phosphor-icons/react';
 import { useState } from 'react';
-import type { FeedActionDescriptor, FeedImage, FeedItem } from '../../../types/feed';
+import type {
+  FeedActionDescriptor,
+  FeedBlock,
+  FeedImage,
+  FeedItem,
+} from '../../../types/feed';
 import { ActionBar } from '../../components/ActionBar';
 import { BlockRenderer } from '../../components/BlockRenderer';
 import {
@@ -19,25 +24,22 @@ interface FeedCardProps {
   onAction: (item: FeedItem, action: FeedActionDescriptor) => void;
 }
 
-/** 文字与单张常规比例图片组合时，图片作为 Feed 辅助信息收敛到右侧。 */
-function getSideGallery(item: FeedItem) {
-  const galleryBlocks = item.previewBlocks.filter((block) => block.type === 'gallery');
-  const hasRichText = item.previewBlocks.some((block) => block.type === 'richText');
-  const hasOtherBlocks = item.previewBlocks.some(
-    (block) => block.type !== 'richText' && block.type !== 'gallery',
-  );
-  const gallery = galleryBlocks[0];
+type FeedMediaBlock = Extract<FeedBlock, { type: 'gallery' | 'video' }>;
 
-  if (!hasRichText || hasOtherBlocks || galleryBlocks.length !== 1 || gallery?.items.length !== 1) {
-    return undefined;
+/** Feed 只保留首个有效内容媒体，并将图库收敛为单图右侧预览。 */
+function getSideMedia(item: FeedItem): FeedMediaBlock | undefined {
+  for (const block of item.previewBlocks) {
+    if (block.type === 'gallery') {
+      const image = block.items[0];
+      if (image) return { type: 'gallery', items: [image] };
+    }
+
+    if (block.type === 'video' && (block.media.url || block.media.poster)) {
+      return block;
+    }
   }
 
-  const image = gallery.items[0];
-  const aspectRatio = image?.aspectRatio
-    || (image?.width && image.height ? image.width / image.height : undefined);
-  if (aspectRatio && (aspectRatio < 0.75 || aspectRatio > 2.2)) return undefined;
-
-  return gallery;
+  return undefined;
 }
 
 /** Feed 专用卡片：负责预览截断、详情导航、已读状态和 Feed 媒体布局。 */
@@ -50,22 +52,24 @@ export function FeedCard({
 }: FeedCardProps) {
   const [preview, setPreview] = useState<FeedImage>();
   const densityClassName = getDensityClassName(item, item.previewBlocks);
-  const sideGallery = getSideGallery(item);
-  const contentBlocks = item.previewBlocks.filter((block) => block !== sideGallery);
+  const sideMedia = getSideMedia(item);
+  const contentBlocks = item.previewBlocks.filter(
+    (block) => block.type !== 'gallery' && block.type !== 'video',
+  );
 
   return (
     <article
-      className={`item-card feed-card feed-card-${item.kind} feed-card-${item.role} ${item.title ? 'item-card-titled' : 'item-card-untitled'} ${sideGallery ? 'feed-card-side-media' : ''} ${densityClassName} ${isSeen ? 'feed-card-seen' : ''}`.trim()}
+      className={`item-card feed-card feed-card-${item.kind} feed-card-${item.role} ${item.title ? 'item-card-titled' : 'item-card-untitled'} ${sideMedia ? 'feed-card-side-media' : ''} ${densityClassName} ${isSeen ? 'feed-card-seen' : ''}`.trim()}
       data-seen={isSeen ? 'true' : undefined}
     >
       <div className="card-main">
         <ItemTitle item={item} linked onOpen={onSeen} />
         <ItemBody blocks={contentBlocks} expanded={false} onPreview={setPreview} />
 
-        {sideGallery && (
+        {sideMedia && (
           <div className="card-media-aside">
             <BlockRenderer
-              block={sideGallery}
+              block={sideMedia}
               expanded={false}
               onPreview={setPreview}
               compactGallery
