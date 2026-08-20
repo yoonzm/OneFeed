@@ -121,6 +121,20 @@ describe('V2EX topic thread', () => {
     expect(thread?.entries.every((entry) => entry.actions.length === 0)).toBe(true);
   });
 
+  it('parses a title-only topic without a topic body', () => {
+    fixture();
+    document.querySelector('.topic_content')?.remove();
+
+    const thread = parseV2exThread(
+      document,
+      new URL('https://www.v2ex.com/t/123'),
+    );
+
+    expect(thread?.header.title).toBe('怎样设计一个稳定的扩展？');
+    expect(thread?.header.body).toEqual([]);
+    expect(thread?.entries).toHaveLength(2);
+  });
+
   it('proxies the topic vote from the thread header', () => {
     fixture();
     const vote = document.querySelector<HTMLElement>('.votes .vote')!;
