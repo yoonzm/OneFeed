@@ -514,7 +514,7 @@ export function parseZhihuCard(element: Element): FeedItem | null {
       kind: 'discussion',
       role: 'question',
       title,
-      author: { name: '知乎用户', avatar: '' },
+      author: { name: '', avatar: '' },
       sequence: parseCount(firstText(element, ['.HotItem-index'])) || undefined,
       context: { reason: { type: 'recommended', label: '热榜' } },
       previewBlocks,

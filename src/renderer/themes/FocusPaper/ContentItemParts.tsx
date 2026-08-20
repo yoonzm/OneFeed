@@ -77,6 +77,7 @@ export function ItemBody({ blocks, expanded, onPreview }: ItemBodyProps) {
 
 /** 两个列表 Surface 共用内容元信息，但把各自的导航和操作作为 children 注入。 */
 export function ItemMeta({ item, index, children }: ItemMetaProps) {
+  const hasAuthor = Boolean(item.author.name.trim());
   const authorAvatar = item.author.avatar ? (
     <img className="card-author-avatar" src={item.author.avatar} alt="" loading="lazy" />
   ) : null;
@@ -86,16 +87,18 @@ export function ItemMeta({ item, index, children }: ItemMetaProps) {
       <span className="card-index" aria-label={`第 ${item.sequence || index + 1} 条`}>
         {String(item.sequence || index + 1).padStart(2, '0')}
       </span>
-      {item.author.link ? (
-        <a className="card-author" href={item.author.link} target="_blank" rel="noreferrer">
-          {authorAvatar}
-          {item.author.name}
-        </a>
-      ) : (
-        <span className="card-author">
-          {authorAvatar}
-          {item.author.name}
-        </span>
+      {hasAuthor && (
+        item.author.link ? (
+          <a className="card-author" href={item.author.link} target="_blank" rel="noreferrer">
+            {authorAvatar}
+            {item.author.name}
+          </a>
+        ) : (
+          <span className="card-author">
+            {authorAvatar}
+            {item.author.name}
+          </span>
+        )
       )}
       {item.publishedAt !== undefined && (
         <span className="card-time">

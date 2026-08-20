@@ -3,9 +3,9 @@
  * 这里不能保存原站 DOM 节点或点击句柄；这类运行时对象由 Adapter 自己维护。
  */
 
-/** 内容作者快照；avatar 允许为空字符串，Renderer 负责展示降级状态。 */
+/** 内容作者快照；原内容没有作者时 name 为空，Renderer 不展示作者信息。 */
 export interface FeedAuthor {
-  /** 面向用户展示的作者名称；缺失时由 Adapter 提供平台级降级文案。 */
+  /** 面向用户展示的作者名称；空字符串表示原内容没有可展示的作者。 */
   name: string;
   /** 作者头像的绝对 URL；空字符串表示原站未提供可用头像。 */
   avatar: string;
@@ -319,7 +319,7 @@ export interface ContentItemBase {
   kind: ContentKind;
   /** 内容在当前 Surface 中承担的语义角色。 */
   role: ContentRole;
-  /** 作者数据仍属于协议，即使某个主题选择不在列表条目中展示。 */
+  /** 作者数据仍属于协议；原内容没有作者时保留空作者快照。 */
   author: FeedAuthor;
   /** 原讨论中的楼层或条目序号；缺失时 Renderer 使用当前列表位置。 */
   sequence?: number;

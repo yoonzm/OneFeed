@@ -72,6 +72,18 @@ describe('FeedCard', () => {
     expect(markup).toContain('loading="lazy"');
   });
 
+  it('omits author metadata when the source has no author', () => {
+    const markup = renderToStaticMarkup(
+      <FeedCard
+        item={{ ...shortReply, author: { name: '', avatar: '' } }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).not.toContain('class="card-author"');
+  });
+
   it('orders title, body and remaining metadata as three semantic rows', () => {
     const markup = renderToStaticMarkup(
       <FeedCard

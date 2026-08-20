@@ -79,6 +79,7 @@ describe('parseZhihuCard', () => {
         items: [{ url: 'https://pic.example/hot.png', alt: '热榜配图' }],
       },
     ]);
+    expect(item?.author).toEqual({ name: '', avatar: '' });
   });
 
   it('normalizes a Zhihu card and sanitizes content', () => {
