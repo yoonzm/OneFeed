@@ -151,8 +151,8 @@ describe('FeedCard', () => {
     expect(markup).not.toContain('查看原文');
   });
 
-  it('keeps long text in the comfortable card layout', () => {
-    const plainText = '这是一段需要保留完整阅读节奏的较长内容，用于确认通用列表不会把所有纯文本条目都压缩成行内布局。';
+  it('keeps long text collapsed without offering expansion', () => {
+    const plainText = '这是一段需要保留完整阅读节奏的较长内容。'.repeat(20);
     const markup = renderToStaticMarkup(
       <FeedCard
         item={{
@@ -169,6 +169,10 @@ describe('FeedCard', () => {
     );
 
     expect(markup).not.toContain('item-card-compact');
+    expect(markup).toContain('class="content"');
+    expect(markup).not.toContain('content-expanded');
+    expect(markup).not.toContain('展开全文');
+    expect(markup).not.toContain('收起');
   });
 
   it('places a supplementary single image in the side-media region', () => {

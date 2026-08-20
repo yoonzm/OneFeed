@@ -9,7 +9,7 @@ import {
   ItemMeta,
   ItemTitle,
 } from './ContentItemParts';
-import { getDensityClassName, hasExpandableText } from './contentItemUtils';
+import { getDensityClassName } from './contentItemUtils';
 
 interface FeedCardProps {
   item: FeedItem;
@@ -48,9 +48,7 @@ export function FeedCard({
   onSeen,
   onAction,
 }: FeedCardProps) {
-  const [expanded, setExpanded] = useState(false);
   const [preview, setPreview] = useState<FeedImage>();
-  const expandable = hasExpandableText(item.previewBlocks);
   const densityClassName = getDensityClassName(item, item.previewBlocks);
   const sideGallery = getSideGallery(item);
   const contentBlocks = item.previewBlocks.filter((block) => block !== sideGallery);
@@ -62,13 +60,13 @@ export function FeedCard({
     >
       <div className="card-main">
         <ItemTitle item={item} linked onOpen={onSeen} />
-        <ItemBody blocks={contentBlocks} expanded={expanded} onPreview={setPreview} />
+        <ItemBody blocks={contentBlocks} expanded={false} onPreview={setPreview} />
 
         {sideGallery && (
           <div className="card-media-aside">
             <BlockRenderer
               block={sideGallery}
-              expanded={expanded}
+              expanded={false}
               onPreview={setPreview}
               compactGallery
             />
@@ -76,16 +74,6 @@ export function FeedCard({
         )}
 
         <ItemMeta item={item} index={index}>
-          {expandable && (
-            <button
-              className="text-action"
-              type="button"
-              onClick={() => setExpanded(!expanded)}
-            >
-              {expanded ? '收起' : '展开全文'}
-            </button>
-          )}
-
           {!item.title && (
             <a
               className="card-detail-link"
