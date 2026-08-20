@@ -289,7 +289,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .item-card-compact .content { line-height: 1.65; }
 .card-media-aside .media-button { border: 1px solid var(--line); border-radius: 8px; }
 
-/* 宽屏下把 Feed 的唯一内容媒体收敛到现有右侧槽位。 */
+/* 宽屏下把 Feed 的唯一内容媒体收敛到右侧，并避免跨行媒体拉伸正文截断容器。 */
 @media (min-width: 721px) {
   .feed-card-side-media .card-main {
     grid-template-columns: minmax(0, 1fr) 216px;
@@ -306,7 +306,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
       "meta media";
   }
   .feed-card-side-media .card-title-row { grid-area: title; }
-  .feed-card-side-media .card-body-row { grid-area: body; }
+  .feed-card-side-media .card-body-row { grid-area: body; align-self: start; }
   .feed-card-side-media .card-media-aside { grid-area: media; align-self: start; }
   .feed-card-side-media .card-meta-row { grid-area: meta; }
   .feed-card-side-media .card-media-aside .media-button { height: 144px; }

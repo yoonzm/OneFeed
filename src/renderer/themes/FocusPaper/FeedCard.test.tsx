@@ -210,6 +210,9 @@ describe('FeedCard', () => {
     expect(readerStyles).toContain('.feed-card-side-media.item-card-titled .card-main');
     expect(readerStyles).toContain('grid-template-columns: minmax(0, 1fr) 216px');
     expect(readerStyles).toContain(
+      '.feed-card-side-media .card-body-row { grid-area: body; align-self: start; }',
+    );
+    expect(readerStyles).toContain(
       '.feed-card-side-media .card-media-aside .media-button { height: 144px; }',
     );
   });
