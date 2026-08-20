@@ -77,8 +77,8 @@ a { color: inherit; }
 .rail-track i { display: block; width: 100%; background: var(--blue); transition: height 100ms linear; }
 .rail-percent { display: block; letter-spacing: 0; transform: rotate(-90deg); }
 
-/* Feed Card 按标题、正文、元信息三层组织；缺失的标题或正文不会保留空行。 */
-.feed-card {
+/* Feed 与 Thread 条目共享标题、正文、元信息三层骨架；各 Surface 独立控制交互。 */
+.item-card {
   position: relative;
   display: block;
   padding: 16px 0;
@@ -121,8 +121,8 @@ a { color: inherit; }
   font-weight: 600;
   letter-spacing: .02em;
 }
-.feed-card-seen.feed-card-titled .card-title-row { padding-right: 72px; }
-.feed-card-seen.feed-card-untitled .card-main { padding-top: 28px; }
+.feed-card-seen.item-card-titled .card-title-row { padding-right: 72px; }
+.feed-card-seen.item-card-untitled .card-main { padding-top: 28px; }
 .feed-card-seen .card-title-row h2 a,
 .feed-card-seen .content { color: var(--muted); }
 .card-author { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-weight: 600; text-decoration: none; }
@@ -224,6 +224,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .thread-header h1 { margin-bottom: 20px; }
 .thread-header h1 + .author-row { margin-top: -8px; }
 .thread-body { margin-top: 20px; }
+.thread-question-toggle { margin-bottom: 8px; }
 .thread-entries { margin-top: 8px; }
 .thread-list-header {
   display: flex;
@@ -239,7 +240,18 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 }
 .thread-list-header span { font-size: 12px; }
 .thread-empty { padding: 64px 0; color: var(--muted); text-align: center; }
-.feed-card-reply { padding-top: 16px; padding-bottom: 16px; }
+.thread-entry-answer { padding-top: 20px; padding-bottom: 18px; }
+.thread-answer-detail-link {
+  display: inline-flex;
+  min-height: 28px;
+  align-items: center;
+  margin: 0;
+  padding: 2px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.thread-entry-reply { padding-top: 16px; padding-bottom: 16px; }
 .thread-pagination {
   display: flex;
   align-items: center;
@@ -252,7 +264,7 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .thread-pagination span { color: var(--color-onefeed-subtle); }
 .thread-pagination strong { color: var(--muted); font-weight: 500; }
 
-/* 列表正文固定预览两行；展开状态与详情正文恢复完整的块级排版。 */
+/* Feed、问题说明和回答预览显示两行；可原地展开的回复恢复完整块级排版。 */
 .content {
   display: -webkit-box;
   overflow: hidden;
@@ -271,13 +283,13 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 
 .block-stack { display: grid; gap: 14px; }
 
-/* 只有结构简单的短标题或短纯文本会由 Card 选择紧凑密度。 */
-.feed-card-compact { padding-top: 16px; padding-bottom: 16px; }
-.feed-card-compact .card-main { gap: 8px; }
-.feed-card-compact .content { line-height: 1.65; }
+/* 只有结构简单的短标题或短纯文本会由条目组件选择紧凑密度。 */
+.item-card-compact { padding-top: 16px; padding-bottom: 16px; }
+.item-card-compact .card-main { gap: 8px; }
+.item-card-compact .content { line-height: 1.65; }
 .card-media-aside .media-button { border: 1px solid var(--line); border-radius: 8px; }
 
-/* 宽屏下把文字型卡片的单张辅助图片收敛到右侧，图片型内容仍使用完整宽度。 */
+/* 宽屏下把 Feed 的唯一内容媒体收敛到右侧，并避免跨行媒体拉伸正文截断容器。 */
 @media (min-width: 721px) {
   .feed-card-side-media .card-main {
     grid-template-columns: minmax(0, 1fr) 216px;
@@ -287,14 +299,14 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
     column-gap: 20px;
     row-gap: 10px;
   }
-  .feed-card-side-media.feed-card-titled .card-main {
+  .feed-card-side-media.item-card-titled .card-main {
     grid-template-areas:
       "title media"
       "body media"
       "meta media";
   }
   .feed-card-side-media .card-title-row { grid-area: title; }
-  .feed-card-side-media .card-body-row { grid-area: body; }
+  .feed-card-side-media .card-body-row { grid-area: body; align-self: start; }
   .feed-card-side-media .card-media-aside { grid-area: media; align-self: start; }
   .feed-card-side-media .card-meta-row { grid-area: meta; }
   .feed-card-side-media .card-media-aside .media-button { height: 144px; }
@@ -321,6 +333,22 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .media-count-4 .media-button { height: 106px; }
 .media-button img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 240ms ease; }
 .media-button:hover img { transform: scale(1.018); }
+/* 单篇正文按原始内容流展示图片，并保留完整构图；列表和 Thread 仍使用紧凑媒体样式。 */
+.detail-body .media-button { height: auto; background: transparent; }
+.detail-body .media-button img { height: auto; object-fit: contain; }
+/* 单图回答收敛到接近折叠卡片的高度，完整构图交给点击后的大图预览。 */
+.thread-entry .media-count-1 .media-button {
+  display: grid;
+  height: 144px;
+  place-items: center;
+}
+.thread-entry .media-count-1 .media-button img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+}
 .media-overflow-count {
   position: absolute;
   inset: 0;
@@ -404,11 +432,11 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--color-onefeed-f
 @media (max-width: 720px) {
   .reader-app { padding: 0 16px 40px; }
   .reading-rail { display: none; }
-  .feed-card { padding: 16px 0; }
+  .item-card { padding: 16px 0; }
   .detail-article { padding-top: 32px; }
   .thread-header { padding: 32px 0 26px; }
   .thread-list-header { padding-top: 20px; }
-  .feed-card-reply { padding: 16px 0; }
+  .thread-entry-reply { padding: 16px 0; }
   .card-main { gap: 10px; }
   .card-meta-row { gap: 5px 10px; }
   .card-meta-row .card-actions { margin-left: 0; }

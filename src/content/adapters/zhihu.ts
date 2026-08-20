@@ -188,6 +188,16 @@ function extractMedia(body: Element): FeedImage[] {
     });
 }
 
+function extractImage(image: Element): FeedImage | null {
+  const url = absoluteUrl(
+    image.getAttribute('data-original') ||
+      image.getAttribute('data-actualsrc') ||
+      image.getAttribute('src') ||
+      '',
+  );
+  return url ? { url, alt: image.getAttribute('alt') || '' } : null;
+}
+
 function cleanContent(body: Element): string {
   const clone = body.cloneNode(true) as Element;
   clone.querySelectorAll('img, video, button, svg, noscript').forEach((node) => node.remove());
@@ -202,20 +212,131 @@ function cleanContent(body: Element): string {
   });
 }
 
-export function parseZhihuBlocks(body: Element): FeedBlock[] {
+type RichTextBlock = Extract<FeedBlock, { type: 'richText' }>;
+
+function createRichTextBlock(body: Element): RichTextBlock | null {
   const html = cleanContent(body);
   const textContainer = document.createElement('div');
   textContainer.innerHTML = html;
-  const contentText = textContainer.textContent?.trim() || '';
+  const plainText = textContainer.textContent?.trim() || '';
+  return plainText ? { type: 'richText', html, plainText } : null;
+}
+
+export function parseZhihuBlocks(body: Element): FeedBlock[] {
+  const richText = createRichTextBlock(body);
   const images = extractMedia(body);
   return [
-    ...(contentText ? [{
-      type: 'richText' as const,
-      html,
-      plainText: contentText,
-    }] : []),
+    ...(richText ? [richText] : []),
     ...(images.length ? [{ type: 'gallery' as const, items: images }] : []),
   ];
+}
+
+type OrderedZhihuSegment =
+  | { type: 'content'; node: Node }
+  | { type: 'gallery'; items: FeedImage[] };
+
+function splitZhihuContentNode(node: Node): OrderedZhihuSegment[] {
+  if (node.nodeType === Node.TEXT_NODE) {
+    return [{ type: 'content', node: node.cloneNode(true) }];
+  }
+  if (node.nodeType !== Node.ELEMENT_NODE) return [];
+
+  const element = node as Element;
+  if (element.matches('figure')) {
+    const items = extractMedia(element);
+    if (items.length) {
+      const captions = Array.from(element.querySelectorAll('figcaption'))
+        .map((caption) => {
+          const paragraph = document.createElement('p');
+          paragraph.append(...Array.from(caption.childNodes).map((child) => child.cloneNode(true)));
+          return { type: 'content' as const, node: paragraph };
+        });
+      return [{ type: 'gallery', items }, ...captions];
+    }
+  }
+  if (element.matches('img')) {
+    const image = extractImage(element);
+    return image ? [{ type: 'gallery', items: [image] }] : [];
+  }
+
+  const clone = () => element.cloneNode(false) as Element;
+  let content = clone();
+  const segments: OrderedZhihuSegment[] = [];
+
+  if (!element.childNodes.length) {
+    return [{ type: 'content', node: content }];
+  }
+
+  Array.from(element.childNodes).forEach((child) => {
+    splitZhihuContentNode(child).forEach((segment) => {
+      if (segment.type === 'content') {
+        content.append(segment.node);
+        return;
+      }
+
+      if (content.childNodes.length) {
+        segments.push({ type: 'content', node: content });
+      }
+      segments.push(segment);
+      content = clone();
+    });
+  });
+
+  if (content.childNodes.length) {
+    segments.push({ type: 'content', node: content });
+  }
+  return segments;
+}
+
+function findZhihuContentFlow(body: Element): Element {
+  const selectors = [
+    '.CopyrightRichText-richText',
+    '.Post-RichText',
+    '.RichText.ztext',
+    '.RichText',
+  ];
+  if (selectors.some((selector) => body.matches(selector))) return body;
+  for (const selector of selectors) {
+    const flow = body.querySelector(selector);
+    if (flow) return flow;
+  }
+  return body;
+}
+
+/** 单篇正文按原 DOM 流切分 Block，避免跨段收集图片后统一移到正文末尾。 */
+export function parseOrderedZhihuBlocks(body: Element): FeedBlock[] {
+  const flow = findZhihuContentFlow(body);
+  const blocks: FeedBlock[] = [];
+  let contentNodes: Node[] = [];
+
+  const flushContent = () => {
+    if (!contentNodes.length) return;
+    const container = document.createElement('div');
+    container.append(...contentNodes);
+    const block = createRichTextBlock(container);
+    if (block) blocks.push(block);
+    contentNodes = [];
+  };
+
+  Array.from(flow.childNodes).forEach((node) => {
+    splitZhihuContentNode(node).forEach((segment) => {
+      if (segment.type === 'content') {
+        contentNodes.push(segment.node);
+        return;
+      }
+
+      flushContent();
+      if (segment.items.length) {
+        blocks.push({ type: 'gallery', items: segment.items });
+      }
+    });
+  });
+  flushContent();
+  return blocks;
+}
+
+export function findZhihuContentBody(element: Element): Element | null {
+  return element.querySelector(BODY_SELECTOR);
 }
 
 export interface ParsedZhihuContent {
@@ -232,10 +353,20 @@ export interface ParsedZhihuContent {
 }
 
 export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
-  const body = element.querySelector(BODY_SELECTOR);
+  const body = findZhihuContentBody(element);
   if (!body) return null;
 
   const metadata = getMetadata(element);
+  // 新版回答列表不再把日期写入 data-zop，但仍保留 Schema.org 时间元数据。
+  const structuredPublishedAt = firstAttribute(element, [
+    'meta[itemprop="dateCreated"]',
+    'meta[itemprop="datePublished"]',
+  ], 'content');
+  const structuredUpdatedAt = firstAttribute(
+    element,
+    ['meta[itemprop="dateModified"]'],
+    'content',
+  );
   const title = firstText(element, [
     '.ContentItem-title',
     '.QuestionItem-title',
@@ -251,6 +382,18 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
     firstAttribute(element, ['.Avatar', '.AuthorInfo-avatar img'], 'src'),
   );
   const blocks = parseZhihuBlocks(body);
+  // 折叠信息流的封面是正文容器的兄弟节点，需要单独并入图库且避免与正文图片重复。
+  const cover = element.querySelector('.RichContent-cover, .RichContent-cover-inner');
+  const coverImages = cover ? extractMedia(cover) : [];
+  if (coverImages.length) {
+    const gallery = blocks.find((block) => block.type === 'gallery');
+    if (gallery) {
+      const knownUrls = new Set(gallery.items.map((image) => image.url));
+      gallery.items.push(...coverImages.filter((image) => !knownUrls.has(image.url)));
+    } else {
+      blocks.push({ type: 'gallery', items: coverImages });
+    }
+  }
   const contentText = blocks.find((block) => block.type === 'richText')?.plainText || '';
   if (!title && !contentText) return null;
 
@@ -333,8 +476,10 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
       avatar,
       link: absoluteUrl(firstAttribute(element, ['.AuthorInfo-name a', '.UserLink-link'], 'href')) || undefined,
     },
-    publishedAt: metadata.dateCreated ?? metadata.datePublished,
-    updatedAt: metadata.dateModified,
+    publishedAt: metadata.dateCreated ??
+      metadata.datePublished ??
+      (structuredPublishedAt || undefined),
+    updatedAt: metadata.dateModified ?? (structuredUpdatedAt || undefined),
     blocks,
     metrics: [
       { kind: 'reactions', value: agrees, label: '赞同' },
@@ -369,7 +514,7 @@ export function parseZhihuCard(element: Element): FeedItem | null {
       kind: 'discussion',
       role: 'question',
       title,
-      author: { name: '知乎用户', avatar: '' },
+      author: { name: '', avatar: '' },
       sequence: parseCount(firstText(element, ['.HotItem-index'])) || undefined,
       context: { reason: { type: 'recommended', label: '热榜' } },
       previewBlocks,

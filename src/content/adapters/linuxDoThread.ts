@@ -1,6 +1,6 @@
 import DOMPurify from 'dompurify';
 import type { ThreadDetail, ThreadHeader } from '../../types/detail';
-import type { FeedBlock, FeedImage, FeedItem } from '../../types/feed';
+import type { FeedBlock, FeedImage, ThreadEntry } from '../../types/feed';
 import type { DetailAdapterDefinition, DetailListener } from './detail';
 import {
   LINUX_DO_SOURCE,
@@ -68,7 +68,7 @@ function parseBlocks(body: Element): FeedBlock[] {
   ];
 }
 
-function parseAuthor(element: Element): FeedItem['author'] {
+function parseAuthor(element: Element): ThreadEntry['author'] {
   const authorLink = element.querySelector<HTMLAnchorElement>(
     '.names .first a[data-user-card], .names a[data-user-card], .main-avatar[data-user-card]',
   );
@@ -98,7 +98,7 @@ export function parseLinuxDoPost(
   element: Element,
   topicId: string,
   topicUrl: string,
-): FeedItem | null {
+): ThreadEntry | null {
   const sequence = Number(element.getAttribute('data-post-number'));
   const article = element.querySelector<HTMLElement>('article[data-post-id]');
   const body = element.querySelector('.cooked');
@@ -129,7 +129,7 @@ export function parseLinuxDoPost(
     sequence,
     author: parseAuthor(element),
     publishedAt: Number.isFinite(publishedAt) ? publishedAt : undefined,
-    previewBlocks: parseBlocks(body),
+    body: parseBlocks(body),
     metrics: reactions
       ? [{ kind: 'reactions', value: reactions, label: '赞' }]
       : [],
@@ -167,7 +167,7 @@ export function parseLinuxDoThread(
       element,
       item: parseLinuxDoPost(element, topicId, topicUrl),
     }))
-    .filter((entry): entry is { element: Element; item: FeedItem } => entry.item !== null);
+    .filter((entry): entry is { element: Element; item: ThreadEntry } => entry.item !== null);
   const firstPost = parsedPosts.find(({ item }) => item.sequence === 1);
   const entries = parsedPosts
     .map(({ item }) => item)
@@ -201,7 +201,7 @@ export function parseLinuxDoThread(
     title,
     author: firstPost?.item.author,
     publishedAt: firstPost?.item.publishedAt,
-    body: firstPost?.item.previewBlocks || [],
+    body: firstPost?.item.body || [],
     context: categoryName || tags.length ? {
       community: categoryName ? {
         name: categoryName,

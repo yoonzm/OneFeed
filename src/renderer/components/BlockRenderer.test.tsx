@@ -54,6 +54,19 @@ describe('BlockRenderer', () => {
     expect(gallery).not.toContain('image-5.jpg');
   });
 
+  it('renders every gallery image outside compact list surfaces', () => {
+    const gallery = render({
+      type: 'gallery',
+      items: Array.from({ length: 7 }, (_, index) => ({
+        url: `https://example.com/detail-${index + 1}.jpg`,
+        alt: `详情图片 ${index + 1}`,
+      })),
+    });
+
+    expect(gallery.match(/<button/g) ?? []).toHaveLength(7);
+    expect(gallery).toContain('detail-7.jpg');
+  });
+
   it('renders link, quote and poll blocks without platform branches', () => {
     const link = render({
       type: 'linkPreview',

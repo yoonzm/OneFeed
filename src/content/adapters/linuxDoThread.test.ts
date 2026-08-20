@@ -128,6 +128,11 @@ describe('Linux DO topic thread', () => {
         height: 600,
       }],
     });
+    expect(thread?.entries[0]?.body[0]).toMatchObject({
+      type: 'richText',
+      plainText: '引用。第十八楼。',
+    });
+    expect(thread?.entries[0]).not.toHaveProperty('previewBlocks');
   });
 
   it('keeps a numbered permalink usable when Discourse virtualizes away the first post', () => {

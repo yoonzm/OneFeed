@@ -14,7 +14,7 @@ describe('launch-center recency', () => {
       'zhihu',
       'twitter',
       'v2ex',
-    ])).toEqual(['reddit', 'zhihu', 'twitter']);
+    ])).toEqual(['zhihu', 'v2ex']);
   });
 
   it('falls back to a useful default when storage is missing or invalid', () => {
@@ -23,13 +23,13 @@ describe('launch-center recency', () => {
   });
 
   it('moves the selected platform to the front and limits history to three', () => {
-    expect(movePlatformToRecent(['zhihu', 'v2ex', 'reddit'], 'v2ex')).toEqual([
+    expect(movePlatformToRecent(['zhihu', 'v2ex', 'linux-do'], 'v2ex')).toEqual([
       'v2ex',
       'zhihu',
-      'reddit',
+      'linux-do',
     ]);
-    expect(movePlatformToRecent(['zhihu', 'v2ex', 'reddit'], 'twitter')).toEqual([
-      'twitter',
+    expect(movePlatformToRecent(['zhihu', 'v2ex', 'linux-do'], 'hacker-news')).toEqual([
+      'hacker-news',
       'zhihu',
       'v2ex',
     ]);

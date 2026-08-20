@@ -1,7 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { FeedItem } from '../../../types/feed';
-import { Card } from './Card';
+import { FeedCard } from './FeedCard';
+
+const readerStyles = readFileSync(resolve('src/renderer/styles.css'), 'utf8');
 
 const shortReply: FeedItem = {
   id: 'v2ex_reply_1',
@@ -20,10 +24,10 @@ const shortReply: FeedItem = {
   actions: [],
 };
 
-describe('Card', () => {
+describe('FeedCard', () => {
   it('renders a quiet seen marker without changing the feed item protocol', () => {
     const markup = renderToStaticMarkup(
-      <Card item={shortReply} index={0} isSeen onAction={vi.fn()} />,
+      <FeedCard item={shortReply} index={0} isSeen onAction={vi.fn()} />,
     );
 
     expect(markup).toContain('feed-card-seen');
@@ -33,10 +37,10 @@ describe('Card', () => {
 
   it('renders short plain text as a compact card with author metadata but no avatar', () => {
     const markup = renderToStaticMarkup(
-      <Card item={shortReply} index={0} onAction={vi.fn()} />,
+      <FeedCard item={shortReply} index={0} onAction={vi.fn()} />,
     );
 
-    expect(markup).toContain('feed-card-compact');
+    expect(markup).toContain('item-card-compact');
     expect(markup).toContain('class="content"');
     expect(markup).not.toContain('content-expanded');
     expect(markup).toContain('class="card-meta-row"');
@@ -48,7 +52,7 @@ describe('Card', () => {
 
   it('renders a provided avatar beside the linked author name', () => {
     const markup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           author: {
@@ -68,9 +72,21 @@ describe('Card', () => {
     expect(markup).toContain('loading="lazy"');
   });
 
+  it('omits author metadata when the source has no author', () => {
+    const markup = renderToStaticMarkup(
+      <FeedCard
+        item={{ ...shortReply, author: { name: '', avatar: '' } }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).not.toContain('class="card-author"');
+  });
+
   it('orders title, body and remaining metadata as three semantic rows', () => {
     const markup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           title: '测试标题',
@@ -109,7 +125,7 @@ describe('Card', () => {
 
   it('keeps contextual short text compact', () => {
     const markup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           context: { community: { name: '分享创造' } },
@@ -119,12 +135,12 @@ describe('Card', () => {
       />,
     );
 
-    expect(markup).toContain('feed-card-compact');
+    expect(markup).toContain('item-card-compact');
   });
 
   it('renders a short title without body blocks as a compact card', () => {
     const markup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           title: '问',
@@ -142,15 +158,15 @@ describe('Card', () => {
       />,
     );
 
-    expect(markup).toContain('feed-card-compact');
+    expect(markup).toContain('item-card-compact');
     expect(markup).toContain('>问</a>');
     expect(markup).not.toContain('查看原文');
   });
 
-  it('keeps long text in the comfortable card layout', () => {
-    const plainText = '这是一段需要保留完整阅读节奏的较长内容，用于确认通用列表不会把所有纯文本条目都压缩成行内布局。';
+  it('keeps long text collapsed without offering expansion', () => {
+    const plainText = '这是一段需要保留完整阅读节奏的较长内容。'.repeat(20);
     const markup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           previewBlocks: [{
@@ -164,12 +180,16 @@ describe('Card', () => {
       />,
     );
 
-    expect(markup).not.toContain('feed-card-compact');
+    expect(markup).not.toContain('item-card-compact');
+    expect(markup).toContain('class="content"');
+    expect(markup).not.toContain('content-expanded');
+    expect(markup).not.toContain('展开全文');
+    expect(markup).not.toContain('收起');
   });
 
   it('places a supplementary single image in the side-media region', () => {
     const markup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           title: '带配图的正文',
@@ -195,14 +215,23 @@ describe('Card', () => {
     );
 
     expect(markup).toContain('feed-card-side-media');
+    expect(markup).toContain('item-card-titled');
     expect(markup).toContain('class="card-media-aside"');
     expect(markup.indexOf('card-body-row')).toBeLessThan(markup.indexOf('card-media-aside'));
     expect(markup.indexOf('card-media-aside')).toBeLessThan(markup.indexOf('card-meta-row'));
+    expect(readerStyles).toContain('.feed-card-side-media.item-card-titled .card-main');
+    expect(readerStyles).toContain('grid-template-columns: minmax(0, 1fr) 216px');
+    expect(readerStyles).toContain(
+      '.feed-card-side-media .card-body-row { grid-area: body; align-self: start; }',
+    );
+    expect(readerStyles).toContain(
+      '.feed-card-side-media .card-media-aside .media-button { height: 144px; }',
+    );
   });
 
-  it('keeps image-led and extreme-ratio media in the main content flow', () => {
+  it('places image-led and extreme-ratio media in the side-media region', () => {
     const imageLedMarkup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           title: '图片内容',
@@ -216,7 +245,7 @@ describe('Card', () => {
       />,
     );
     const portraitMarkup = renderToStaticMarkup(
-      <Card
+      <FeedCard
         item={{
           ...shortReply,
           previewBlocks: [
@@ -241,9 +270,63 @@ describe('Card', () => {
       />,
     );
 
-    expect(imageLedMarkup).not.toContain('feed-card-side-media');
-    expect(imageLedMarkup).not.toContain('card-media-aside');
-    expect(portraitMarkup).not.toContain('feed-card-side-media');
-    expect(portraitMarkup).not.toContain('card-media-aside');
+    expect(imageLedMarkup).toContain('feed-card-side-media');
+    expect(imageLedMarkup).toContain('card-media-aside');
+    expect(portraitMarkup).toContain('feed-card-side-media');
+    expect(portraitMarkup).toContain('card-media-aside');
+  });
+
+  it('renders only the first gallery image in the side-media region', () => {
+    const markup = renderToStaticMarkup(
+      <FeedCard
+        item={{
+          ...shortReply,
+          previewBlocks: [{
+            type: 'gallery',
+            items: [
+              { url: 'https://example.com/first.jpg', alt: '第一张图' },
+              { url: 'https://example.com/second.jpg', alt: '第二张图' },
+            ],
+          }],
+        }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain('feed-card-side-media');
+    expect(markup.match(/class="media-button"/g) ?? []).toHaveLength(1);
+    expect(markup).toContain('first.jpg');
+    expect(markup).not.toContain('second.jpg');
+  });
+
+  it('renders only the first video media block on the side without requiring text', () => {
+    const markup = renderToStaticMarkup(
+      <FeedCard
+        item={{
+          ...shortReply,
+          previewBlocks: [
+            {
+              type: 'video',
+              media: {
+                url: 'https://example.com/clip.mp4',
+                poster: 'https://example.com/poster.jpg',
+              },
+            },
+            {
+              type: 'gallery',
+              items: [{ url: 'https://example.com/later.jpg', alt: '后续图片' }],
+            },
+          ],
+        }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).toContain('feed-card-side-media');
+    expect(markup).toContain('class="video-player"');
+    expect(markup).toContain('clip.mp4');
+    expect(markup).not.toContain('later.jpg');
   });
 });

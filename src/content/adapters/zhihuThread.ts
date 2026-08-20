@@ -1,5 +1,5 @@
 import type { ThreadDetail, ThreadHeader } from '../../types/detail';
-import type { FeedItem } from '../../types/feed';
+import type { ThreadEntry } from '../../types/feed';
 import type { DetailAdapterDefinition, DetailListener } from './detail';
 import {
   parseCount,
@@ -31,7 +31,7 @@ export function findZhihuThreadAnswerElements(root: ParentNode): Element[] {
     : Array.from(root.querySelectorAll('.AnswerItem'));
 }
 
-export function parseZhihuThreadAnswer(element: Element): FeedItem | null {
+export function parseZhihuThreadAnswer(element: Element): ThreadEntry | null {
   const parsed = parseZhihuContent(element);
   if (!parsed || parsed.role !== 'answer') return null;
 
@@ -45,13 +45,13 @@ export function parseZhihuThreadAnswer(element: Element): FeedItem | null {
     author: parsed.author,
     publishedAt: parsed.publishedAt,
     updatedAt: parsed.updatedAt,
-    previewBlocks: parsed.blocks,
+    body: parsed.blocks,
     metrics: parsed.metrics,
     actions: parsed.actions.map((action) => {
       if (action.kind === 'reply') {
         return { ...action, enabled: false, fallback: undefined };
       }
-      if (action.kind === 'open') return { ...action, label: '查看回答' };
+      if (action.kind === 'open') return { ...action, label: '查看详情' };
       return action;
     }),
   };
@@ -70,7 +70,7 @@ export function parseZhihuThread(
   );
   const answers = findZhihuThreadAnswerElements(root)
     .map(parseZhihuThreadAnswer)
-    .filter((item): item is FeedItem => item !== null);
+    .filter((item): item is ThreadEntry => item !== null);
   const answerCount = parseCount(firstText(root, ['.List-headerText'])) || answers.length;
   const header: ThreadHeader = {
     id: `zhihu_question_${questionId}`,

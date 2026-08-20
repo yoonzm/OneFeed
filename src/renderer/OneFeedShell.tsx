@@ -11,6 +11,7 @@ interface OneFeedShellProps {
   surface: 'feed' | 'article' | 'thread';
   scrollElement: HTMLElement;
   initialColorScheme?: ColorScheme;
+  hiddenItemCount?: number;
   children: ReactNode;
 }
 
@@ -21,6 +22,7 @@ export function OneFeedShell({
   surface,
   scrollElement,
   initialColorScheme,
+  hiddenItemCount = 0,
   children,
 }: OneFeedShellProps) {
   const { colorScheme, ready, setColorScheme } = useColorScheme(initialColorScheme);
@@ -38,6 +40,7 @@ export function OneFeedShell({
         scrollElement={scrollElement}
         colorScheme={colorScheme}
         themeReady={ready}
+        hiddenItemCount={hiddenItemCount}
         onColorSchemeChange={setColorScheme}
       />
       {children}

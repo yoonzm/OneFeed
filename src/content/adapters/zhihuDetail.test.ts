@@ -123,6 +123,109 @@ describe('Zhihu answer detail', () => {
     });
   });
 
+  it('preserves interleaved images in the answer body DOM order', () => {
+    document.body.innerHTML = `
+      <h1 class="QuestionHeader-title">如何组织图文回答？</h1>
+      <article class="ContentItem AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+        <a class="UserLink-link" href="/people/reader">林一</a>
+        <div class="RichContent-inner">
+          <div class="css-wrapper">
+            <span class="RichText ztext CopyrightRichText-richText">
+              <p>图片前的正文。<script>alert(1)</script></p>
+              <figure>
+                <div class="RichText-ConditionalImagePortal">
+                  <img data-original="https://pic.example/first.jpg" alt="第一张图" />
+                </div>
+              </figure>
+              <p>两张图片之间的正文。</p>
+              <img data-actualsrc="https://pic.example/second.jpg" alt="第二张图" />
+              <p>图片后的正文。</p>
+            </span>
+          </div>
+        </div>
+      </article>`;
+
+    const url = new URL('https://www.zhihu.com/question/1/answer/42');
+    const root = findZhihuDetailRoot(document, url);
+    const detail = root ? parseZhihuDetail(root, url) : null;
+
+    expect(detail?.body.map((block) => block.type)).toEqual([
+      'richText',
+      'gallery',
+      'richText',
+      'gallery',
+      'richText',
+    ]);
+    expect(detail?.body).toMatchObject([
+      { type: 'richText', plainText: '图片前的正文。' },
+      {
+        type: 'gallery',
+        items: [{ url: 'https://pic.example/first.jpg', alt: '第一张图' }],
+      },
+      { type: 'richText', plainText: '两张图片之间的正文。' },
+      {
+        type: 'gallery',
+        items: [{ url: 'https://pic.example/second.jpg', alt: '第二张图' }],
+      },
+      { type: 'richText', plainText: '图片后的正文。' },
+    ]);
+    expect(detail?.body[0]).not.toMatchObject({ html: expect.stringContaining('script') });
+  });
+
+  it('reads the complete question background from initial data without clicking', () => {
+    const initialData = {
+      initialState: {
+        entities: {
+          questions: {
+            1: {
+              id: '1',
+              detail: [
+                '<p style="color:red" onclick="alert(1)">完整问题背景。</p>',
+                '<img src="https://pic.example/question.jpg" alt="问题配图" />',
+              ].join(''),
+            },
+          },
+        },
+      },
+    };
+    document.body.innerHTML = `
+      <script id="js-initialData" type="text/json">${JSON.stringify(initialData)}</script>
+      <h1 class="QuestionHeader-title">如何保持专注？</h1>
+      <div class="QuestionRichText QuestionRichText--expandable QuestionRichText--collapsed">
+        <div>
+          <span itemprop="text">折叠占位内容</span>
+          <button class="QuestionRichText-more" type="button">显示全部</button>
+        </div>
+      </div>
+      <article class="ContentItem AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+        <a class="UserLink-link" href="/people/reader">林一</a>
+        <div class="RichContent-inner"><p>回答正文。</p></div>
+      </article>`;
+
+    const button = document.querySelector<HTMLButtonElement>('.QuestionRichText-more')!;
+    const click = vi.spyOn(button, 'click');
+    const onDetail = vi.fn();
+    const adapter = new ZhihuDetailAdapter(onDetail);
+
+    window.history.replaceState({}, '', '/question/1/answer/42');
+    adapter.init();
+
+    expect(click).not.toHaveBeenCalled();
+    expect(onDetail).toHaveBeenCalledOnce();
+    expect(onDetail.mock.lastCall?.[0].context?.body).toEqual([
+      {
+        type: 'richText',
+        html: '<p>完整问题背景。</p>',
+        plainText: '完整问题背景。',
+      },
+      {
+        type: 'gallery',
+        items: [{ url: 'https://pic.example/question.jpg', alt: '问题配图' }],
+      },
+    ]);
+    adapter.disconnect();
+  });
+
   it('expands a collapsed question background before publishing the detail', async () => {
     document.body.innerHTML = `
       <h1 class="QuestionHeader-title">如何保持专注？</h1>

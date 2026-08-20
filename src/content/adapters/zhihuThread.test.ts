@@ -31,6 +31,8 @@ describe('Zhihu question thread', () => {
       </div>
       <div class="List-item">
         <article class="AnswerItem" data-zop='{"type":"answer","itemId":"43","authorName":"周二","title":"如何保持专注？"}'>
+          <meta itemprop="dateCreated" content="2026-08-02T11:00:00Z" />
+          <meta itemprop="dateModified" content="2026-08-03T12:00:00Z" />
           <a href="/question/1/answer/43">发布于昨天</a>
           <div class="RichContent-inner"><p>第二个回答。</p></div>
           <button class="ContentItem-action">0 条评论</button>
@@ -67,11 +69,17 @@ describe('Zhihu question thread', () => {
       publishedAt: '2026-08-01T10:00:00Z',
     });
     expect(thread?.entries[0]).not.toHaveProperty('title');
+    expect(thread?.entries[0]?.body[0]).toMatchObject({ type: 'richText' });
+    expect(thread?.entries[0]).not.toHaveProperty('previewBlocks');
+    expect(thread?.entries[1]).toMatchObject({
+      publishedAt: '2026-08-02T11:00:00Z',
+      updatedAt: '2026-08-03T12:00:00Z',
+    });
     expect(thread?.entries[0]?.actions.find((action) => action.kind === 'reply')).toMatchObject({
       enabled: false,
     });
     expect(thread?.entries[0]?.actions.find((action) => action.kind === 'open')).toMatchObject({
-      label: '查看回答',
+      label: '查看详情',
     });
   });
 
@@ -97,5 +105,35 @@ describe('Zhihu question thread', () => {
     expect(adapter.triggerAction('zhihu_42', 'react')).toBe(true);
     expect(click).toHaveBeenCalledOnce();
     adapter.disconnect();
+  });
+
+  it('keeps the existing question-detail projection for interleaved images', () => {
+    document.body.innerHTML = `
+      <h1 class="QuestionHeader-title">如何组织图文回答？</h1>
+      <div class="List-item">
+        <article class="AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+          <a href="/question/1/answer/42">发布时间</a>
+          <div class="RichContent-inner">
+            <p>图片前。</p>
+            <img src="https://pic.example/thread.jpg" alt="问题详情配图" />
+            <p>图片后。</p>
+          </div>
+        </article>
+      </div>`;
+
+    const thread = parseZhihuThread(
+      document,
+      new URL('https://www.zhihu.com/question/1'),
+    );
+
+    expect(thread?.entries[0]?.body.map((block) => block.type)).toEqual([
+      'richText',
+      'gallery',
+    ]);
+    expect(thread?.entries[0]?.body[0]).toMatchObject({ type: 'richText' });
+    const firstBlock = thread?.entries[0]?.body[0];
+    expect(firstBlock?.type === 'richText'
+      ? firstBlock.plainText.replace(/\s+/g, '')
+      : '').toBe('图片前。图片后。');
   });
 });

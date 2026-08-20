@@ -16,12 +16,6 @@ export const PLATFORM_PRESENTATIONS: PlatformPresentation[] = [
     accent: '#1677ff',
   },
   {
-    id: 'twitter',
-    scope: 'Home Feed',
-    access: '需要平台账号',
-    accent: '#18202b',
-  },
-  {
     id: 'v2ex',
     scope: '首页分类、最近主题、VXNA 与主题详情',
     access: '无需登录即可体验',
@@ -34,28 +28,10 @@ export const PLATFORM_PRESENTATIONS: PlatformPresentation[] = [
     accent: '#0f8a6a',
   },
   {
-    id: 'weibo',
-    scope: '首页、关注与热门信息流',
-    access: '需要平台账号',
-    accent: '#e14a3b',
-  },
-  {
-    id: 'xiaohongshu',
-    scope: '发现页基础笔记 Feed',
-    access: '部分内容需登录',
-    accent: '#ff2442',
-  },
-  {
     id: 'hacker-news',
     scope: 'News、Newest、Ask、Show 与 Jobs',
     access: '无需登录即可体验',
     accent: '#ff6600',
-  },
-  {
-    id: 'reddit',
-    scope: '首页与社区 Feed',
-    access: '部分内容需登录',
-    accent: '#ff4500',
   },
 ];
 

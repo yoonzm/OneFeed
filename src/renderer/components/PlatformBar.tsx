@@ -1,4 +1,4 @@
-import { CaretDown, Check } from '@phosphor-icons/react';
+import { CaretDown, Check, EyeSlash } from '@phosphor-icons/react';
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import {
   getPlannedPlatforms,
@@ -25,6 +25,7 @@ interface PlatformBarProps {
   scrollElement: HTMLElement;
   colorScheme: ColorScheme;
   themeReady: boolean;
+  hiddenItemCount?: number;
   onColorSchemeChange: (colorScheme: ColorScheme) => void;
 }
 
@@ -36,6 +37,7 @@ export function PlatformBar({
   scrollElement,
   colorScheme,
   themeReady,
+  hiddenItemCount = 0,
   onColorSchemeChange,
 }: PlatformBarProps) {
   const supportedPlatforms = getSupportedPlatforms();
@@ -240,6 +242,17 @@ export function PlatformBar({
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
+          {hiddenItemCount > 0 && (
+            <span
+              className="inline-flex items-center gap-1 text-[9px] leading-none tabular-nums text-onefeed-faint"
+              role="status"
+              aria-label={`已隐藏 ${hiddenItemCount} 条内容`}
+              title={`已隐藏 ${hiddenItemCount} 条内容`}
+            >
+              <EyeSlash size={12} aria-hidden="true" />
+              <span aria-hidden="true">{hiddenItemCount}</span>
+            </span>
+          )}
           <GitHubLink />
           <span className="h-4 w-px shrink-0 bg-onefeed-line" aria-hidden="true" />
           <ThemeSwitch
