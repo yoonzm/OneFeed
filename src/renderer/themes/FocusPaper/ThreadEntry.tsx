@@ -57,6 +57,8 @@ export function ThreadEntry({ item, index, onAction }: ThreadEntryProps) {
             <a
               className="card-detail-link thread-answer-detail-link"
               href={item.originalUrl}
+              target="_blank"
+              rel="noreferrer"
             >
               {openAction?.label || '查看详情'}
             </a>
