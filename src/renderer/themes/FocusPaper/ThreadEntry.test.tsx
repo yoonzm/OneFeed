@@ -110,6 +110,8 @@ describe('ThreadEntry', () => {
     expect(markup).toContain('查看详情');
     expect(markup).not.toContain('查看回答');
     expect(markup).toContain('href="https://www.zhihu.com/question/1/answer/42"');
+    expect(markup).toContain('target="_blank"');
+    expect(markup).toContain('rel="noreferrer"');
   });
 
   it('expands a long reply in place without adding a detail link', async () => {

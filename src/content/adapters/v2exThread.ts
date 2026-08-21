@@ -119,8 +119,9 @@ export function parseV2exThread(
 ): ThreadDetail | null {
   const topicId = url.pathname.match(/^\/t\/(\d+)/)?.[1];
   const title = root.querySelector('#Main .header h1')?.textContent?.trim() || '';
+  // V2EX 允许只填写标题；缺少正文节点时仍应展示主题与回复。
   const body = root.querySelector('#Main .topic_content');
-  if (!topicId || !title || !body) return null;
+  if (!topicId || !title) return null;
 
   const headerElement = root.querySelector('#Main .header')!;
   const authorLink = firstNonEmptyLink(headerElement, 'a[href^="/member/"]');
@@ -151,7 +152,7 @@ export function parseV2exThread(
         : undefined,
     },
     publishedAt: headerElement.querySelector('.gray [title]')?.getAttribute('title') || undefined,
-    body: parseBlocks(body),
+    body: body ? parseBlocks(body) : [],
     context: communityLink || tags.length ? {
       community: communityLink ? {
         name: communityLink.textContent?.trim() || '',
