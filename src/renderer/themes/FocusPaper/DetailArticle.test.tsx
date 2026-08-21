@@ -62,7 +62,8 @@ describe('DetailArticle', () => {
     expect(markup).not.toContain('查看问题');
     expect(markup).toContain('查看全部 12 个回答 →');
     expect(markup).toContain('href="https://www.zhihu.com/question/1"');
-    expect(markup).not.toContain('target="_blank"');
+    expect(markup).toContain('target="_blank"');
+    expect(markup).toContain('rel="noreferrer"');
     expect(markup).toContain('超过列表摘要长度的完整正文。');
     expect(markup).toContain('avatar-fallback');
     expect(markup).toContain('<time>');

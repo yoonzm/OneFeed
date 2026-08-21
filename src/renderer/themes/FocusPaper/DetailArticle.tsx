@@ -55,6 +55,8 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
             <a
               className="detail-context-navigation"
               href={content.context.navigation.url}
+              target="_blank"
+              rel="noreferrer"
             >
               {content.context.navigation.label} →
             </a>
