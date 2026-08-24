@@ -154,8 +154,16 @@ function getMetadata(element: Element): ZhihuMetadata {
   }
 }
 
-function getOriginalUrl(element: Element): string {
-  const link = firstAttribute(
+function getOriginalUrl(element: Element, metadata: ZhihuMetadata): string {
+  // 徽章和正文可能先出现其他问题链接；回答永久链接必须与 data-zop 中的回答 ID 对应。
+  const answerPermalink = Array.from(
+    element.querySelectorAll<HTMLAnchorElement>('a[href*="/answer/"]'),
+  ).find((anchor) => {
+    const href = absoluteUrl(anchor.getAttribute('href') || '');
+    const answerId = href.match(/\/question\/\d+\/answer\/([^/?#]+)/)?.[1];
+    return answerId && (!metadata.itemId || answerId === String(metadata.itemId));
+  })?.getAttribute('href') || '';
+  const fallbackLink = firstAttribute(
     element,
     [
       '.ContentItem-title a',
@@ -166,7 +174,7 @@ function getOriginalUrl(element: Element): string {
     ],
     'href',
   );
-  return absoluteUrl(link) || window.location.href;
+  return absoluteUrl(answerPermalink || fallbackLink) || window.location.href;
 }
 
 function extractMedia(body: Element): FeedImage[] {
@@ -372,7 +380,7 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
     '.QuestionItem-title',
     'h2',
   ]) || metadata.title || '';
-  const originalUrl = getOriginalUrl(element);
+  const originalUrl = getOriginalUrl(element, metadata);
   const authorName = firstText(element, [
     '.AuthorInfo-name',
     '.UserLink-link',
