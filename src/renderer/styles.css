@@ -186,7 +186,9 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
   line-height: 1.28;
   letter-spacing: -.025em;
 }
-.detail-body .content { max-height: none; font-family: "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif; font-size: 17px; line-height: 2; }
+/* 不可断行的外链不能扩大 Grid 轨道，否则 100% 宽度的正文图片会同步变宽。 */
+.detail-body { grid-template-columns: minmax(0, 1fr); }
+.detail-body .content { max-height: none; overflow-wrap: anywhere; font-family: "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif; font-size: 17px; line-height: 2; }
 .detail-body .content::after { display: none; }
 .detail-body .content h2,
 .detail-body .content h3,

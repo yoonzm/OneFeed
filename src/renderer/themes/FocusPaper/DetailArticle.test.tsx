@@ -1,7 +1,11 @@
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { ArticleDetail } from '../../../types/detail';
 import { DetailArticle } from './DetailArticle';
+
+const readerStyles = readFileSync(resolve('src/renderer/styles.css'), 'utf8');
 
 const content: ArticleDetail = {
   id: 'zhihu_42',
@@ -50,6 +54,15 @@ const content: ArticleDetail = {
 };
 
 describe('DetailArticle', () => {
+  it('keeps unbreakable detail content from widening the media column', () => {
+    expect(readerStyles).toContain(
+      '.detail-body { grid-template-columns: minmax(0, 1fr); }',
+    );
+    expect(readerStyles).toMatch(
+      /\.detail-body \.content \{[^}]*overflow-wrap: anywhere;/,
+    );
+  });
+
   it('renders the detail body as expanded content', () => {
     const markup = renderToStaticMarkup(
       <DetailArticle content={content} onAction={vi.fn()} />,
