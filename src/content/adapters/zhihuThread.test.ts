@@ -83,6 +83,27 @@ describe('Zhihu question thread', () => {
     });
   });
 
+  it('uses the answer permalink when an earlier badge links to another question', () => {
+    document.body.innerHTML = `
+      <h1 class="QuestionHeader-title">当前问题</h1>
+      <div class="List-item">
+        <article class="AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+          <a class="AnswerBadge" href="/question/48509984">优秀答主</a>
+          <div class="RichContent-inner"><p>回答正文。</p></div>
+          <a href="/question/1/answer/42">编辑于今天</a>
+        </article>
+      </div>`;
+
+    const thread = parseZhihuThread(
+      document,
+      new URL('https://www.zhihu.com/question/1'),
+    );
+
+    expect(thread?.entries[0]?.originalUrl).toBe(
+      'http://localhost:3000/question/1/answer/42',
+    );
+  });
+
   it('proxies answer reactions through the matching runtime element', () => {
     document.body.innerHTML = `
       <h1 class="QuestionHeader-title">如何保持专注？</h1>
