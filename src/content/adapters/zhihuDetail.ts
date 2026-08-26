@@ -1,13 +1,17 @@
 import type { ArticleDetail } from '../../types/detail';
+import type { CommentCommand, CommentRequestResult } from '../../types/comments';
 import type { DetailAdapterDefinition, DetailListener } from './detail';
 import {
   findZhihuContentBody,
+  hasZhihuActionControl,
+  parseCount,
   parseOrderedZhihuBlocks,
   parseZhihuBlocks,
   parseZhihuContent,
   triggerZhihuAction,
   ZHIHU_SOURCE,
 } from './zhihu';
+import { ZhihuCommentsController } from './zhihuComments';
 
 const ANSWER_SELECTOR = '.ContentItem.AnswerItem, .AnswerItem';
 const ARTICLE_SELECTOR = '.Post-content, .Post-Main';
@@ -171,6 +175,13 @@ export function parseZhihuDetail(
   const originId = metadata.itemId ?? answerId ?? articleId ?? parsed.originId;
   const reactions = parsed.metrics.find((metric) => metric.kind === 'reactions')?.value || 0;
   const replies = parsed.metrics.find((metric) => metric.kind === 'replies')?.value || 0;
+  const expandedCommentCount = parseCount(
+    element.querySelector('.Comments-container')?.textContent?.match(
+      /[\d,.]+\s*[万千]?\s*条评论/,
+    )?.[0] || '',
+  );
+  const commentCount = metricValue(metadata.commentCount, expandedCommentCount || replies);
+  const supportsComments = hasZhihuActionControl(element, 'reply');
 
   return {
     id: `zhihu_${originId}`,
@@ -195,7 +206,7 @@ export function parseZhihuDetail(
           },
           {
             kind: 'replies',
-            value: metricValue(metadata.commentCount, replies),
+            value: commentCount,
             label: '评论',
           },
         ],
@@ -203,10 +214,20 @@ export function parseZhihuDetail(
           .filter((action) => AUTHOR_ACTION_IDS.has(action.id))
           .map((action) => ({
             ...action,
+            count: action.kind === 'reply' ? commentCount : action.count,
             fallback: undefined,
           })),
       },
     },
+    comments: supportsComments ? {
+      targetId: `zhihu_${originId}`,
+      count: commentCount,
+      capabilities: {
+        preview: true,
+        all: true,
+        loadMore: true,
+      },
+    } : undefined,
   };
 }
 
@@ -227,6 +248,10 @@ export class ZhihuDetailAdapter {
   private runtimeElement?: Element;
   private itemId?: string;
   private questionContextExpansionRequested = false;
+  private readonly comments = new ZhihuCommentsController(
+    () => this.runtimeElement,
+    () => this.itemId,
+  );
 
   constructor(private readonly onDetail: DetailListener) {}
 
@@ -250,11 +275,16 @@ export class ZhihuDetailAdapter {
     this.runtimeElement = undefined;
     this.itemId = undefined;
     this.questionContextExpansionRequested = false;
+    this.comments.disconnect();
   }
 
   triggerAction(itemId: string, actionId: string): boolean {
     if (itemId !== this.itemId) return false;
     return triggerZhihuAction(this.runtimeElement, actionId);
+  }
+
+  requestComments(command: CommentCommand): Promise<CommentRequestResult> {
+    return this.comments.request(command);
   }
 
   private processDetail(): void {

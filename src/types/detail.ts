@@ -8,6 +8,7 @@ import type {
   FeedSourceRef,
   ThreadEntry,
 } from './feed';
+import type { CommentThreadDescriptor } from './comments';
 
 /** 单篇正文所属的上级内容摘要，例如回答对应的问题背景。 */
 export interface ArticleContext {
@@ -66,6 +67,8 @@ export interface ArticleDetail {
     /** 正文结束后展示的操作和统计。 */
     footer?: ArticleActionSlot;
   };
+  /** 当前正文可由 Detail Adapter 按需读取的评论能力。 */
+  comments?: CommentThreadDescriptor;
   /** 原平台标记的敏感、剧透、锁定或置顶状态。 */
   flags?: FeedFlags;
 }

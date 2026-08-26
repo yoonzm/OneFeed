@@ -563,6 +563,12 @@ export function triggerZhihuAction(element: Element | undefined, actionId: strin
   return true;
 }
 
+/** 仅声明当前 DOM 中真实存在的动作能力，避免 Renderer 展示无法代理的入口。 */
+export function hasZhihuActionControl(element: Element, actionId: string): boolean {
+  return Object.hasOwn(ACTION_SELECTORS, actionId) &&
+    findActionControl(element, actionId as ZhihuActionId) !== null;
+}
+
 export class ZhihuAdapter extends BaseAdapter {
   protected readonly cardSelector = CARD_SELECTOR;
 

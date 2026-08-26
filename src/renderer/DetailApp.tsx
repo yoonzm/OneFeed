@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { ColorScheme } from '../theme/useColorScheme';
+import type { CommentCommand, CommentRequestResult } from '../types/comments';
 import type { FeedActionDescriptor } from '../types/feed';
 import { OneFeedShell } from './OneFeedShell';
 import { useDetailStore } from './store/useDetailStore';
@@ -12,6 +13,7 @@ interface DetailAppProps {
   scrollElement: HTMLElement;
   initialColorScheme?: ColorScheme;
   onAction: (itemId: string, actionId: string) => boolean;
+  onCommentRequest?: (command: CommentCommand) => Promise<CommentRequestResult>;
 }
 
 /** 根据 DetailContent.kind 在文章详情与讨论详情之间分流的 Surface 外壳。 */
@@ -21,6 +23,7 @@ export default function DetailApp({
   scrollElement,
   initialColorScheme,
   onAction,
+  onCommentRequest,
 }: DetailAppProps) {
   const content = useDetailStore((state) => state.content);
   const [progress, setProgress] = useState(0);
@@ -74,6 +77,7 @@ export default function DetailApp({
             <DetailArticle
               content={content}
               onAction={(action) => handleAction(content.id, content.originalUrl, action)}
+              onCommentRequest={onCommentRequest}
             />
           ) : content?.kind === 'thread' ? (
             <ThreadDetail content={content} onAction={handleAction} />

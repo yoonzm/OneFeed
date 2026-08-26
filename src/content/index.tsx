@@ -170,6 +170,10 @@ function mount(
           {...sharedProps}
           activePlatformId={activeAdapter.source.id}
           surface={activeAdapter.surface}
+          onCommentRequest={(command) => (
+            activeAdapter.adapter.requestComments?.(command) ||
+            Promise.resolve({ kind: 'failed' as const, retryable: false })
+          )}
         />,
       );
     }

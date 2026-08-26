@@ -67,6 +67,11 @@ describe('Zhihu answer detail', () => {
           ],
         },
       },
+      comments: {
+        targetId: 'zhihu_42',
+        count: 18,
+        capabilities: { preview: true, all: true, loadMore: true },
+      },
     });
     expect(detail?.originalUrl).toBe(url.href);
     expect(detail?.context).toMatchObject({
@@ -170,6 +175,29 @@ describe('Zhihu answer detail', () => {
       { type: 'richText', plainText: '图片后的正文。' },
     ]);
     expect(detail?.body[0]).not.toMatchObject({ html: expect.stringContaining('script') });
+  });
+
+  it('keeps the comment count after the source action changes to collapse', () => {
+    document.body.innerHTML = `
+      <h1 class="QuestionHeader-title">测试问题</h1>
+      <article class="ContentItem AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+        <a class="UserLink-link" href="/people/reader">测试作者</a>
+        <div class="RichContent-inner"><p>测试回答。</p></div>
+        <button class="ContentItem-action">收起评论</button>
+        <div class="Comments-container"><strong>18 条评论</strong></div>
+      </article>`;
+    const url = new URL('https://www.zhihu.com/question/1/answer/42');
+    const root = findZhihuDetailRoot(document, url)!;
+    const detail = parseZhihuDetail(root, url);
+
+    expect(detail?.comments?.count).toBe(18);
+    expect(detail?.actionSlots?.author?.metrics).toContainEqual({
+      kind: 'replies',
+      value: 18,
+      label: '评论',
+    });
+    expect(detail?.actionSlots?.author?.actions.find((action) => action.kind === 'reply')?.count)
+      .toBe(18);
   });
 
   it('reads the complete question background from initial data without clicking', () => {
