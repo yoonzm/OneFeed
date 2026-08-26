@@ -1,6 +1,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { getSupportedPlatforms } from '../../config/platforms';
 import { FEED_FILTER_SETTINGS_KEY } from '../../filters/feedFilters';
 import { OptionsApp } from './OptionsApp';
 
@@ -56,7 +57,9 @@ describe('filter settings page', () => {
     const selectedScope = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="radio"]'))
       .find((input) => !input.checked);
     await act(async () => selectedScope?.click());
-    expect(container.querySelectorAll('.platform-checks .platform-icon')).toHaveLength(4);
+    expect(container.querySelectorAll('.platform-checks .platform-icon')).toHaveLength(
+      getSupportedPlatforms().length,
+    );
   });
 
   it('persists the quick seen filter immediately', async () => {
