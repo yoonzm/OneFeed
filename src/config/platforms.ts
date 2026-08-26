@@ -75,12 +75,21 @@ export const HACKER_NEWS_PLATFORM = {
   hosts: ['news.ycombinator.com'],
 } as const satisfies PlatformDefinition;
 
+export const THIRTY_SIX_KR_PLATFORM = {
+  id: '36kr',
+  name: '36Kr',
+  homeUrl: 'https://36kr.com/information/web_news/',
+  status: 'supported',
+  navOrder: 8,
+  hosts: ['36kr.com'],
+} as const satisfies PlatformDefinition;
+
 export const REDDIT_PLATFORM = {
   id: 'reddit',
   name: 'Reddit',
   homeUrl: 'https://www.reddit.com/',
   status: 'planned',
-  navOrder: 8,
+  navOrder: 9,
   plannedOrder: 4,
   hosts: ['reddit.com', 'redd.it'],
 } as const satisfies PlatformDefinition;
@@ -90,7 +99,7 @@ export const BILIBILI_PLATFORM = {
   name: '哔哩哔哩',
   homeUrl: 'https://www.bilibili.com/',
   status: 'planned',
-  navOrder: 9,
+  navOrder: 10,
   plannedOrder: 5,
   hosts: ['bilibili.com'],
 } as const satisfies PlatformDefinition;
@@ -100,7 +109,7 @@ export const YOUTUBE_PLATFORM = {
   name: 'YouTube',
   homeUrl: 'https://www.youtube.com/',
   status: 'planned',
-  navOrder: 10,
+  navOrder: 11,
   plannedOrder: 6,
   hosts: ['youtube.com', 'youtu.be'],
 } as const satisfies PlatformDefinition;
@@ -114,6 +123,7 @@ export const PLATFORM_CATALOG = [
   WEIBO_PLATFORM,
   XIAOHONGSHU_PLATFORM,
   HACKER_NEWS_PLATFORM,
+  THIRTY_SIX_KR_PLATFORM,
   REDDIT_PLATFORM,
   BILIBILI_PLATFORM,
   YOUTUBE_PLATFORM,

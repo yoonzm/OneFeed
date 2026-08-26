@@ -82,11 +82,12 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 | 迭代 | 目标 | 平台交付 | 验收重点 |
 | :--- | :--- | :--- | :--- |
 | **基础能力（已完成）** | 完成 Schema、Surface 与 Renderer 解耦 | 知乎、V2EX、Linux DO、Hacker News | `FeedItem`/`ArticleDetail`/`ThreadDetail` 可序列化；URL 路由互斥；SPA 切换清理旧 Surface；Block Registry 与 Action Bar 跨 Surface 复用 |
-| **2.1 开放订阅扩展** | 优先扩展近乎纯文字的信息源 | RSS/Atom | Feed 摘要与全文解析；作者与来源、发布时间、已读/稍后读和重复文章处理 |
-| **2.2 长文平台扩展** | 验证不同长文站点的正文与列表结构 | Medium、Substack、WordPress | 文章列表、正文、作者、发布时间与原文回退，避免引入播放器和复杂社交操作 |
+| **2.1 综合资讯扩展（已完成）** | 验证多频道资讯列表、同文档增量加载与完整文章阅读 | 36Kr | 资讯频道、标题、摘要、封面、作者、主题、“查看更多”加载与文章详情正文 |
+| **2.2 开放订阅扩展** | 优先扩展近乎纯文字的信息源 | RSS/Atom | Feed 摘要与全文解析；作者与来源、发布时间、已读/稍后读和重复文章处理 |
+| **2.3 长文平台扩展** | 验证不同长文站点的正文与列表结构 | Medium、Substack、WordPress | 文章列表、正文、作者、发布时间与原文回退，避免引入播放器和复杂社交操作 |
 | **后续待排期** | 文字型平台稳定后再评估开放社交与富媒体 | X、微博、小红书、Reddit、哔哩哔哩、YouTube | 根据真实用户需求、目标站点政策、DOM 稳定性和互动代理成本确定顺序 |
 
-Phase 2 前期不以 Adapter 数量为 KPI，而以文字阅读链路的稳定性为先。当前正式支持知乎、V2EX、Linux DO 与 Hacker News；X、微博、小红书、Reddit、哔哩哔哩和 YouTube 均为待支持平台。Schema 理论上能够表达某个平台，不代表已经交付该平台适配；平台支持状态和适配进度以 README 为准。
+Phase 2 前期不以 Adapter 数量为 KPI，而以文字阅读链路的稳定性为先。当前正式支持知乎、V2EX、Linux DO、Hacker News 与 36Kr 资讯频道及文章详情；X、微博、小红书、Reddit、哔哩哔哩和 YouTube 均为待支持平台。Schema 理论上能够表达某个平台，不代表已经交付该平台适配；平台支持状态和适配进度以 README 为准。
 
 建模依据包括 [ActivityStreams 2.0](https://www.w3.org/TR/activitystreams-core/)、[Mastodon Status](https://docs.joinmastodon.org/entities/Status/)、[Bluesky Posts](https://docs.bsky.app/docs/advanced-guides/posts)、[Reddit Post](https://developers.reddit.com/docs/api/redditapi/models/classes/Post)、[Hacker News API](https://github.com/HackerNews/API)、[LinkedIn Posts API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api)、[YouTube Video](https://developers.google.com/youtube/v3/docs/videos)、[Twitch API](https://dev.twitch.tv/docs/api/reference/) 与 [Atom RFC 4287](https://www.rfc-editor.org/rfc/rfc4287)。
 

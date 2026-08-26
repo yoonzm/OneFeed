@@ -33,6 +33,12 @@ export const PLATFORM_PRESENTATIONS: PlatformPresentation[] = [
     access: '无需登录即可体验',
     accent: '#ff6600',
   },
+  {
+    id: '36kr',
+    scope: '资讯频道、文章列表与文章详情',
+    access: '无需登录即可浏览',
+    accent: '#ff5a36',
+  },
 ];
 
 export function getPlatformPresentation(id: PlatformId): PlatformPresentation {

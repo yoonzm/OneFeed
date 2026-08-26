@@ -13,6 +13,7 @@ describe('platform catalog', () => {
       'V2EX',
       'Linux DO',
       'Hacker News',
+      '36Kr',
     ]);
     expect(getPlannedPlatforms().map((platform) => [
       platform.name,
@@ -42,6 +43,7 @@ describe('platform catalog', () => {
     expect(getPlatformForUrl('https://www.weibo.com/hot/weibo/102803')?.id).toBe('weibo');
     expect(getPlatformForUrl('https://www.xiaohongshu.com/explore')?.id).toBe('xiaohongshu');
     expect(getPlatformForUrl('https://news.ycombinator.com/newest')?.id).toBe('hacker-news');
+    expect(getPlatformForUrl('https://36kr.com/information/web_news/')?.id).toBe('36kr');
     expect(getPlatformForUrl('https://www.reddit.com/r/typescript/')?.id).toBe('reddit');
     expect(getPlatformForUrl('https://linux.do.example.com/')).toBeUndefined();
     expect(getPlatformForUrl('https://news.ycombinator.com.example.com/')).toBeUndefined();

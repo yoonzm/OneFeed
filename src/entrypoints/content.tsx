@@ -10,6 +10,8 @@ export default defineContentScript({
     'https://linux.do/*',
     'https://*.linux.do/*',
     'https://news.ycombinator.com/*',
+    'https://36kr.com/*',
+    'https://*.36kr.com/*',
   ],
   runAt: 'document_start',
   main(ctx) {
