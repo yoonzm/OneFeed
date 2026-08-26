@@ -87,6 +87,32 @@ describe('content surface lifecycle', () => {
     controller.cleanup();
   });
 
+  it.each(['article', 'thread'] as const)(
+    'shows the dark %s loading surface when the stored theme resolves',
+    (surface) => {
+      let resolveStorage: ((value: {
+        enabled: boolean;
+        colorScheme: string;
+      }) => void) | undefined;
+      mocks.storageGet.mockImplementationOnce((_defaults, callback) => {
+        resolveStorage = callback;
+      });
+      mocks.createAdapter.mockReturnValue(activeSurface(surface));
+
+      const controller = startContentScript();
+
+      const pendingStyle = document.getElementById('__universal_feed_hide_original__');
+      expect(pendingStyle?.textContent).toContain('background: #f7f8fa');
+
+      resolveStorage?.({ enabled: true, colorScheme: 'dark' });
+
+      expect(pendingStyle?.textContent).toContain('background: #101722');
+      expect(document.getElementById('__universal_feed_root__')?.dataset.onefeedTheme).toBe('dark');
+      expect(document.getElementById('__universal_feed_root__')?.style.display).toBe('');
+      controller.cleanup();
+    },
+  );
+
   it('waits for document.body while keeping the original page hidden', async () => {
     document.body.remove();
     const feed = activeSurface('feed');
@@ -131,7 +157,7 @@ describe('content surface lifecycle', () => {
     controller.refresh();
     expect(feed.adapter.disconnect).toHaveBeenCalledOnce();
     expect(detail.adapter.init).toHaveBeenCalledOnce();
-    expect(document.getElementById('__universal_feed_root__')?.style.display).toBe('none');
+    expect(document.getElementById('__universal_feed_root__')?.style.display).toBe('');
     expect(document.getElementById('__universal_feed_hide_original__')).not.toBeNull();
 
     window.history.pushState({}, '', '/unsupported');
@@ -144,7 +170,27 @@ describe('content surface lifecycle', () => {
     controller.cleanup();
   });
 
-  it('reveals a detail surface only after the adapter produces content', () => {
+  it('shows the dark detail loading surface during SPA navigation', () => {
+    mocks.storageGet.mockImplementationOnce((_defaults, callback) => (
+      callback({ enabled: true, colorScheme: 'dark' })
+    ));
+    const feed = activeSurface('feed');
+    const detail = activeSurface('article');
+    mocks.createAdapter.mockImplementation((url: URL) => (
+      url.pathname === '/feed' ? feed : detail
+    ));
+
+    const controller = startContentScript();
+    window.history.pushState({}, '', '/detail');
+    controller.refresh();
+
+    const pendingStyle = document.getElementById('__universal_feed_hide_original__');
+    expect(pendingStyle?.textContent).toContain('background: #101722');
+    expect(document.getElementById('__universal_feed_root__')?.style.display).toBe('');
+    controller.cleanup();
+  });
+
+  it('renders detail content produced during adapter initialization', () => {
     window.history.replaceState({}, '', '/detail');
     const detail = activeSurface('article');
     mocks.createAdapter.mockImplementation((_url: URL, listeners) => {

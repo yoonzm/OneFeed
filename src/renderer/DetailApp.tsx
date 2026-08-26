@@ -84,14 +84,14 @@ export default function DetailApp({
           ) : (
             <section className="empty-state" aria-live="polite">
               <span className="scan-mark" aria-hidden="true" />
-              <p>正在整理详情</p>
-              <small>正文出现后，会自动转换为专注阅读模式。</small>
             </section>
           )}
         </main>
-        <footer className="reader-footer">
-          {content?.kind === 'thread' ? `已读完本页${content.entryLabel}` : '已读完本文'}
-        </footer>
+        {content && (
+          <footer className="reader-footer">
+            {content.kind === 'thread' ? `已读完本页${content.entryLabel}` : '已读完本文'}
+          </footer>
+        )}
       </div>
     </OneFeedShell>
   );
