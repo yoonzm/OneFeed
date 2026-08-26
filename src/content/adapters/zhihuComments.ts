@@ -356,6 +356,23 @@ export class ZhihuCommentsController {
   }
 
   request(command: CommentCommand): Promise<CommentRequestResult> {
+    if (command.kind === 'closeReplies') {
+      this.abortController?.abort();
+      this.abortController = undefined;
+      this.requestPending = false;
+      // 嵌入主评论 Modal 的回复面板无需关闭；仅旧版独立 Modal 需要回收。
+      if (
+        this.repliesRoot?.isConnected &&
+        this.repliesRoot !== this.modal &&
+        this.repliesRoot.matches(COMMENT_MODAL_SELECTOR)
+      ) {
+        findCloseControl(this.repliesRoot)?.click();
+      }
+      this.repliesRoot = undefined;
+      this.replyRootId = undefined;
+      this.replyTotal = 0;
+      return Promise.resolve({ kind: 'closed' });
+    }
     if (command.kind === 'closeAll') {
       this.abortController?.abort();
       this.abortController = undefined;
@@ -394,7 +411,10 @@ export class ZhihuCommentsController {
   }
 
   private async perform(
-    command: Exclude<CommentCommand, { kind: 'closeAll' }>,
+    command: Exclude<
+      CommentCommand,
+      { kind: 'closeReplies' } | { kind: 'closeAll' }
+    >,
     signal: AbortSignal,
   ): Promise<CommentRequestResult> {
     if (command.kind === 'openPreview') return this.openPreview(command.targetId, signal);

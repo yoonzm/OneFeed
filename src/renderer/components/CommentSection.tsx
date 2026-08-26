@@ -114,7 +114,10 @@ function CommentItemView({ item, onPreview, onOpenReplies }: {
             <button
               className="comment-replies-button"
               type="button"
-              onClick={() => onOpenReplies(item)}
+              onClick={(event) => {
+                event.currentTarget.focus();
+                onOpenReplies(item);
+              }}
             >
               {item.replyCount.toLocaleString('zh-CN')} 条回复
             </button>
@@ -151,6 +154,7 @@ function CommentsDialog({
   fallbackItems,
   fallbackTotal,
   replyRoot,
+  active,
   status,
   retryable,
   onClose,
@@ -163,47 +167,53 @@ function CommentsDialog({
   fallbackItems: CommentItem[];
   fallbackTotal: number;
   replyRoot?: CommentItem;
+  active: boolean;
   status: CommentStatus;
   retryable: boolean;
   onClose: () => void;
   onLoadMore: () => void;
-  onOpenReplies: (item: CommentItem) => void;
+  onOpenReplies?: (item: CommentItem) => void;
   onRetry: () => void;
   onPreview: (image: FeedImage) => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const items = snapshot?.items.length ? snapshot.items : fallbackItems;
   const isReplyView = Boolean(replyRoot);
+  const titleId = isReplyView ? 'replies-dialog-title' : 'comments-dialog-title';
 
   useEffect(() => {
     closeRef.current?.focus();
   }, []);
 
   useEffect(() => {
-    if (replyRoot) closeRef.current?.focus();
-  }, [replyRoot]);
-
-  useEffect(() => {
+    if (!active) return undefined;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [active, onClose]);
 
   return (
-    <div className="comments-dialog-backdrop" role="presentation" onMouseDown={(event) => {
-      if (event.target === event.currentTarget) onClose();
-    }}>
+    <div
+      className={`comments-dialog-backdrop${isReplyView
+        ? ' comments-dialog-backdrop--reply'
+        : ''}`}
+      role="presentation"
+      aria-hidden={active ? undefined : true}
+      onMouseDown={(event) => {
+        if (active && event.target === event.currentTarget) onClose();
+      }}
+    >
       <section
-        className="comments-dialog"
+        className={`comments-dialog${isReplyView ? ' comments-dialog--reply' : ''}`}
         role="dialog"
-        aria-modal="true"
-        aria-labelledby="comments-dialog-title"
+        aria-modal={active ? 'true' : undefined}
+        aria-labelledby={titleId}
       >
         <header>
           <div>
-            <h2 id="comments-dialog-title">{replyRoot ? '回复' : '评论'}</h2>
+            <h2 id={titleId}>{isReplyView ? '回复' : '评论'}</h2>
             <span>{(snapshot?.total ?? fallbackTotal).toLocaleString('zh-CN')}</span>
           </div>
           <button
@@ -258,10 +268,11 @@ function CommentsDialog({
   );
 }
 
-/** 平台无关的评论弹层状态机；评论与回复只通过可序列化快照切换内容。 */
+/** 平台无关的评论弹层状态机；主评论常驻，回复只作为单独的上层弹窗。 */
 export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionProps>(
   function CommentSection({ descriptor, onRequest }, ref) {
     const returnFocusRef = useRef<HTMLElement | null>(null);
+    const replyReturnFocusRef = useRef<HTMLElement | null>(null);
     const activeRequest = useRef(0);
     const requestPending = useRef(false);
     const [dialogOpen, setDialogOpen] = useState(false);
@@ -386,8 +397,23 @@ export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionPro
       returnFocusRef.current?.focus();
       void onRequest({ kind: 'closeAll', targetId: descriptor.targetId }).catch(() => undefined);
     };
+    const closeReplies = () => {
+      activeRequest.current += 1;
+      requestPending.current = false;
+      setReplyRoot(undefined);
+      setReplies(undefined);
+      setStatus('ready');
+      setRetryable(false);
+      setFailedCommand(undefined);
+      replyReturnFocusRef.current?.focus();
+      void onRequest({ kind: 'closeReplies', targetId: descriptor.targetId })
+        .catch(() => undefined);
+    };
     const openReplies = (item: CommentItem) => {
       if (!descriptor.capabilities.replies || !item.replyCount || requestPending.current) return;
+      replyReturnFocusRef.current = document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
       setReplyRoot(item);
       setReplies(undefined);
       void execute({
@@ -416,19 +442,36 @@ export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionPro
     return (
       <>
         {dialogOpen && (
-          <CommentsDialog
-            snapshot={replyRoot ? replies : all}
-            fallbackItems={replyRoot ? [] : preview?.items || []}
-            fallbackTotal={replyRoot?.replyCount ?? preview?.total ?? descriptor.count}
-            replyRoot={replyRoot}
-            status={status}
-            retryable={retryable}
-            onClose={closeAll}
-            onLoadMore={loadMore}
-            onOpenReplies={openReplies}
-            onRetry={retry}
-            onPreview={setImagePreview}
-          />
+          <>
+            <CommentsDialog
+              snapshot={all}
+              fallbackItems={preview?.items || []}
+              fallbackTotal={preview?.total ?? descriptor.count}
+              active={!replyRoot}
+              status={status}
+              retryable={retryable}
+              onClose={closeAll}
+              onLoadMore={loadMore}
+              onOpenReplies={openReplies}
+              onRetry={retry}
+              onPreview={setImagePreview}
+            />
+            {replyRoot && (
+              <CommentsDialog
+                snapshot={replies}
+                fallbackItems={[]}
+                fallbackTotal={replyRoot.replyCount || 0}
+                replyRoot={replyRoot}
+                active
+                status={status}
+                retryable={retryable}
+                onClose={closeReplies}
+                onLoadMore={loadMore}
+                onRetry={retry}
+                onPreview={setImagePreview}
+              />
+            )}
+          </>
         )}
         {imagePreview && (
           <button

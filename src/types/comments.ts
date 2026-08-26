@@ -40,6 +40,7 @@ export type CommentCommand =
   | { kind: 'openAll'; targetId: string }
   | { kind: 'loadMore'; targetId: string }
   | { kind: 'openReplies'; targetId: string; commentId: string }
+  | { kind: 'closeReplies'; targetId: string }
   | { kind: 'closeAll'; targetId: string };
 
 export type CommentRequestResult =

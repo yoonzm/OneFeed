@@ -161,7 +161,7 @@ describe('CommentSection', () => {
     expect(container.textContent).not.toContain('在原文查看评论');
   });
 
-  it('replaces the comments dialog with a reply dialog and reuses loadMore', async () => {
+  it('opens replies above comments and restores the preserved comments dialog on close', async () => {
     let replyMode = false;
     const onRequest = vi.fn(async (command: CommentCommand): Promise<CommentRequestResult> => {
       if (command.kind === 'openPreview' || command.kind === 'openAll') {
@@ -206,6 +206,7 @@ describe('CommentSection', () => {
           },
         };
       }
+      if (command.kind === 'closeReplies') replyMode = false;
       return { kind: 'closed' };
     });
     const container = await renderArticle(onRequest);
@@ -217,6 +218,13 @@ describe('CommentSection', () => {
       await Promise.resolve();
       await Promise.resolve();
     });
+    const commentsDialog = container.querySelector<HTMLElement>('[role="dialog"]')!;
+    const commentsScroller = commentsDialog.querySelector<HTMLElement>('.comments-dialog-scroll')!;
+    Object.defineProperty(commentsScroller, 'scrollTop', {
+      configurable: true,
+      value: 180,
+      writable: true,
+    });
     const replyAction = Array.from(container.querySelectorAll('button'))
       .find((button) => button.textContent === '2 条回复');
     await act(async () => {
@@ -224,27 +232,53 @@ describe('CommentSection', () => {
       await Promise.resolve();
     });
 
-    const dialog = container.querySelector<HTMLElement>('[role="dialog"]');
-    const scroller = container.querySelector<HTMLElement>('.comments-dialog-scroll');
-    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(1);
-    expect(dialog?.querySelector('h2')?.textContent).toBe('回复');
-    expect(dialog?.textContent).toContain('父评论');
-    expect(dialog?.textContent).toContain('第一条回复');
-    expect(dialog?.textContent).not.toContain('另一条评论');
-    expect(dialog?.textContent).not.toContain('返回全部评论');
+    const dialogs = container.querySelectorAll<HTMLElement>('[role="dialog"]');
+    const replyDialog = dialogs[1];
+    const replyScroller = replyDialog?.querySelector<HTMLElement>('.comments-dialog-scroll');
+    expect(dialogs).toHaveLength(2);
+    expect(commentsDialog.textContent).toContain('另一条评论');
+    expect(commentsDialog.parentElement?.getAttribute('aria-hidden')).toBe('true');
+    expect(replyDialog?.querySelector('h2')?.textContent).toBe('回复');
+    expect(replyDialog?.textContent).toContain('父评论');
+    expect(replyDialog?.textContent).toContain('第一条回复');
+    expect(replyDialog?.textContent).not.toContain('另一条评论');
 
-    Object.defineProperties(scroller!, {
+    Object.defineProperties(replyScroller!, {
       scrollHeight: { configurable: true, value: 900 },
       clientHeight: { configurable: true, value: 400 },
       scrollTop: { configurable: true, value: 600, writable: true },
     });
     await act(async () => {
-      scroller?.dispatchEvent(new Event('scroll', { bubbles: true }));
+      replyScroller?.dispatchEvent(new Event('scroll', { bubbles: true }));
       await Promise.resolve();
     });
 
     expect(onRequest).toHaveBeenCalledWith({ kind: 'loadMore', targetId: 'article-1' });
-    expect(dialog?.textContent).toContain('第二条回复');
-    expect(dialog?.textContent).toContain('已加载当前全部回复');
+    expect(replyDialog?.textContent).toContain('第二条回复');
+    expect(replyDialog?.textContent).toContain('已加载当前全部回复');
+
+    await act(async () => {
+      container.querySelector<HTMLButtonElement>('[aria-label="关闭回复"]')?.click();
+      await Promise.resolve();
+    });
+    expect(onRequest).toHaveBeenCalledWith({ kind: 'closeReplies', targetId: 'article-1' });
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+    expect(container.querySelector('[role="dialog"]')).toBe(commentsDialog);
+    expect(commentsScroller.scrollTop).toBe(180);
+    expect(document.activeElement).toBe(replyAction);
+
+    await act(async () => {
+      replyAction?.click();
+      await Promise.resolve();
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      await Promise.resolve();
+    });
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+      await Promise.resolve();
+    });
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(0);
   });
 });

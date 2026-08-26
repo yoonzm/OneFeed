@@ -193,6 +193,10 @@ describe('ZhihuCommentsController', () => {
       },
     });
     expect(await controller.request({
+      kind: 'closeReplies',
+      targetId: 'zhihu_42',
+    })).toEqual({ kind: 'closed' });
+    expect(await controller.request({
       kind: 'openPreview',
       targetId: 'zhihu_other',
     })).toEqual({ kind: 'failed', retryable: false });

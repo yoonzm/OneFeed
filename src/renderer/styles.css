@@ -477,16 +477,26 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
   background: rgb(15 22 34 / 58%);
   overscroll-behavior: contain;
 }
+.comments-dialog-backdrop--reply {
+  z-index: 21;
+  padding: 48px;
+  background: rgb(15 22 34 / 42%);
+}
 .comments-dialog {
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  width: min(680px, 100%);
+  width: min(760px, 100%);
   max-height: min(860px, calc(100vh - 48px));
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--surface);
   box-shadow: 0 24px 80px rgb(0 0 0 / 28%);
+}
+.comments-dialog--reply {
+  width: min(700px, 100%);
+  max-height: min(780px, calc(100vh - 96px));
+  box-shadow: 0 28px 90px rgb(0 0 0 / 38%);
 }
 .comments-dialog > header {
   display: flex;
@@ -542,6 +552,12 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--color-onefeed-f
   .comment-item-reply { margin-left: 16px; padding-left: 12px; }
   .comments-dialog-backdrop { padding: 0; }
   .comments-dialog { width: 100%; max-height: 100vh; border-width: 0; border-radius: 0; }
+  .comments-dialog-backdrop--reply { padding: 12px; }
+  .comments-dialog--reply {
+    max-height: calc(100vh - 24px);
+    border-width: 1px;
+    border-radius: 10px;
+  }
   .comments-dialog > header,
   .comments-dialog-scroll { padding-right: 16px; padding-left: 16px; }
 }
