@@ -35,7 +35,7 @@ export const PLATFORM_PRESENTATIONS: PlatformPresentation[] = [
   },
   {
     id: '36kr',
-    scope: '资讯频道与文章列表',
+    scope: '资讯频道、文章列表与文章详情',
     access: '无需登录即可浏览',
     accent: '#ff5a36',
   },

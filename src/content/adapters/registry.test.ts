@@ -5,6 +5,7 @@ import { HackerNewsAdapter } from './hackerNews';
 import { LinuxDoAdapter } from './linuxDo';
 import { LinuxDoThreadAdapter } from './linuxDoThread';
 import { ThirtySixKrAdapter } from './thirtySixKr';
+import { ThirtySixKrDetailAdapter } from './thirtySixKrDetail';
 import { V2exAdapter } from './v2ex';
 import { V2exThreadAdapter } from './v2exThread';
 import { ZhihuAdapter } from './zhihu';
@@ -60,7 +61,7 @@ describe('createAdapter', () => {
     });
   });
 
-  it('prioritizes supported Zhihu detail routes', () => {
+  it('selects supported article detail adapters', () => {
     expect(createAdapter(
       new URL('https://www.zhihu.com/question/1/answer/42?utm_source=test#comment-1'),
       listeners(),
@@ -75,6 +76,14 @@ describe('createAdapter', () => {
     )).toMatchObject({
       surface: 'article',
       adapter: expect.any(ZhihuDetailAdapter),
+    });
+    expect(createAdapter(
+      new URL('https://36kr.com/p/123456'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'article',
+      adapter: expect.any(ThirtySixKrDetailAdapter),
+      source: { id: '36kr', name: '36Kr' },
     });
   });
 
@@ -111,7 +120,6 @@ describe('createAdapter', () => {
     expect(createAdapter(new URL('https://www.zhihu.com/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://news.ycombinator.com/item?id=43876543'), listeners())).toBeNull();
-    expect(createAdapter(new URL('https://36kr.com/p/123456'), listeners())).toBeNull();
     expect(createAdapter(
       new URL('https://www.reddit.com/'),
       listeners(),
@@ -130,7 +138,7 @@ describe('createAdapter', () => {
     expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore'))).toBe(false);
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/news'))).toBe(true);
     expect(isSupportedUrl(new URL('https://36kr.com/information/technology/'))).toBe(true);
-    expect(isSupportedUrl(new URL('https://36kr.com/p/123456'))).toBe(false);
+    expect(isSupportedUrl(new URL('https://36kr.com/p/123456'))).toBe(true);
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/item?id=43876543'))).toBe(false);
     expect(isSupportedUrl(new URL('https://www.reddit.com/'))).toBe(false);
   });

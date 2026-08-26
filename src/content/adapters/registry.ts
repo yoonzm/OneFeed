@@ -6,6 +6,7 @@ import { hackerNewsAdapterDefinition } from './hackerNews';
 import { linuxDoAdapterDefinition } from './linuxDo';
 import { linuxDoThreadAdapterDefinition } from './linuxDoThread';
 import { thirtySixKrAdapterDefinition } from './thirtySixKr';
+import { thirtySixKrDetailAdapterDefinition } from './thirtySixKrDetail';
 import { v2exAdapterDefinition } from './v2ex';
 import { v2exThreadAdapterDefinition } from './v2exThread';
 import { zhihuAdapterDefinition } from './zhihu';
@@ -21,6 +22,7 @@ const feedAdapterDefinitions: AdapterDefinition[] = [
 ];
 
 const detailAdapterDefinitions: DetailAdapterDefinition[] = [
+  thirtySixKrDetailAdapterDefinition,
   zhihuThreadAdapterDefinition,
   v2exThreadAdapterDefinition,
   linuxDoThreadAdapterDefinition,
