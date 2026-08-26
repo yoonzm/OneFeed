@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
   parseCount,
+  parseOrderedZhihuBlocks,
   parseZhihuCard,
   triggerZhihuAction,
   ZhihuAdapter,
@@ -27,6 +28,23 @@ describe('ZhihuAdapter feed channels', () => {
       { label: '热榜', active: false },
     ]);
     adapter.disconnect();
+  });
+});
+
+describe('Zhihu rich content', () => {
+  it('keeps a standalone sticker as a normalized inline emoji', () => {
+    document.body.innerHTML = `
+      <div class="CommentContent">
+        <p><img class="sticker" src="https://pic.example/emoji.png" alt="[捂脸]" /></p>
+      </div>`;
+
+    const blocks = parseOrderedZhihuBlocks(document.querySelector('.CommentContent')!);
+
+    expect(blocks).toHaveLength(1);
+    expect(blocks[0]).toMatchObject({ type: 'richText', plainText: '[捂脸]' });
+    expect(blocks[0]?.type === 'richText' ? blocks[0].html : '')
+      .toContain('data-onefeed-kind="emoji"');
+    expect(blocks.some((block) => block.type === 'gallery')).toBe(false);
   });
 });
 

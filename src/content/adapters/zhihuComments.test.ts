@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { ZhihuCommentsController } from './zhihuComments';
 
-function commentHtml(id: string, author: string, text: string): string {
+function commentHtml(id: string, author: string, text: string, content = `<p>${text}</p>`): string {
   return `
     <div data-id="${id}">
       <a href="https://www.zhihu.com/people/${id}">${author}</a>
       <img class="Avatar" src="https://pic.example/${id}.png" alt="${author}" />
-      <div class="CommentContent"><p>${text}</p></div>
+      <div class="CommentContent">${content}</div>
       <span>2 小时前</span><span>北京</span><span>热评</span>
       <button><svg class="ZDI--HeartFill24"></svg>12</button>
       <button>查看全部 3 条回复</button>
@@ -25,7 +25,12 @@ describe('ZhihuCommentsController', () => {
       target.insertAdjacentHTML('beforeend', `
         <div class="Comments-container">
           <strong>3 条评论</strong>
-          ${commentHtml('c1', '测试用户一', '局部评论')}
+          ${commentHtml(
+            'c1',
+            '测试用户一',
+            '局部评论',
+            '<p>局部评论<img class="sticker" src="https://pic.example/emoji.png" alt="[微笑]" />继续</p>',
+          )}
           <div data-id="c1-reply">
             <a href="https://www.zhihu.com/people/c1-reply">测试用户二</a>
             <div class="CommentContent"><p>已加载的子回复</p></div>
@@ -89,6 +94,16 @@ describe('ZhihuCommentsController', () => {
         ],
       },
     });
+    if (preview.kind !== 'loaded') throw new Error('预览评论应加载成功');
+    const previewBody = preview.snapshot.items[0]?.body;
+    expect(previewBody).toHaveLength(1);
+    expect(previewBody?.[0]).toMatchObject({
+      type: 'richText',
+      plainText: '局部评论[微笑]继续',
+    });
+    expect(previewBody?.[0]?.type === 'richText' ? previewBody[0].html : '')
+      .toContain('data-onefeed-kind="emoji"');
+    expect(previewBody?.some((block) => block.type === 'gallery')).toBe(false);
 
     const all = await controller.request({ kind: 'openAll', targetId: 'zhihu_42' });
     expect(all).toMatchObject({

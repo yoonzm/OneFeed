@@ -97,8 +97,9 @@ export interface FeedPoll {
 
 /**
  * Renderer 支持的标准内容积木。
- * richText.html 必须由 Adapter 在写入协议前完成清洗；plainText 专供长度判断、
- * 去重或摘要使用，避免 Renderer 再次解析 HTML。
+ * richText.html 必须由 Adapter 在写入协议前完成清洗；平台内联表情统一使用
+ * `img[data-onefeed-kind="emoji"]` 标记。plainText 专供长度判断、过滤、去重或摘要使用，
+ * 避免 Renderer 再次解析 HTML。
  */
 export type FeedBlock =
   /** 已清洗的富文本内容。 */
