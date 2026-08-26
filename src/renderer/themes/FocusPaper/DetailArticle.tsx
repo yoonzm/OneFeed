@@ -1,12 +1,18 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ArticleDetail } from '../../../types/detail';
+import type { CommentCommand, CommentRequestResult } from '../../../types/comments';
 import type { FeedActionDescriptor, FeedImage } from '../../../types/feed';
 import { ActionBar } from '../../components/ActionBar';
 import { BlockRenderer } from '../../components/BlockRenderer';
+import {
+  CommentSection,
+  type CommentSectionHandle,
+} from '../../components/CommentSection';
 
 interface DetailArticleProps {
   content: ArticleDetail;
   onAction: (action: FeedActionDescriptor) => void;
+  onCommentRequest?: (command: CommentCommand) => Promise<CommentRequestResult>;
 }
 
 function formatPublishedAt(value: string | number): string {
@@ -23,8 +29,17 @@ function formatPublishedAt(value: string | number): string {
 }
 
 /** 单篇正文视图：保留作者元信息，并始终完整渲染所有标准 Block。 */
-export function DetailArticle({ content, onAction }: DetailArticleProps) {
+export function DetailArticle({ content, onAction, onCommentRequest }: DetailArticleProps) {
   const [preview, setPreview] = useState<FeedImage>();
+  const commentsRef = useRef<CommentSectionHandle>(null);
+
+  const handleAction = (action: FeedActionDescriptor) => {
+    if (action.kind === 'reply' && content.comments && onCommentRequest) {
+      commentsRef.current?.openDialog();
+      return;
+    }
+    onAction(action);
+  };
 
   return (
     <article className="detail-article">
@@ -89,7 +104,7 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
             originalUrl={content.originalUrl}
             metrics={content.actionSlots.author.metrics}
             actions={content.actionSlots.author.actions}
-            onAction={onAction}
+            onAction={handleAction}
           />
         )}
       </div>
@@ -111,7 +126,16 @@ export function DetailArticle({ content, onAction }: DetailArticleProps) {
           originalUrl={content.originalUrl}
           metrics={content.actionSlots.footer.metrics}
           actions={content.actionSlots.footer.actions}
-          onAction={onAction}
+          onAction={handleAction}
+        />
+      )}
+
+      {content.comments && onCommentRequest && (
+        <CommentSection
+          key={content.comments.targetId}
+          ref={commentsRef}
+          descriptor={content.comments}
+          onRequest={onCommentRequest}
         />
       )}
 

@@ -61,6 +61,22 @@ describe('reader app shells', () => {
     expect(markup).not.toContain('已读到这里');
   });
 
+  it('renders only the loading icon while organizing a detail', () => {
+    const markup = renderToStaticMarkup(
+      <DetailApp
+        activePlatformId="zhihu"
+        surface="article"
+        scrollElement={document.createElement('div')}
+        onAction={vi.fn(() => false)}
+      />,
+    );
+
+    expect(markup).toContain('scan-mark');
+    expect(markup).not.toContain('正在整理详情');
+    expect(markup).not.toContain('正文出现后');
+    expect(markup).not.toContain('已读完本文');
+  });
+
   it('places the current site channel control beside the active platform name', () => {
     const markup = renderToStaticMarkup(
       <FeedApp

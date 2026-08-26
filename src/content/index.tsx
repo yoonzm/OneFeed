@@ -17,6 +17,10 @@ import toggleStyles from './floatingToggle.css?inline';
 const READER_HOST_ID = '__universal_feed_root__';
 const TOGGLE_HOST_ID = '__universal_feed_toggle__';
 const HIDE_STYLE_ID = '__universal_feed_hide_original__';
+const PAGE_BACKGROUND_BY_COLOR_SCHEME: Record<ColorScheme, string> = {
+  light: '#f7f8fa',
+  dark: '#101722',
+};
 
 function routeKey(url: URL): string {
   return `${url.origin}${url.pathname}${url.search}`;
@@ -27,19 +31,14 @@ function clearSurfaceStores(): void {
   useDetailStore.getState().clear();
 }
 
-/** 在原站首屏绘制前建立纸张色遮罩；Surface 与开关节点挂载后仍保持可见。 */
-function hideOriginalPage(url: URL): HTMLStyleElement | undefined {
-  if (!isSupportedUrl(url)) return undefined;
-  const existing = document.getElementById(HIDE_STYLE_ID);
-  if (existing instanceof HTMLStyleElement) return existing;
-
-  const container = document.head || document.documentElement;
-  if (!container) return undefined;
-  const style = document.createElement('style');
-  style.id = HIDE_STYLE_ID;
+/** 在原站首屏绘制前建立纸张色遮罩；详情解析期间同步主题，避免等待画面闪烁。 */
+function updateHiddenPageTheme(
+  style: HTMLStyleElement,
+  colorScheme: ColorScheme,
+): void {
   style.textContent = `
     html, body {
-      background: #f7f8fa !important;
+      background: ${PAGE_BACKGROUND_BY_COLOR_SCHEME[colorScheme]} !important;
       scrollbar-width: none !important;
     }
     body > *:not(#${READER_HOST_ID}):not(#${TOGGLE_HOST_ID}) {
@@ -48,8 +47,31 @@ function hideOriginalPage(url: URL): HTMLStyleElement | undefined {
     }
     body::-webkit-scrollbar { display: none !important; }
   `;
+}
+
+function hideOriginalPage(
+  url: URL,
+  colorScheme: ColorScheme = DEFAULT_COLOR_SCHEME,
+): HTMLStyleElement | undefined {
+  if (!isSupportedUrl(url)) return undefined;
+  const existing = document.getElementById(HIDE_STYLE_ID);
+  if (existing instanceof HTMLStyleElement) {
+    updateHiddenPageTheme(existing, colorScheme);
+    return existing;
+  }
+
+  const container = document.head || document.documentElement;
+  if (!container) return undefined;
+  const style = document.createElement('style');
+  style.id = HIDE_STYLE_ID;
+  updateHiddenPageTheme(style, colorScheme);
   container.appendChild(style);
   return style;
+}
+
+function updateActiveHiddenPageTheme(colorScheme: ColorScheme): void {
+  const style = document.getElementById(HIDE_STYLE_ID);
+  if (style instanceof HTMLStyleElement) updateHiddenPageTheme(style, colorScheme);
 }
 
 /** document_start 时 body 尚未创建，通过短生命周期观察器尽早继续挂载。 */
@@ -94,7 +116,7 @@ function mount(
   const host = document.createElement('div');
   host.id = READER_HOST_ID;
   host.dataset.onefeedTheme = initialColorScheme;
-  if (activeAdapter.surface !== 'feed') host.style.display = 'none';
+  // DetailApp 自带加载态；适配器等待原站正文时保持宿主可见，避免只显示空白遮罩。
   document.body.appendChild(host);
 
   let root: ReturnType<typeof createRoot> | undefined;
@@ -129,7 +151,10 @@ function mount(
     revealSurface = () => {
       host.style.removeProperty('display');
       if (!hideOriginal?.isConnected) {
-        hideOriginal = hideOriginalPage(new URL(window.location.href));
+        hideOriginal = hideOriginalPage(
+          new URL(window.location.href),
+          normalizeColorScheme(host.dataset.onefeedTheme),
+        );
       }
     };
     if (activeAdapter.surface === 'feed') {
@@ -170,6 +195,10 @@ function mount(
           {...sharedProps}
           activePlatformId={activeAdapter.source.id}
           surface={activeAdapter.surface}
+          onCommentRequest={(command) => (
+            activeAdapter.adapter.requestComments?.(command) ||
+            Promise.resolve({ kind: 'failed' as const, retryable: false })
+          )}
         />,
       );
     }
@@ -222,12 +251,12 @@ export function startContentScript(): ContentScriptController {
       return;
     }
     if (!domReady) {
-      pendingHideStyle ||= hideOriginalPage(new URL(window.location.href));
+      pendingHideStyle = hideOriginalPage(new URL(window.location.href), colorScheme);
       return;
     }
     if (unmount) return;
 
-    const hideStyle = pendingHideStyle || hideOriginalPage(new URL(window.location.href));
+    const hideStyle = hideOriginalPage(new URL(window.location.href), colorScheme);
     pendingHideStyle = undefined;
     unmount = mount(hideStyle, colorScheme);
     if (!unmount) hideStyle?.remove();
@@ -259,6 +288,7 @@ export function startContentScript(): ContentScriptController {
     if (areaName !== 'local') return;
     if (changes.colorScheme) {
       colorScheme = normalizeColorScheme(changes.colorScheme.newValue);
+      updateActiveHiddenPageTheme(colorScheme);
       const readerHost = document.getElementById(READER_HOST_ID);
       if (readerHost instanceof HTMLDivElement) {
         readerHost.dataset.onefeedTheme = colorScheme;
@@ -282,7 +312,9 @@ export function startContentScript(): ContentScriptController {
     unmount?.();
     unmount = undefined;
     pendingHideStyle?.remove();
-    pendingHideStyle = (!storageReady || enabled) ? hideOriginalPage(url) : undefined;
+    pendingHideStyle = (!storageReady || enabled)
+      ? hideOriginalPage(url, colorScheme)
+      : undefined;
     applyEnabledState();
   };
 
@@ -293,6 +325,7 @@ export function startContentScript(): ContentScriptController {
       storageReady = true;
       enabled = storedEnabled !== false;
       colorScheme = normalizeColorScheme(storedColorScheme);
+      updateActiveHiddenPageTheme(colorScheme);
       renderToggle(true);
       applyEnabledState();
     },

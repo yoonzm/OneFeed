@@ -335,6 +335,15 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .media-count-4 .media-button { height: 106px; }
 .media-button img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 240ms ease; }
 .media-button:hover img { transform: scale(1.018); }
+/* Adapter 归一化后的行内表情跟随文字字号，不进入 Gallery 或图片预览。 */
+.content img[data-onefeed-kind="emoji"] {
+  display: inline-block;
+  width: 1.4em;
+  height: 1.4em;
+  margin: 0 .08em;
+  object-fit: contain;
+  vertical-align: -.3em;
+}
 /* 单篇正文按原始内容流展示图片，并保留完整构图；列表和 Thread 仍使用紧凑媒体样式。 */
 .detail-body .media-button { height: auto; background: transparent; }
 .detail-body .media-button img { height: auto; object-fit: contain; }
@@ -417,6 +426,98 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .lightbox img { max-width: min(1200px, 92vw); max-height: 84vh; object-fit: contain; box-shadow: 0 24px 80px rgb(0 0 0 / 40%); }
 .lightbox span { position: absolute; bottom: 20px; color: #b8c4d6; font-size: 11px; letter-spacing: .08em; }
 
+/* 评论数据来自 Adapter 快照，Renderer 只在统一弹层内展示。 */
+.comments-dialog > header h2 {
+  margin: 0;
+  color: var(--ink);
+  font: 600 20px/1.4 "Songti SC", SimSun, Georgia, serif;
+}
+.comments-dialog > header span { color: var(--muted); font-size: 12px; }
+.comment-list { display: grid; }
+.comment-item {
+  min-width: 0;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--line);
+}
+.comment-item-reply {
+  margin-left: 38px;
+  padding-left: 16px;
+  border-left: 2px solid var(--line);
+}
+.comment-author-row { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+.comment-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: var(--blue-soft); }
+.comment-avatar-fallback { display: grid; place-items: center; color: var(--blue); font-size: 12px; font-weight: 600; }
+.comment-author-row > span { min-width: 0; }
+.comment-author-row strong,
+.comment-author-row small { display: block; }
+.comment-author-row strong { font-size: 13px; line-height: 1.3; }
+.comment-author-row small { margin-top: 2px; color: var(--muted); font-size: 10.5px; line-height: 1.4; }
+.comment-body .content { font-size: 14px; line-height: 1.75; }
+.comment-body .media-button { height: 88px; }
+.comment-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; color: var(--muted); font-size: 11px; }
+.comment-replies-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--blue);
+  cursor: pointer;
+  font: inherit;
+}
+.comment-replies-button:hover { text-decoration: underline; text-underline-offset: 3px; }
+.comment-status { margin: 18px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
+.comment-status button,
+.comment-status a { margin-left: 10px; padding: 0; border: 0; background: transparent; color: var(--blue); cursor: pointer; text-decoration: none; }
+.comments-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgb(15 22 34 / 58%);
+  overscroll-behavior: contain;
+}
+.comments-dialog-backdrop--reply {
+  z-index: 21;
+  padding: 48px;
+  background: rgb(15 22 34 / 42%);
+}
+.comments-dialog {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(760px, 100%);
+  max-height: min(860px, calc(100vh - 48px));
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 24px 80px rgb(0 0 0 / 28%);
+}
+.comments-dialog--reply {
+  width: min(700px, 100%);
+  max-height: min(780px, calc(100vh - 96px));
+  box-shadow: 0 28px 90px rgb(0 0 0 / 38%);
+}
+.comments-dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--line);
+}
+.comments-dialog > header > div { display: flex; align-items: baseline; gap: 10px; }
+.comments-dialog > header button { padding: 4px; border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 12px; }
+.comments-dialog > header button:hover { color: var(--blue); }
+.comments-dialog-scroll {
+  min-height: 160px;
+  padding: 0 22px 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.comments-dialog .comment-status { padding-bottom: 10px; }
+.comment-lightbox { z-index: 30; }
+
 .empty-state { display: grid; min-height: 55vh; place-content: center; text-align: center; }
 .empty-state p { margin: 22px 0 2px; font-family: "Songti SC", SimSun, serif; font-size: 22px; }
 .empty-state small { color: var(--muted); font-size: 12px; }
@@ -448,6 +549,17 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--color-onefeed-f
   .link-preview { grid-template-columns: minmax(0, 1fr) 92px; }
   .link-preview img { width: 92px; }
   .lightbox { padding: 16px; }
+  .comment-item-reply { margin-left: 16px; padding-left: 12px; }
+  .comments-dialog-backdrop { padding: 0; }
+  .comments-dialog { width: 100%; max-height: 100vh; border-width: 0; border-radius: 0; }
+  .comments-dialog-backdrop--reply { padding: 12px; }
+  .comments-dialog--reply {
+    max-height: calc(100vh - 24px);
+    border-width: 1px;
+    border-radius: 10px;
+  }
+  .comments-dialog > header,
+  .comments-dialog-scroll { padding-right: 16px; padding-left: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

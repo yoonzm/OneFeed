@@ -177,23 +177,9 @@ function getOriginalUrl(element: Element, metadata: ZhihuMetadata): string {
   return absoluteUrl(answerPermalink || fallbackLink) || window.location.href;
 }
 
-function extractMedia(body: Element): FeedImage[] {
-  const seen = new Set<string>();
-  return Array.from(body.querySelectorAll('img'))
-    .map((image) => {
-      const url = absoluteUrl(
-        image.getAttribute('data-original') ||
-          image.getAttribute('data-actualsrc') ||
-          image.getAttribute('src') ||
-          '',
-      );
-      return { url, alt: image.getAttribute('alt') || '' };
-    })
-    .filter((media) => {
-      if (!media.url || seen.has(media.url)) return false;
-      seen.add(media.url);
-      return true;
-    });
+/** 知乎使用语义化的 sticker 类标记随文字排版的 20px 评论表情。 */
+function isZhihuInlineEmoji(image: Element): boolean {
+  return image.matches('img.sticker');
 }
 
 function extractImage(image: Element): FeedImage | null {
@@ -206,17 +192,48 @@ function extractImage(image: Element): FeedImage | null {
   return url ? { url, alt: image.getAttribute('alt') || '' } : null;
 }
 
+function extractMedia(body: Element): FeedImage[] {
+  const seen = new Set<string>();
+  return Array.from(body.querySelectorAll('img'))
+    .filter((image) => !isZhihuInlineEmoji(image))
+    .map(extractImage)
+    .filter((media): media is FeedImage => media !== null)
+    .filter((media) => {
+      if (!media.url || seen.has(media.url)) return false;
+      seen.add(media.url);
+      return true;
+    });
+}
+
+function createInlineEmoji(image: Element): HTMLImageElement | null {
+  const media = extractImage(image);
+  if (!media) return null;
+
+  const inlineImage = document.createElement('img');
+  inlineImage.src = media.url;
+  inlineImage.alt = media.alt;
+  inlineImage.loading = 'lazy';
+  inlineImage.dataset.onefeedKind = 'emoji';
+  return inlineImage;
+}
+
 function cleanContent(body: Element): string {
   const clone = body.cloneNode(true) as Element;
-  clone.querySelectorAll('img, video, button, svg, noscript').forEach((node) => node.remove());
+  clone.querySelectorAll('img.sticker').forEach((image) => {
+    const inlineImage = createInlineEmoji(image);
+    if (inlineImage) image.replaceWith(inlineImage);
+    else image.remove();
+  });
+  clone.querySelectorAll('img:not([data-onefeed-kind="emoji"]), video, button, svg, noscript')
+    .forEach((node) => node.remove());
   clone.querySelectorAll('[style], [class], [id]').forEach((node) => {
     node.removeAttribute('style');
     node.removeAttribute('class');
     node.removeAttribute('id');
   });
   return DOMPurify.sanitize(clone.innerHTML, {
-    ALLOWED_TAGS: ['p', 'br', 'h2', 'h3', 'h4', 'strong', 'b', 'em', 'i', 'u', 's', 'blockquote', 'ol', 'ul', 'li', 'a', 'code', 'pre'],
-    ALLOWED_ATTR: ['href', 'target', 'rel'],
+    ALLOWED_TAGS: ['p', 'br', 'h2', 'h3', 'h4', 'strong', 'b', 'em', 'i', 'u', 's', 'blockquote', 'ol', 'ul', 'li', 'a', 'code', 'pre', 'img'],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'src', 'alt', 'loading', 'data-onefeed-kind'],
   });
 }
 
@@ -226,6 +243,9 @@ function createRichTextBlock(body: Element): RichTextBlock | null {
   const html = cleanContent(body);
   const textContainer = document.createElement('div');
   textContainer.innerHTML = html;
+  textContainer.querySelectorAll('img[data-onefeed-kind="emoji"]').forEach((image) => {
+    image.replaceWith(document.createTextNode(image.getAttribute('alt') || ''));
+  });
   const plainText = textContainer.textContent?.trim() || '';
   return plainText ? { type: 'richText', html, plainText } : null;
 }
@@ -263,6 +283,10 @@ function splitZhihuContentNode(node: Node): OrderedZhihuSegment[] {
     }
   }
   if (element.matches('img')) {
+    if (isZhihuInlineEmoji(element)) {
+      const inlineImage = createInlineEmoji(element);
+      return inlineImage ? [{ type: 'content', node: inlineImage }] : [];
+    }
     const image = extractImage(element);
     return image ? [{ type: 'gallery', items: [image] }] : [];
   }
@@ -561,6 +585,12 @@ export function triggerZhihuAction(element: Element | undefined, actionId: strin
   if (!button) return false;
   button.click();
   return true;
+}
+
+/** 仅声明当前 DOM 中真实存在的动作能力，避免 Renderer 展示无法代理的入口。 */
+export function hasZhihuActionControl(element: Element, actionId: string): boolean {
+  return Object.hasOwn(ACTION_SELECTORS, actionId) &&
+    findActionControl(element, actionId as ZhihuActionId) !== null;
 }
 
 export class ZhihuAdapter extends BaseAdapter {

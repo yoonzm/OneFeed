@@ -33,6 +33,19 @@ describe('BlockRenderer', () => {
     expect(gallery).toContain('alt="示例图片"');
   });
 
+  it('keeps normalized emoji inline without adding gallery interaction', () => {
+    const text = render({
+      type: 'richText',
+      html: '<p>文字<img src="https://example.com/emoji.png" alt="[微笑]" data-onefeed-kind="emoji">继续</p>',
+      plainText: '文字[微笑]继续',
+    });
+
+    expect(text).toContain('data-onefeed-kind="emoji"');
+    expect(text).toContain('alt="[微笑]"');
+    expect(text).not.toContain('media-button');
+    expect(text).not.toContain('<button');
+  });
+
   it('limits compact galleries to four cells and exposes the remaining count', () => {
     const gallery = render({
       type: 'gallery',
