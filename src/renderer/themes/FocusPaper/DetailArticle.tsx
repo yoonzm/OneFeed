@@ -135,7 +135,6 @@ export function DetailArticle({ content, onAction, onCommentRequest }: DetailArt
           key={content.comments.targetId}
           ref={commentsRef}
           descriptor={content.comments}
-          originalUrl={content.originalUrl}
           onRequest={onCommentRequest}
         />
       )}

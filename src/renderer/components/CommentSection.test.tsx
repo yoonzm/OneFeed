@@ -9,12 +9,13 @@ import type {
 } from '../../types/comments';
 import { DetailArticle } from '../themes/FocusPaper/DetailArticle';
 
-function comment(id: string, text: string): CommentItem {
+function comment(id: string, text: string, replyCount?: number): CommentItem {
   return {
     id,
     author: { name: `用户 ${id}`, avatar: '' },
     body: [{ type: 'richText', html: `<p>${text}</p>`, plainText: text }],
     metrics: [],
+    replyCount,
   };
 }
 
@@ -36,7 +37,7 @@ const content: ArticleDetail = {
   comments: {
     targetId: 'article-1',
     count: 3,
-    capabilities: { preview: true, all: true, loadMore: true },
+    capabilities: { preview: true, all: true, loadMore: true, replies: true },
   },
 };
 
@@ -157,7 +158,93 @@ describe('CommentSection', () => {
 
     expect(container.textContent).toContain('评论加载失败');
     expect(container.textContent).toContain('重试');
-    expect(container.querySelector<HTMLAnchorElement>('a[href="https://example.com/article-1"]')
-      ?.textContent).toBe('在原文查看评论');
+    expect(container.textContent).not.toContain('在原文查看评论');
+  });
+
+  it('replaces the comments dialog with a reply dialog and reuses loadMore', async () => {
+    let replyMode = false;
+    const onRequest = vi.fn(async (command: CommentCommand): Promise<CommentRequestResult> => {
+      if (command.kind === 'openPreview' || command.kind === 'openAll') {
+        return {
+          kind: 'loaded',
+          snapshot: {
+            targetId: command.targetId,
+            scope: command.kind === 'openPreview' ? 'preview' : 'all',
+            total: 2,
+            items: [
+              comment('parent', '父评论', 2),
+              comment('sibling', '另一条评论'),
+            ],
+            hasMore: false,
+          },
+        };
+      }
+      if (command.kind === 'openReplies') {
+        replyMode = true;
+        return {
+          kind: 'loaded',
+          snapshot: {
+            targetId: command.targetId,
+            scope: 'replies',
+            rootId: command.commentId,
+            total: 2,
+            items: [comment('reply-1', '第一条回复')],
+            hasMore: true,
+          },
+        };
+      }
+      if (command.kind === 'loadMore' && replyMode) {
+        return {
+          kind: 'exhausted',
+          snapshot: {
+            targetId: command.targetId,
+            scope: 'replies',
+            rootId: 'parent',
+            total: 2,
+            items: [comment('reply-1', '第一条回复'), comment('reply-2', '第二条回复')],
+            hasMore: false,
+          },
+        };
+      }
+      return { kind: 'closed' };
+    });
+    const container = await renderArticle(onRequest);
+    const commentAction = Array.from(container.querySelectorAll('button'))
+      .find((button) => button.textContent === '评论 3');
+
+    await act(async () => {
+      commentAction?.click();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    const replyAction = Array.from(container.querySelectorAll('button'))
+      .find((button) => button.textContent === '2 条回复');
+    await act(async () => {
+      replyAction?.click();
+      await Promise.resolve();
+    });
+
+    const dialog = container.querySelector<HTMLElement>('[role="dialog"]');
+    const scroller = container.querySelector<HTMLElement>('.comments-dialog-scroll');
+    expect(container.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+    expect(dialog?.querySelector('h2')?.textContent).toBe('回复');
+    expect(dialog?.textContent).toContain('父评论');
+    expect(dialog?.textContent).toContain('第一条回复');
+    expect(dialog?.textContent).not.toContain('另一条评论');
+    expect(dialog?.textContent).not.toContain('返回全部评论');
+
+    Object.defineProperties(scroller!, {
+      scrollHeight: { configurable: true, value: 900 },
+      clientHeight: { configurable: true, value: 400 },
+      scrollTop: { configurable: true, value: 600, writable: true },
+    });
+    await act(async () => {
+      scroller?.dispatchEvent(new Event('scroll', { bubbles: true }));
+      await Promise.resolve();
+    });
+
+    expect(onRequest).toHaveBeenCalledWith({ kind: 'loadMore', targetId: 'article-1' });
+    expect(dialog?.textContent).toContain('第二条回复');
+    expect(dialog?.textContent).toContain('已加载当前全部回复');
   });
 });

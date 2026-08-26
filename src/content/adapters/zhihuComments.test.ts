@@ -58,6 +58,38 @@ describe('ZhihuCommentsController', () => {
           clientHeight: { configurable: true, value: 200 },
           scrollTop: { configurable: true, value: 0, writable: true },
         });
+        const parentReplyControl = Array.from(
+          scroller.querySelectorAll<HTMLButtonElement>('[data-id="c1"] button'),
+        ).find((button) => /查看全部 3 条回复/.test(button.textContent || ''));
+        parentReplyControl?.addEventListener('click', () => {
+          scroller.closest('.Modal-content')?.insertAdjacentHTML('beforeend', `
+            <div class="replies-panel">
+              <div>评论回复</div>
+              <div class="nested-scroll" style="overflow-y: auto">
+                ${commentHtml('c1', '测试用户一', '父评论')}
+                ${commentHtml('c1-r1', '测试用户五', '第一条回复')}
+                ${commentHtml('c1-r2', '测试用户六', '第二条回复')}
+              </div>
+            </div>`);
+          const nestedScroller = document.querySelector<HTMLElement>('.nested-scroll')!;
+          Object.defineProperties(nestedScroller, {
+            scrollHeight: { configurable: true, value: 600, writable: true },
+            clientHeight: { configurable: true, value: 200 },
+            scrollTop: { configurable: true, value: 0, writable: true },
+          });
+          nestedScroller.addEventListener('scroll', () => {
+            if (document.querySelector('[data-id="c1-r3"]')) return;
+            nestedScroller.insertAdjacentHTML(
+              'beforeend',
+              commentHtml('c1-r3', '测试用户七', '第三条回复'),
+            );
+            Object.defineProperty(nestedScroller, 'scrollHeight', {
+              configurable: true,
+              value: 800,
+              writable: true,
+            });
+          });
+        });
         scroller.addEventListener('scroll', () => {
           if (document.querySelector('[data-id="c3"]')) return;
           scroller.insertAdjacentHTML(
@@ -123,10 +155,111 @@ describe('ZhihuCommentsController', () => {
         hasMore: true,
       },
     });
+
+    const replies = await controller.request({
+      kind: 'openReplies',
+      targetId: 'zhihu_42',
+      commentId: 'c1',
+    });
+    expect(replies).toMatchObject({
+      kind: 'loaded',
+      snapshot: {
+        scope: 'replies',
+        rootId: 'c1',
+        total: 3,
+        items: [
+          { id: 'c1-r1', parentId: 'c1' },
+          { id: 'c1-r2', parentId: 'c1' },
+        ],
+        hasMore: true,
+      },
+    });
+
+    const moreReplies = await controller.request({
+      kind: 'loadMore',
+      targetId: 'zhihu_42',
+    });
+    expect(moreReplies).toMatchObject({
+      kind: 'loaded',
+      snapshot: {
+        scope: 'replies',
+        rootId: 'c1',
+        items: [
+          { id: 'c1-r1' },
+          { id: 'c1-r2' },
+          { id: 'c1-r3' },
+        ],
+        hasMore: false,
+      },
+    });
     expect(await controller.request({
       kind: 'openPreview',
       targetId: 'zhihu_other',
     })).toEqual({ kind: 'failed', retryable: false });
+    expect(await controller.request({
+      kind: 'closeAll',
+      targetId: 'zhihu_42',
+    })).toEqual({ kind: 'closed' });
+    controller.disconnect();
+  });
+
+  it('normalizes inline reply expansion into the same replies snapshot', async () => {
+    document.body.innerHTML = `
+      <article class="AnswerItem" data-zop='{"type":"answer","itemId":"84"}'>
+        <button class="ContentItem-action">1 条评论</button>
+      </article>`;
+    const target = document.querySelector('.AnswerItem')!;
+    target.querySelector('button')?.addEventListener('click', () => {
+      target.insertAdjacentHTML('beforeend', `
+        <div class="Comments-container">
+          <strong>1 条评论</strong>
+          <div data-id="parent">
+            <a href="https://www.zhihu.com/people/parent">测试用户</a>
+            <div class="CommentContent"><p>父评论</p></div>
+            <div data-id="reply-0">
+              <a href="https://www.zhihu.com/people/reply-0">回复用户一</a>
+              <div class="CommentContent"><p>已显示回复</p></div>
+            </div>
+            <button class="expand-replies">展开其他 2 条回复</button>
+          </div>
+        </div>`);
+      const control = target.querySelector('.expand-replies');
+      control?.addEventListener('click', () => {
+        control.insertAdjacentHTML('beforebegin', `
+          <div data-id="reply-1">
+            <a href="https://www.zhihu.com/people/reply-1">回复用户二</a>
+            <div class="CommentContent"><p>补载回复一</p></div>
+          </div>
+          <div data-id="reply-2">
+            <a href="https://www.zhihu.com/people/reply-2">回复用户三</a>
+            <div class="CommentContent"><p>补载回复二</p></div>
+          </div>`);
+        control.remove();
+      });
+    });
+
+    const controller = new ZhihuCommentsController(() => target, () => 'zhihu_84');
+    await controller.request({ kind: 'openPreview', targetId: 'zhihu_84' });
+    const replies = await controller.request({
+      kind: 'openReplies',
+      targetId: 'zhihu_84',
+      commentId: 'parent',
+    });
+
+    expect(replies).toMatchObject({
+      kind: 'exhausted',
+      snapshot: {
+        scope: 'replies',
+        rootId: 'parent',
+        total: 3,
+        items: [
+          { id: 'reply-0', parentId: 'parent' },
+          { id: 'reply-1', parentId: 'parent' },
+          { id: 'reply-2', parentId: 'parent' },
+        ],
+        hasMore: false,
+      },
+    });
     controller.disconnect();
   });
 });

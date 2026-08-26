@@ -81,9 +81,15 @@ function parseZhihuComment(item: Element): CommentItem | null {
     /(?:喜欢|赞)/.test(normalizedText(button))
   ));
   const reactions = parseCount(normalizedText(reactionButton || null));
-  const replyCount = Math.max(0, ...buttons
+  const loadedReplyCount = commentItemRoots(item)
+    .filter((comment) => comment !== item).length;
+  const replyCount = Math.max(loadedReplyCount, ...buttons
     .filter((button) => /(?:查看全部|展开其他).*回复/.test(normalizedText(button)))
-    .map((button) => parseCount(normalizedText(button))));
+    .map((button) => {
+      const label = normalizedText(button);
+      const count = parseCount(label);
+      return /^展开其他/.test(label) ? loadedReplyCount + count : count;
+    }));
   const metrics: FeedMetric[] = reactions
     ? [{ kind: 'reactions', value: reactions, label: '赞' }]
     : [];
@@ -139,6 +145,63 @@ function parseSnapshot(
     items,
     hasMore: forceExhausted ? false : scope === 'all' && (
       canScroll || (!scroller && items.length < total)
+    ),
+  };
+}
+
+function findCommentRoot(root: ParentNode, commentId: string): Element | undefined {
+  return commentItemRoots(root)
+    .find((comment) => comment.getAttribute('data-id') === commentId);
+}
+
+function findReplyControl(item: Element): HTMLElement | undefined {
+  const controls = ownedElements<HTMLElement>(item, 'button, [role="button"]')
+    .filter((button) => /(?:查看全部|展开其他).*回复/.test(normalizedText(button)));
+  return controls.find((button) => /^查看全部/.test(normalizedText(button))) || controls[0];
+}
+
+/** 新版知乎把回复面板插入现有评论弹层，而不是创建第二个 Modal。 */
+function findReplyPanel(modal: Element, rootId: string): Element | undefined {
+  const headings = Array.from(modal.querySelectorAll('*'))
+    .filter((element) => normalizedText(element) === '评论回复');
+  for (const heading of headings) {
+    let panel = heading;
+    while (panel.parentElement && panel.parentElement !== modal) panel = panel.parentElement;
+    if (panel.parentElement !== modal || !normalizedText(panel).startsWith('评论回复')) continue;
+    const ids = modalCommentIds(panel);
+    if (ids.has(rootId) && ids.size > 1) return panel;
+  }
+  return undefined;
+}
+
+function parseReplySnapshot(
+  root: Element,
+  targetId: string,
+  rootId: string,
+  totalHint: number,
+  forceExhausted = false,
+): CommentSnapshot {
+  const items = commentItemRoots(root)
+    .filter((item) => item.getAttribute('data-id') !== rootId)
+    .map(parseZhihuComment)
+    .filter((item): item is CommentItem => item !== null && item.body.length > 0)
+    .map((item) => ({ ...item, parentId: item.parentId || rootId }));
+  const total = Math.max(totalHint, items.length);
+  const scroller = findScrollable(root);
+  const canScroll = Boolean(
+    scroller && scroller.scrollTop + scroller.clientHeight < scroller.scrollHeight - 2,
+  );
+  const inlineControl = root.getAttribute('data-id') === rootId
+    ? findReplyControl(root)
+    : undefined;
+  return {
+    targetId,
+    scope: 'replies',
+    rootId,
+    total,
+    items,
+    hasMore: forceExhausted ? false : Boolean(
+      inlineControl || canScroll || items.length < total,
     ),
   };
 }
@@ -269,6 +332,9 @@ function findCloseControl(modal: Element): HTMLElement | undefined {
 /** 只持有知乎评论运行时节点，返回给 Renderer 的始终是可序列化快照。 */
 export class ZhihuCommentsController {
   private modal?: Element;
+  private repliesRoot?: Element;
+  private replyRootId?: string;
+  private replyTotal = 0;
   private abortController?: AbortController;
   private requestPending = false;
   private readonly previewIds = new Set<string>();
@@ -283,6 +349,9 @@ export class ZhihuCommentsController {
     this.abortController = undefined;
     this.requestPending = false;
     this.modal = undefined;
+    this.repliesRoot = undefined;
+    this.replyRootId = undefined;
+    this.replyTotal = 0;
     this.previewIds.clear();
   }
 
@@ -291,8 +360,18 @@ export class ZhihuCommentsController {
       this.abortController?.abort();
       this.abortController = undefined;
       this.requestPending = false;
-      if (this.modal?.isConnected) findCloseControl(this.modal)?.click();
+      const repliesClose = this.repliesRoot?.isConnected &&
+        this.repliesRoot !== this.modal &&
+        this.repliesRoot.matches(COMMENT_MODAL_SELECTOR)
+        ? findCloseControl(this.repliesRoot)
+        : undefined;
+      const commentsClose = this.modal?.isConnected ? findCloseControl(this.modal) : undefined;
+      repliesClose?.click();
+      if (commentsClose !== repliesClose) commentsClose?.click();
       this.modal = undefined;
+      this.repliesRoot = undefined;
+      this.replyRootId = undefined;
+      this.replyTotal = 0;
       return Promise.resolve({ kind: 'closed' });
     }
     if (this.requestPending) {
@@ -320,6 +399,12 @@ export class ZhihuCommentsController {
   ): Promise<CommentRequestResult> {
     if (command.kind === 'openPreview') return this.openPreview(command.targetId, signal);
     if (command.kind === 'openAll') return this.openAll(command.targetId, signal);
+    if (command.kind === 'openReplies') {
+      return this.openReplies(command.targetId, command.commentId, signal);
+    }
+    if (this.replyRootId) {
+      return this.loadMoreReplies(command.targetId, this.replyRootId, signal);
+    }
     return this.loadMore(command.targetId, signal);
   }
 
@@ -382,6 +467,126 @@ export class ZhihuCommentsController {
     await waitForDomSettled(this.modal, signal);
     if (signal.aborted) return { kind: 'failed', retryable: true };
     return { kind: 'loaded', snapshot: parseSnapshot(this.modal, targetId, 'all') };
+  }
+
+  private findLoadedComment(commentId: string): Element | undefined {
+    const target = this.getTarget();
+    const preview = target ? findPreviewContainer(target) : undefined;
+    const sources = [this.modal, preview].filter((source): source is Element => Boolean(source));
+    for (const source of sources) {
+      const comment = findCommentRoot(source, commentId);
+      if (comment) return comment;
+    }
+    return undefined;
+  }
+
+  private async openReplies(
+    targetId: string,
+    commentId: string,
+    signal: AbortSignal,
+  ): Promise<CommentRequestResult> {
+    if (this.repliesRoot?.isConnected && this.replyRootId === commentId) {
+      return {
+        kind: 'loaded',
+        snapshot: parseReplySnapshot(
+          this.repliesRoot,
+          targetId,
+          commentId,
+          this.replyTotal,
+        ),
+      };
+    }
+
+    const item = this.findLoadedComment(commentId);
+    if (!item) return { kind: 'failed', retryable: true };
+    const parsed = parseZhihuComment(item);
+    this.replyRootId = commentId;
+    this.replyTotal = Math.max(parsed?.replyCount || 0, this.replyTotal);
+    const existingPanel = this.modal ? findReplyPanel(this.modal, commentId) : undefined;
+    if (existingPanel) {
+      this.repliesRoot = existingPanel;
+      return {
+        kind: 'loaded',
+        snapshot: parseReplySnapshot(existingPanel, targetId, commentId, this.replyTotal),
+      };
+    }
+    const control = findReplyControl(item);
+    if (!control) {
+      return {
+        kind: 'exhausted',
+        snapshot: parseReplySnapshot(item, targetId, commentId, this.replyTotal, true),
+      };
+    }
+
+    const knownIds = new Set(commentItemRoots(item)
+      .map((comment) => comment.getAttribute('data-id') || ''));
+    const existingModals = new Set(currentModals());
+    control.click();
+    const found = await waitFor(() => {
+      const modal = currentModals().find((candidate) => !existingModals.has(candidate));
+      if (modal) return { modal };
+      const panel = this.modal ? findReplyPanel(this.modal, commentId) : undefined;
+      if (panel) return { panel };
+      const updated = this.findLoadedComment(commentId);
+      if (!updated) return undefined;
+      const added = commentItemRoots(updated)
+        .some((comment) => !knownIds.has(comment.getAttribute('data-id') || ''));
+      return added || !control.isConnected ? { inline: updated } : undefined;
+    }, signal);
+    if (!found || signal.aborted) return { kind: 'failed', retryable: true };
+    if (found.modal || found.panel) this.repliesRoot = found.modal || found.panel;
+    const source = found.modal || found.panel || found.inline;
+    if (!source) return { kind: 'failed', retryable: true };
+    await waitForDomSettled(source, signal);
+    if (signal.aborted) return { kind: 'failed', retryable: true };
+    const snapshot = parseReplySnapshot(source, targetId, commentId, this.replyTotal);
+    return snapshot.hasMore
+      ? { kind: 'loaded', snapshot }
+      : { kind: 'exhausted', snapshot };
+  }
+
+  private async loadMoreReplies(
+    targetId: string,
+    commentId: string,
+    signal: AbortSignal,
+  ): Promise<CommentRequestResult> {
+    if (this.replyRootId !== commentId) return { kind: 'failed', retryable: true };
+    if (!this.repliesRoot?.isConnected) {
+      return this.openReplies(targetId, commentId, signal);
+    }
+    const scroller = findScrollable(this.repliesRoot);
+    if (!scroller) {
+      return {
+        kind: 'exhausted',
+        snapshot: parseReplySnapshot(
+          this.repliesRoot,
+          targetId,
+          commentId,
+          this.replyTotal,
+          true,
+        ),
+      };
+    }
+    const knownIds = modalCommentIds(this.repliesRoot);
+    scroller.scrollTop = scroller.scrollHeight;
+    scroller.dispatchEvent(new Event('scroll', { bubbles: true }));
+    const added = await waitFor(() => {
+      const ids = modalCommentIds(this.repliesRoot!);
+      return Array.from(ids).some((id) => !knownIds.has(id)) ? true : undefined;
+    }, signal);
+    if (signal.aborted) return { kind: 'failed', retryable: true };
+    if (added) await waitForDomSettled(this.repliesRoot, signal);
+    if (signal.aborted) return { kind: 'failed', retryable: true };
+    const snapshot = parseReplySnapshot(
+      this.repliesRoot,
+      targetId,
+      commentId,
+      this.replyTotal,
+      !added,
+    );
+    return added
+      ? { kind: 'loaded', snapshot }
+      : { kind: 'exhausted', snapshot };
   }
 
   private async loadMore(

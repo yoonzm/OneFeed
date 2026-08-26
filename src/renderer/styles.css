@@ -455,6 +455,15 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .comment-body .content { font-size: 14px; line-height: 1.75; }
 .comment-body .media-button { height: 88px; }
 .comment-meta { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 10px; color: var(--muted); font-size: 11px; }
+.comment-replies-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--blue);
+  cursor: pointer;
+  font: inherit;
+}
+.comment-replies-button:hover { text-decoration: underline; text-underline-offset: 3px; }
 .comment-status { margin: 18px 0 0; color: var(--muted); font-size: 12px; text-align: center; }
 .comment-status button,
 .comment-status a { margin-left: 10px; padding: 0; border: 0; background: transparent; color: var(--blue); cursor: pointer; text-decoration: none; }

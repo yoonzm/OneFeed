@@ -70,7 +70,7 @@ describe('Zhihu answer detail', () => {
       comments: {
         targetId: 'zhihu_42',
         count: 18,
-        capabilities: { preview: true, all: true, loadMore: true },
+        capabilities: { preview: true, all: true, loadMore: true, replies: true },
       },
     });
     expect(detail?.originalUrl).toBe(url.href);

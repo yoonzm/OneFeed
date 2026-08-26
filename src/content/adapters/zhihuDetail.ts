@@ -226,6 +226,7 @@ export function parseZhihuDetail(
         preview: true,
         all: true,
         loadMore: true,
+        replies: true,
       },
     } : undefined,
   };

@@ -24,7 +24,6 @@ export interface CommentSectionHandle {
 
 interface CommentSectionProps {
   descriptor: CommentThreadDescriptor;
-  originalUrl: string;
   onRequest: CommentRequest;
 }
 
@@ -46,7 +45,12 @@ function mergeSnapshots(
   incoming: CommentSnapshot,
   exhausted: boolean,
 ): CommentSnapshot {
-  if (!current || current.targetId !== incoming.targetId) {
+  if (
+    !current ||
+    current.targetId !== incoming.targetId ||
+    current.scope !== incoming.scope ||
+    current.rootId !== incoming.rootId
+  ) {
     return { ...incoming, hasMore: exhausted ? false : incoming.hasMore };
   }
 
@@ -59,9 +63,10 @@ function mergeSnapshots(
   };
 }
 
-function CommentItemView({ item, onPreview }: {
+function CommentItemView({ item, onPreview, onOpenReplies }: {
   item: CommentItem;
   onPreview: (image: FeedImage) => void;
+  onOpenReplies?: (item: CommentItem) => void;
 }) {
   return (
     <article
@@ -105,21 +110,37 @@ function CommentItemView({ item, onPreview }: {
               {metric.label || metric.kind} {metric.value.toLocaleString('zh-CN')}
             </span>
           ))}
-          {!!item.replyCount && <span>{item.replyCount.toLocaleString('zh-CN')} 条回复</span>}
+          {!!item.replyCount && (onOpenReplies ? (
+            <button
+              className="comment-replies-button"
+              type="button"
+              onClick={() => onOpenReplies(item)}
+            >
+              {item.replyCount.toLocaleString('zh-CN')} 条回复
+            </button>
+          ) : (
+            <span>{item.replyCount.toLocaleString('zh-CN')} 条回复</span>
+          ))}
         </footer>
       )}
     </article>
   );
 }
 
-function CommentList({ items, onPreview }: {
+function CommentList({ items, onPreview, onOpenReplies }: {
   items: CommentItem[];
   onPreview: (image: FeedImage) => void;
+  onOpenReplies?: (item: CommentItem) => void;
 }) {
   return (
     <div className="comment-list">
       {items.map((item) => (
-        <CommentItemView item={item} onPreview={onPreview} key={item.id} />
+        <CommentItemView
+          item={item}
+          onPreview={onPreview}
+          onOpenReplies={onOpenReplies}
+          key={item.id}
+        />
       ))}
     </div>
   );
@@ -129,31 +150,38 @@ function CommentsDialog({
   snapshot,
   fallbackItems,
   fallbackTotal,
+  replyRoot,
   status,
   retryable,
-  originalUrl,
   onClose,
   onLoadMore,
+  onOpenReplies,
   onRetry,
   onPreview,
 }: {
   snapshot?: CommentSnapshot;
   fallbackItems: CommentItem[];
   fallbackTotal: number;
+  replyRoot?: CommentItem;
   status: CommentStatus;
   retryable: boolean;
-  originalUrl: string;
   onClose: () => void;
   onLoadMore: () => void;
+  onOpenReplies: (item: CommentItem) => void;
   onRetry: () => void;
   onPreview: (image: FeedImage) => void;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const items = snapshot?.items.length ? snapshot.items : fallbackItems;
+  const isReplyView = Boolean(replyRoot);
 
   useEffect(() => {
     closeRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (replyRoot) closeRef.current?.focus();
+  }, [replyRoot]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -175,10 +203,15 @@ function CommentsDialog({
       >
         <header>
           <div>
-            <h2 id="comments-dialog-title">评论</h2>
+            <h2 id="comments-dialog-title">{replyRoot ? '回复' : '评论'}</h2>
             <span>{(snapshot?.total ?? fallbackTotal).toLocaleString('zh-CN')}</span>
           </div>
-          <button ref={closeRef} type="button" onClick={onClose} aria-label="关闭评论">
+          <button
+            ref={closeRef}
+            type="button"
+            onClick={onClose}
+            aria-label={`关闭${isReplyView ? '回复' : '评论'}`}
+          >
             关闭
           </button>
         </header>
@@ -191,18 +224,33 @@ function CommentsDialog({
             }
           }}
         >
-          <CommentList items={items} onPreview={onPreview} />
-          {status === 'loading' && <p className="comment-status" role="status">正在整理评论…</p>}
-          {!items.length && status === 'ready' && <p className="comment-status">暂无评论</p>}
+          {replyRoot && (
+            <CommentItemView
+              item={{ ...replyRoot, parentId: undefined }}
+              onPreview={onPreview}
+            />
+          )}
+          <CommentList
+            items={items}
+            onPreview={onPreview}
+            onOpenReplies={isReplyView ? undefined : onOpenReplies}
+          />
+          {status === 'loading' && (
+            <p className="comment-status" role="status">
+              正在整理{isReplyView ? '回复' : '评论'}…
+            </p>
+          )}
+          {!items.length && status === 'ready' && (
+            <p className="comment-status">暂无{isReplyView ? '回复' : '评论'}</p>
+          )}
           {status === 'failed' && (
             <p className="comment-status" role="alert">
-              评论加载失败。
+              {isReplyView ? '回复' : '评论'}加载失败。
               {retryable && <button type="button" onClick={onRetry}>重试</button>}
-              <a href={originalUrl} target="_blank" rel="noreferrer">在原文查看评论</a>
             </p>
           )}
           {snapshot && !snapshot.hasMore && status !== 'loading' && (
-            <p className="comment-status">已加载当前全部评论</p>
+            <p className="comment-status">已加载当前全部{isReplyView ? '回复' : '评论'}</p>
           )}
         </div>
       </section>
@@ -210,9 +258,9 @@ function CommentsDialog({
   );
 }
 
-/** 平台无关的评论弹层状态机；局部评论只作为完整列表加载前的首屏数据。 */
+/** 平台无关的评论弹层状态机；评论与回复只通过可序列化快照切换内容。 */
 export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionProps>(
-  function CommentSection({ descriptor, originalUrl, onRequest }, ref) {
+  function CommentSection({ descriptor, onRequest }, ref) {
     const returnFocusRef = useRef<HTMLElement | null>(null);
     const activeRequest = useRef(0);
     const requestPending = useRef(false);
@@ -222,6 +270,8 @@ export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionPro
     const [failedCommand, setFailedCommand] = useState<CommentCommand>();
     const [preview, setPreview] = useState<CommentSnapshot>();
     const [all, setAll] = useState<CommentSnapshot>();
+    const [replyRoot, setReplyRoot] = useState<CommentItem>();
+    const [replies, setReplies] = useState<CommentSnapshot>();
     const [imagePreview, setImagePreview] = useState<FeedImage>();
 
     useEffect(() => () => {
@@ -266,8 +316,27 @@ export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionPro
         setFailedCommand(command);
         return false;
       }
+      if (
+        snapshot.scope === 'replies' &&
+        snapshot.rootId !== ('commentId' in command ? command.commentId : replyRoot?.id)
+      ) {
+        setStatus('failed');
+        setRetryable(true);
+        setFailedCommand(command);
+        return false;
+      }
       if (snapshot.scope === 'preview') {
         setPreview(snapshot);
+      } else if (snapshot.scope === 'replies') {
+        if (command.kind === 'loadMore') {
+          setReplies((current) => mergeSnapshots(
+            current,
+            snapshot,
+            result.kind === 'exhausted',
+          ));
+        } else {
+          setReplies(snapshot);
+        }
       } else if (command.kind === 'loadMore') {
         setAll((current) => mergeSnapshots(current, snapshot, result.kind === 'exhausted'));
       } else {
@@ -310,12 +379,29 @@ export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionPro
     const closeAll = () => {
       activeRequest.current += 1;
       requestPending.current = false;
+      setReplyRoot(undefined);
+      setReplies(undefined);
       setDialogOpen(false);
       setStatus('ready');
       returnFocusRef.current?.focus();
       void onRequest({ kind: 'closeAll', targetId: descriptor.targetId }).catch(() => undefined);
     };
+    const openReplies = (item: CommentItem) => {
+      if (!descriptor.capabilities.replies || !item.replyCount || requestPending.current) return;
+      setReplyRoot(item);
+      setReplies(undefined);
+      void execute({
+        kind: 'openReplies',
+        targetId: descriptor.targetId,
+        commentId: item.id,
+      });
+    };
     const loadMore = () => {
+      if (replyRoot) {
+        if (!replies?.hasMore || requestPending.current) return;
+        void execute({ kind: 'loadMore', targetId: descriptor.targetId });
+        return;
+      }
       if (!descriptor.capabilities.loadMore || !all?.hasMore || requestPending.current) return;
       void execute({ kind: 'loadMore', targetId: descriptor.targetId });
     };
@@ -331,14 +417,15 @@ export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionPro
       <>
         {dialogOpen && (
           <CommentsDialog
-            snapshot={all}
-            fallbackItems={preview?.items || []}
-            fallbackTotal={preview?.total ?? descriptor.count}
+            snapshot={replyRoot ? replies : all}
+            fallbackItems={replyRoot ? [] : preview?.items || []}
+            fallbackTotal={replyRoot?.replyCount ?? preview?.total ?? descriptor.count}
+            replyRoot={replyRoot}
             status={status}
             retryable={retryable}
-            originalUrl={originalUrl}
             onClose={closeAll}
             onLoadMore={loadMore}
+            onOpenReplies={openReplies}
             onRetry={retry}
             onPreview={setImagePreview}
           />

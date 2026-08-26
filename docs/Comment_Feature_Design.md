@@ -10,14 +10,13 @@ Renderer 只理解统一评论协议和统一命令，不读取知乎 DOM，不�
 
 - 支持知乎回答详情的评论总数和统一评论弹窗，不在文章底部插入评论区。
 - 支持全部评论弹窗内的增量加载、按评论 ID 去重和失败重试。
+- 支持点击“`N 条回复`”后用回复列表直接替换当前弹窗，并复用触底加载。
 - 展示作者、头像、正文、原站可可靠提取的时间/位置标签、点赞数和回复数。
-- 保留当前评论入口的原文回退能力。
 
 ### 首期不做
 
 - 发表评论、回复评论、点赞评论和删除评论。
 - 切换“默认 / 最新”等排序。
-- 主动展开每条评论下尚未加载的全部子回复。
 - 把评论强行建模为新的 `ThreadDetail`。文章评论仍是文章的从属集合，不是独立详情 Surface。
 - 直接调用知乎未公开的评论 API。
 
@@ -58,6 +57,7 @@ export interface CommentThreadDescriptor {
     preview: boolean;
     all: boolean;
     loadMore: boolean;
+    replies: boolean;
   };
 }
 
@@ -78,7 +78,9 @@ export interface CommentItem {
 
 export interface CommentSnapshot {
   targetId: string;
-  scope: 'preview' | 'all';
+  scope: 'preview' | 'all' | 'replies';
+  /** 回复快照所属的父评论。 */
+  rootId?: string;
   total: number;
   /** 保持原站当前顺序；Renderer 以 id 去重。 */
   items: CommentItem[];
@@ -103,6 +105,7 @@ export type CommentCommand =
   | { kind: 'openPreview'; targetId: string }
   | { kind: 'openAll'; targetId: string }
   | { kind: 'loadMore'; targetId: string }
+  | { kind: 'openReplies'; targetId: string; commentId: string }
   | { kind: 'closeAll'; targetId: string };
 
 export type CommentRequestResult =
@@ -128,8 +131,8 @@ export interface DetailAdapter {
 新增平台无关的 `CommentSection` 控制器和 `CommentsDialog`：
 
 - `CommentSection` 保存弹窗开关、请求状态、首批快照和全部快照，不渲染文章底部区域。
-- `CommentsDialog` 展示全部评论并监听自己的滚动容器；接近底部时只发出一次 `loadMore` 请求。
-- `CommentItemView` 只渲染统一字段，用 `parentId` 组织当前已加载的子回复。
+- `CommentsDialog` 展示当前评论或回复快照并监听自己的滚动容器；接近底部时只发出一次 `loadMore` 请求。
+- `CommentItemView` 只渲染统一字段；有回复能力时把回复数展示为按钮。
 
 评论状态不进入 `useDetailStore`。它是按需、短生命周期的视图状态，放进正文 Store 会破坏“Adapter 提交完整详情快照、Store 直接替换”的现有约束。后续若 Thread 页面同时开放多个回答的评论，可再把同一个 Hook 的 reducer 提升为按 `targetId` 索引的 Store；首期无需提前引入该复杂度。
 
@@ -153,6 +156,8 @@ onAction(action);
 - 打开后聚焦，`Escape` 关闭，关闭后把焦点还给文章操作区的“评论”按钮。
 - 弹窗打开期间锁定 OneFeed 阅读视口，而不是修改原站页面布局。
 - 弹窗打开后串行请求 `openPreview` 和 `openAll`：先显示首批快照，再用完整快照替换列表；用户无需理解原站的两段式控件。
+- 点击某条评论的回复数时请求 `openReplies`，用“父评论 + 回复列表”直接替换当前弹窗；不维护返回栈，关闭后回到文章。
+- 评论和回复触底都使用同一个 `loadMore` 命令，Adapter 根据当前绑定的数据源决定滚动主评论还是回复弹层。
 - 关闭 UI 不等待原站；`closeAll` 仅用于尽力关闭隐藏的原站弹层和释放 Adapter 绑定。
 
 ## 4. 统一状态流
@@ -192,6 +197,18 @@ OneFeed 弹窗接近底部 -> loadMore 单请求锁
         +-- Adapter 滚动原站弹层的内部滚动容器
         +-- 等待新增评论 ID 或确认无新增
         +-- Renderer 按 ID 追加去重
+
+评论的“N 条回复” -> openReplies(commentId)
+        |
+        +-- Adapter 点击“展开其他回复”或“查看全部回复”
+        +-- 绑定内嵌区域、评论弹层内的回复面板或新出现的回复弹层
+        +-- 返回 CommentSnapshot(scope=replies, rootId=commentId)
+        |
+        v
+同一个 CommentsDialog 直接替换为父评论和回复列表
+        |
+        +-- 触底继续复用 loadMore
+        +-- 关闭弹窗后回到文章
 ```
 
 同一 `targetId + command.kind` 同时只能存在一个请求。组件卸载或路由切换时忽略晚到结果；Adapter `disconnect()` 必须中断等待中的 MutationObserver、timer 和滚动请求。
@@ -212,6 +229,7 @@ comments: {
     preview: true,
     all: true,
     loadMore: true,
+    replies: true,
   },
 }
 ```
@@ -230,6 +248,7 @@ comments: {
 - 全部评论弹层：点击前记录已有弹层，点击后绑定新出现且包含评论条目的 `.Modal-content`；若弹层已存在，则用目标评论 ID、标题数量和本次运行时绑定共同校验。
 - 弹层滚动容器：在已绑定弹层内查找 `overflow-y` 为 `auto/scroll` 且 `scrollHeight > clientHeight` 的节点，不硬编码当前哈希类名。
 - “全部评论”控件：在当前局部评论区域内按按钮可见文案匹配“全部 + 评论”，明确排除“查看全部 N 条回复”。
+- 回复控件：只在目标评论根内匹配“展开其他 N 条回复”或“查看全部 N 条回复”；前者读取更新后的内嵌节点，后者优先绑定现有评论弹层内标题为“评论回复”且包含目标评论 ID 的直属面板，并兼容独立回复弹层。
 
 如果知乎某版第一次点击评论就直接创建完整弹层，`openPreview` 从该弹层截取当前已加载的首批条目生成 preview 快照；后续 `openAll` 复用已绑定弹层，不重复点击。
 
@@ -238,14 +257,16 @@ comments: {
 - 正文继续走清洗后的 Block 解析器；评论中的贴图作为图片 Block，不保留原站 class/style/script。
 - 局部区域和完整弹层分别解析，不能把两个根节点一起查询。
 - `CommentSnapshot.items` 在单次解析内按评论 ID 去重；Renderer 在多次 `loadMore` 之间再次去重。
+- 回复快照排除重复的父评论节点，并用 `rootId` 校验归属；Renderer 把已有父评论放在回复列表首项。
 - 评论区打开后优先使用评论区标题中的总数，打开前才使用回答元数据或评论按钮数量。
 - `hasMore` 不能只通过 `items.length < total` 判断，因为总数可能包含未展开子回复或存在审核差异。Adapter 应结合原站滚动位置与一次触底后是否出现新评论 ID 判断；触底且等待后无新增时返回 `exhausted`。
 
 ### 5.4 失败与回退
 
 - 找不到评论入口：不声明评论能力，保留原文入口。
-- 展开超时或结构不匹配：返回 `failed`，Renderer 保留已成功加载的数据并提供“重试”和“在原文查看评论”。
+- 展开超时或结构不匹配：返回 `failed`，Renderer 保留已成功加载的数据并提供重试。
 - 找不到“全部评论”控件：弹窗保留已加载的首批评论并显示失败回退，不猜测点击其他按钮。
+- 找不到目标评论或回复控件：回复弹窗显示失败回退，不点击其他评论的同名控件。
 - 路由变化或 Adapter 断开：立即取消等待，不向已卸载 Renderer 回传结果。
 
 ## 6. 为什么不选其他方案
@@ -271,7 +292,8 @@ comments: {
 1. 新增评论类型、`requestComments` 可选契约和纯 Renderer 假数据测试。
 2. 完成知乎首批评论解析与 `openPreview`，验证评论入口、空状态和失败回退。
 3. 完成 OneFeed 统一评论弹窗、知乎原站弹层绑定与滚动增量加载。
-4. 在真实知乎回答页做浏览器级验证，再评估子回复展开、排序和评论互动。
+4. 完成回复弹窗替换、知乎内嵌/弹层回复绑定及回复增量加载。
+5. 在真实知乎回答页做浏览器级验证，再评估排序和评论互动。
 
 每一步都应保持其他 Detail Adapter 无需修改或只需通过类型检查。
 
@@ -280,17 +302,19 @@ comments: {
 ### 协议与 Renderer
 
 - 评论协议完全可序列化，不包含 DOM 节点、事件处理器或平台 selector。
-- 用一个非知乎的假 Adapter 数据即可在同一弹窗内完成首批评论、完整评论和增量评论渲染。
+- 用一个非知乎的假 Adapter 数据即可在同一弹窗内完成首批评论、完整评论、回复替换和增量加载。
 - Renderer 源码没有 `zhihu`、`.Comments-container` 或 `.Modal-content` 分支。
 - 文章底部不渲染评论区，也不提供额外的“查看全部评论”按钮。
 - 重复 ID 在首批/完整快照和多次加载之间只显示一次。
 - loading、空、失败、重试、无更多数据均有确定状态。
 - 弹窗支持键盘关闭、焦点恢复和滚动请求锁。
+- 点击回复数后始终只有一个 OneFeed 弹窗，不出现嵌套弹窗或返回栈。
 
 ### 知乎 Adapter
 
 - 点击 OneFeed 的评论按钮后立即展示 OneFeed 弹窗，并自动完成原站首批评论与完整评论加载，原站评论区域和弹层保持隐藏。
 - 弹窗触底可连续加载且不会并发触发相同请求。
+- “展开其他回复”和“查看全部回复”都归一化为回复快照；回复触底不会错误滚动主评论弹层。
 - 局部区域与弹层同时存在时不会串读或重复。
 - 哈希样式类变化时，基于评论 ID、正文和语义按钮的解析测试仍可通过。
 - Adapter 断开后不再回调，也不会保留 MutationObserver、timer 或滚动绑定。

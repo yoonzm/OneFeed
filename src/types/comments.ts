@@ -8,6 +8,7 @@ export interface CommentThreadDescriptor {
     preview: boolean;
     all: boolean;
     loadMore: boolean;
+    replies: boolean;
   };
 }
 
@@ -26,7 +27,9 @@ export interface CommentItem {
 /** 一次 Adapter 请求返回的评论集合；局部区和完整弹层必须分开解析。 */
 export interface CommentSnapshot {
   targetId: string;
-  scope: 'preview' | 'all';
+  scope: 'preview' | 'all' | 'replies';
+  /** 回复快照所属的父评论；其他 scope 不提供。 */
+  rootId?: string;
   total: number;
   items: CommentItem[];
   hasMore: boolean;
@@ -36,6 +39,7 @@ export type CommentCommand =
   | { kind: 'openPreview'; targetId: string }
   | { kind: 'openAll'; targetId: string }
   | { kind: 'loadMore'; targetId: string }
+  | { kind: 'openReplies'; targetId: string; commentId: string }
   | { kind: 'closeAll'; targetId: string };
 
 export type CommentRequestResult =
