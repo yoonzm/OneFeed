@@ -17,6 +17,12 @@ export const PLATFORM_PRESENTATIONS: PlatformPresentation[] = [
     accent: '#1677ff',
   },
   {
+    id: 'twitter',
+    scope: i18n.t('platform.twitter.scope'),
+    access: i18n.t('platform.twitter.access'),
+    accent: '#111111',
+  },
+  {
     id: 'v2ex',
     scope: i18n.t('platform.v2ex.scope'),
     access: i18n.t('platform.v2ex.access'),

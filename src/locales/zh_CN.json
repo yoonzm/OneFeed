@@ -44,7 +44,11 @@
       "scope": "首页、热榜、问题与文章",
       "access": "部分页面需登录"
     },
-    "twitter": { "name": "X" },
+    "twitter": {
+      "name": "X",
+      "scope": "为你推荐与正在关注首页时间线",
+      "access": "需要登录后使用"
+    },
     "v2ex": {
       "name": "V2EX",
       "scope": "首页分类、最近主题、VXNA 与主题详情",
@@ -358,6 +362,7 @@
     "bookmark": "收藏",
     "like": "喜欢",
     "reply": "回复",
+    "repost": "转发",
     "views": "浏览",
     "score": "分数",
     "reactions": "赞",

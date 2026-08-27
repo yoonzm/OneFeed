@@ -30,11 +30,13 @@ describe('reader app shells', () => {
     expect(markup).toContain('aria-label="切换到深色主题"');
     expect(markup).toContain('href="https://github.com/yoonzm/OneFeed"');
     expect(markup).toContain('href="https://www.zhihu.com/"');
+    expect(markup).toContain('href="https://x.com/home"');
     expect(markup).toContain('aria-current="page"');
-    expect(markup.indexOf('Hacker News')).toBeLessThan(
-      markup.indexOf('aria-label="X，敬请期待"'),
+    expect(markup.indexOf('href="https://x.com/home"')).toBeLessThan(
+      markup.indexOf('href="https://www.v2ex.com/"'),
     );
-    expect(markup.indexOf('aria-label="X，敬请期待"')).toBeLessThan(markup.indexOf('微博'));
+    expect(markup.indexOf('Hacker News')).toBeLessThan(markup.indexOf('微博'));
+    expect(markup).not.toContain('aria-label="X，敬请期待"');
     expect(markup.indexOf('微博')).toBeLessThan(markup.indexOf('小红书'));
     expect(markup.indexOf('小红书')).toBeLessThan(markup.indexOf('Reddit'));
     expect(markup.indexOf('Reddit')).toBeLessThan(markup.indexOf('哔哩哔哩'));

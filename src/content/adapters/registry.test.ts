@@ -6,6 +6,7 @@ import { LinuxDoAdapter } from './linuxDo';
 import { LinuxDoThreadAdapter } from './linuxDoThread';
 import { ThirtySixKrAdapter } from './thirtySixKr';
 import { ThirtySixKrDetailAdapter } from './thirtySixKrDetail';
+import { TwitterAdapter } from './twitter';
 import { V2exAdapter } from './v2ex';
 import { V2exThreadAdapter } from './v2exThread';
 import { ZhihuAdapter } from './zhihu';
@@ -31,6 +32,11 @@ describe('createAdapter', () => {
       surface: 'feed',
       adapter: expect.any(ZhihuAdapter),
       source: { id: 'zhihu', name: '知乎' },
+    });
+    expect(createAdapter(new URL('https://x.com/home'), listeners())).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(TwitterAdapter),
+      source: { id: 'twitter', name: 'X' },
     });
     expect(createAdapter(
       new URL('https://www.zhihu.com/search?type=content&q=%E9%98%85%E8%AF%BB'),
@@ -120,7 +126,7 @@ describe('createAdapter', () => {
   });
 
   it('leaves unsupported site pages untouched', () => {
-    expect(createAdapter(new URL('https://x.com/home'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://x.com/explore'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://weibo.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://www.xiaohongshu.com/explore'), listeners())).toBeNull();
@@ -148,7 +154,8 @@ describe('createAdapter', () => {
     ))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.zhihu.com/question/1/answer/42'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.zhihu.com/settings/account'))).toBe(false);
-    expect(isSupportedUrl(new URL('https://x.com/home'))).toBe(false);
+    expect(isSupportedUrl(new URL('https://x.com/home'))).toBe(true);
+    expect(isSupportedUrl(new URL('https://x.com/explore'))).toBe(false);
     expect(isSupportedUrl(new URL('https://weibo.com/'))).toBe(false);
     expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore'))).toBe(false);
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/news'))).toBe(true);

@@ -85,6 +85,8 @@ describe('ThreadEntry', () => {
           kind: 'article',
           role: 'answer',
           originalUrl: 'https://www.zhihu.com/question/1/answer/42',
+          publishedAt: '2026-08-12T09:00:00+08:00',
+          context: { community: { name: '测试问题' } },
           body: [
             {
               type: 'richText',
@@ -106,7 +108,12 @@ describe('ThreadEntry', () => {
     expect(markup).not.toContain('content-expanded');
     expect(markup).not.toContain('https://example.com/answer.jpg');
     expect(markup).not.toContain('展开全文');
-    expect(markup).toContain('thread-answer-detail-link');
+    const timeIndex = markup.indexOf('class="card-time"');
+    const detailIndex = markup.indexOf('class="card-detail-link"');
+    const contextIndex = markup.indexOf('class="context-row"');
+    expect(detailIndex).toBeGreaterThan(timeIndex);
+    expect(contextIndex).toBeGreaterThan(detailIndex);
+    expect(markup).not.toContain('thread-answer-detail-link');
     expect(markup).toContain('查看详情');
     expect(markup).not.toContain('查看回答');
     expect(markup).toContain('href="https://www.zhihu.com/question/1/answer/42"');

@@ -10,6 +10,7 @@ describe('platform catalog', () => {
   it('keeps supported and planned platforms in product order', () => {
     expect(getSupportedPlatforms().map((platform) => platform.name)).toEqual([
       '知乎',
+      'X',
       'V2EX',
       'Linux DO',
       'Hacker News',
@@ -19,12 +20,11 @@ describe('platform catalog', () => {
       platform.name,
       platform.plannedOrder,
     ])).toEqual([
-      ['X', 1],
-      ['微博', 2],
-      ['小红书', 3],
-      ['Reddit', 4],
-      ['哔哩哔哩', 5],
-      ['YouTube', 6],
+      ['微博', 1],
+      ['小红书', 2],
+      ['Reddit', 3],
+      ['哔哩哔哩', 4],
+      ['YouTube', 5],
     ]);
   });
 

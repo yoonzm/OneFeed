@@ -52,7 +52,7 @@ describe('launch center', () => {
       getSupportedPlatforms().length - 3,
     );
     expect(container.textContent).toContain(
-      '即将支持：X · 微博 · 小红书 · Reddit · 哔哩哔哩 · YouTube',
+      '即将支持：微博 · 小红书 · Reddit · 哔哩哔哩 · YouTube',
     );
 
     const platformLinks = [...container.querySelectorAll<HTMLAnchorElement>(

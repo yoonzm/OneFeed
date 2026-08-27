@@ -44,7 +44,11 @@
       "scope": "Home, Hot List, questions, and articles",
       "access": "Some pages require sign-in"
     },
-    "twitter": { "name": "X" },
+    "twitter": {
+      "name": "X",
+      "scope": "For You and Following home timelines",
+      "access": "Sign-in required"
+    },
     "v2ex": {
       "name": "V2EX",
       "scope": "Home categories, recent topics, VXNA, and topic pages",
@@ -358,6 +362,7 @@
     "bookmark": "Save",
     "like": "Like",
     "reply": "Reply",
+    "repost": "Repost",
     "views": "Views",
     "score": "Score",
     "reactions": "Reactions",

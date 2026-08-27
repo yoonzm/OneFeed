@@ -84,6 +84,31 @@ describe('FeedCard', () => {
     expect(markup).not.toContain('class="card-author"');
   });
 
+  it('places the answer-style detail link immediately after the published time', () => {
+    const markup = renderToStaticMarkup(
+      <FeedCard
+        item={{
+          ...shortReply,
+          publishedAt: '2026-08-12T09:00:00+08:00',
+          context: { community: { name: '分享创造' } },
+        }}
+        index={0}
+        onAction={vi.fn()}
+      />,
+    );
+
+    const timeIndex = markup.indexOf('class="card-time"');
+    const detailIndex = markup.indexOf('class="card-detail-link"');
+    const contextIndex = markup.indexOf('class="context-row"');
+
+    expect(timeIndex).toBeGreaterThan(-1);
+    expect(detailIndex).toBeGreaterThan(timeIndex);
+    expect(contextIndex).toBeGreaterThan(detailIndex);
+    expect(markup).toContain('class="card-detail-link"');
+    expect(markup).toContain('>查看详情</a>');
+    expect(markup).not.toContain('查看详情 ↗');
+  });
+
   it('orders title, body and remaining metadata as three semantic rows', () => {
     const markup = renderToStaticMarkup(
       <FeedCard
@@ -224,9 +249,15 @@ describe('FeedCard', () => {
     expect(readerStyles).toContain(
       '.feed-card-side-media .card-body-row { grid-area: body; align-self: start; }',
     );
-    expect(readerStyles).toContain(
-      '.feed-card-side-media .card-media-aside .media-button { height: 144px; }',
-    );
+    expect(readerStyles).toContain([
+      '.feed-card-side-media .card-media-aside .media-button,',
+      '  .feed-card-side-media .card-media-aside .video-player,',
+      '  .feed-card-side-media .card-media-aside .video-poster {',
+      '    height: 144px;',
+      '    max-height: 144px;',
+      '    object-fit: cover;',
+      '  }',
+    ].join('\n'));
   });
 
   it('places image-led and extreme-ratio media in the side-media region', () => {
@@ -328,5 +359,14 @@ describe('FeedCard', () => {
     expect(markup).toContain('class="video-player"');
     expect(markup).toContain('clip.mp4');
     expect(markup).not.toContain('later.jpg');
+    expect(readerStyles).toContain([
+      '.feed-card-side-media .card-media-aside .media-button,',
+      '  .feed-card-side-media .card-media-aside .video-player,',
+      '  .feed-card-side-media .card-media-aside .video-poster {',
+      '    height: min(48vw, 220px);',
+      '    max-height: 220px;',
+      '    object-fit: cover;',
+      '  }',
+    ].join('\n'));
   });
 });

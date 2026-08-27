@@ -23,9 +23,8 @@ export const TWITTER_PLATFORM = {
   id: 'twitter',
   name: 'X',
   homeUrl: 'https://x.com/home',
-  status: 'planned',
+  status: 'supported',
   navOrder: 2,
-  plannedOrder: 1,
   hosts: ['x.com', 'twitter.com'],
 } as const satisfies PlatformDefinition;
 
@@ -53,7 +52,7 @@ export const WEIBO_PLATFORM = {
   homeUrl: 'https://weibo.com/',
   status: 'planned',
   navOrder: 5,
-  plannedOrder: 2,
+  plannedOrder: 1,
   hosts: ['weibo.com'],
 } as const satisfies PlatformDefinition;
 
@@ -63,7 +62,7 @@ export const XIAOHONGSHU_PLATFORM = {
   homeUrl: 'https://www.xiaohongshu.com/',
   status: 'planned',
   navOrder: 6,
-  plannedOrder: 3,
+  plannedOrder: 2,
   hosts: ['xiaohongshu.com'],
 } as const satisfies PlatformDefinition;
 
@@ -91,7 +90,7 @@ export const REDDIT_PLATFORM = {
   homeUrl: 'https://www.reddit.com/',
   status: 'planned',
   navOrder: 9,
-  plannedOrder: 4,
+  plannedOrder: 3,
   hosts: ['reddit.com', 'redd.it'],
 } as const satisfies PlatformDefinition;
 
@@ -101,7 +100,7 @@ export const BILIBILI_PLATFORM = {
   homeUrl: 'https://www.bilibili.com/',
   status: 'planned',
   navOrder: 10,
-  plannedOrder: 5,
+  plannedOrder: 4,
   hosts: ['bilibili.com'],
 } as const satisfies PlatformDefinition;
 
@@ -111,7 +110,7 @@ export const YOUTUBE_PLATFORM = {
   homeUrl: 'https://www.youtube.com/',
   status: 'planned',
   navOrder: 11,
-  plannedOrder: 6,
+  plannedOrder: 5,
   hosts: ['youtube.com', 'youtu.be'],
 } as const satisfies PlatformDefinition;
 
