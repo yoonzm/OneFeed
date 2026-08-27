@@ -17,8 +17,10 @@ describe('launch center localization', () => {
     const markup = renderToStaticMarkup(<BoardApp />);
 
     expect(markup).toContain('Continue where you left off.');
-    expect(markup).toContain('Open Zhihu');
-    expect(markup).toContain('Coming soon: X · Weibo · Xiaohongshu · Reddit · Bilibili · YouTube');
+    expect(markup).toContain('Open Weibo');
+    expect(markup).not.toContain('Coming soon');
+    expect(markup).not.toContain('Bilibili');
+    expect(markup).not.toContain('YouTube');
     expect(markup).not.toContain('继续上次的阅读');
   }, 30_000);
 });

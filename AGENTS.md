@@ -23,6 +23,10 @@ WXT 入口位于 `src/entrypoints/`：`background.ts` 是 Service Worker，`cont
 
 遵循现有 TypeScript 代码风格：使用两个空格缩进、分号、单引号，并为共享数据定义明确的接口。React 组件、类和类型使用 `PascalCase`，例如 `FeedItem`、`ZhihuAdapter`；函数和变量使用 `camelCase`。适配器文件按平台命名，如 `zhihu.ts`、`twitter.ts`，并将 DOM 选择器限制在对应适配器内。中英文文档统一保持 UTF-8 编码。
 
+## 前端样式与组件规范
+
+新增或修改界面样式时，优先使用 Tailwind CSS 工具类，并复用项目现有的主题变量与设计令牌。需要通用 UI 组件、交互或视觉效果时，根据具体场景优先评估并复用 [Magic UI](https://magicui.design/)、[Aceternity UI](https://ui.aceternity.com/) 或 [shadcn/ui](https://ui.shadcn.com/) 的实现，并将其适配到项目现有的 React、TypeScript、主题和 Shadow DOM 环境。只有这些方案无法满足具体场景、可访问性或扩展运行约束时，才考虑自行实现样式或组件。
+
 ## 代码注释规范
 
 核心模块、复杂逻辑、关键 DOM 假设及不直观的实现必须添加简洁注释，重点说明设计意图、约束和原因，避免逐行复述代码。修改实现时应同步更新或删除相关注释，确保注释始终准确。

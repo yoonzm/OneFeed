@@ -20,7 +20,9 @@ interface FeedAppProps {
   onFeedChannelSelect?: (channelId: string) => boolean;
   scrollElement: HTMLElement;
   initialColorScheme?: ColorScheme;
+  initialSearchQuery?: string;
   onAction: (itemId: string, actionId: string) => boolean;
+  onSearch?: (query: string) => boolean;
   onLoadMore: () => Promise<FeedLoadResult>;
 }
 
@@ -35,7 +37,9 @@ export default function FeedApp({
   onFeedChannelSelect,
   scrollElement,
   initialColorScheme,
+  initialSearchQuery,
   onAction,
+  onSearch,
   onLoadMore,
 }: FeedAppProps) {
   const items = useFeedStore((state) => state.items);
@@ -147,6 +151,8 @@ export default function FeedApp({
       scrollElement={scrollElement}
       initialColorScheme={initialColorScheme}
       hiddenItemCount={filtersReady ? filterResult.hiddenItems.length : 0}
+      initialSearchQuery={initialSearchQuery}
+      onSearch={onSearch}
     >
       <div className="reader-app">
         <div className="reading-rail" aria-hidden="true">

@@ -78,8 +78,10 @@ export function FeedCard({
           </div>
         )}
 
-        <ItemMeta item={item} index={index}>
-          {!item.title && (
+        <ItemMeta
+          item={item}
+          index={index}
+          afterTime={!item.title ? (
             <a
               className="card-detail-link"
               href={item.originalUrl}
@@ -87,10 +89,10 @@ export function FeedCard({
               rel="noreferrer"
               onClick={onSeen}
             >
-              {i18n.t('reader.viewDetails')} ↗
+              {i18n.t('reader.viewDetails')}
             </a>
-          )}
-
+          ) : undefined}
+        >
           <ActionBar
             originalUrl={item.originalUrl}
             metrics={item.metrics}

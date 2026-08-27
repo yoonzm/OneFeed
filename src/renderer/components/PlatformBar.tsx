@@ -1,7 +1,18 @@
-import { CaretDown, Check, EyeSlash } from '@phosphor-icons/react';
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import {
-  getPlannedPlatforms,
+  CaretDown,
+  Check,
+  EyeSlash,
+  MagnifyingGlass,
+  X,
+} from '@phosphor-icons/react';
+import {
+  useEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type MouseEvent,
+} from 'react';
+import {
   getPlatformById,
   getPlatformDisplayName,
   getSupportedPlatforms,
@@ -29,7 +40,9 @@ interface PlatformBarProps {
   colorScheme: ColorScheme;
   themeReady: boolean;
   hiddenItemCount?: number;
+  initialSearchQuery?: string;
   onColorSchemeChange: (colorScheme: ColorScheme) => void;
+  onSearch?: (query: string) => boolean;
 }
 
 export function PlatformBar({
@@ -41,18 +54,31 @@ export function PlatformBar({
   colorScheme,
   themeReady,
   hiddenItemCount = 0,
+  initialSearchQuery,
   onColorSchemeChange,
+  onSearch,
 }: PlatformBarProps) {
   const supportedPlatforms = getSupportedPlatforms();
-  const plannedPlatforms = getPlannedPlatforms();
   const activePlatform = getPlatformById(activePlatformId);
   const activeChannel = channels.find((channel) => channel.active);
   const [menuOpen, setMenuOpen] = useState(false);
   const [channelMenuOpen, setChannelMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(Boolean(initialSearchQuery));
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery || '');
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const channelButtonRef = useRef<HTMLButtonElement>(null);
   const channelMenuRef = useRef<HTMLSpanElement>(null);
+  const searchButtonRef = useRef<HTMLButtonElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const focusSearchRef = useRef(false);
+
+  useEffect(() => {
+    if (!searchOpen || !focusSearchRef.current) return;
+    focusSearchRef.current = false;
+    searchInputRef.current?.focus();
+    searchInputRef.current?.select();
+  }, [searchOpen]);
 
   useEffect(() => {
     if (!menuOpen) return undefined;
@@ -90,6 +116,18 @@ export function PlatformBar({
   const closeMenu = () => {
     setMenuOpen(false);
     menuButtonRef.current?.focus();
+  };
+
+  const closeSearch = () => {
+    setSearchOpen(false);
+    setSearchQuery(initialSearchQuery || '');
+    searchButtonRef.current?.focus();
+  };
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    if (query) onSearch?.(query);
   };
 
   const handleSupportedClick = (
@@ -219,22 +257,6 @@ export function PlatformBar({
     );
   });
 
-  const renderPlannedItems = (mobile = false) => plannedPlatforms.map((platform) => {
-    const displayName = getPlatformDisplayName(platform.id as PlatformId);
-    return (
-      <span
-        key={platform.id}
-        className={mobile
-          ? `${mobileItemClass} cursor-help text-onefeed-subtle`
-          : `${desktopItemClass} cursor-help text-onefeed-faint`}
-        title={i18n.t('common.comingSoon')}
-        aria-label={i18n.t('platformBar.comingSoonPlatform', [displayName])}
-      >
-        {displayName}
-      </span>
-    );
-  });
-
   const activePlatformName = activePlatform
     ? getPlatformDisplayName(activePlatform.id as PlatformId)
     : undefined;
@@ -243,20 +265,62 @@ export function PlatformBar({
     <header className="sticky top-0 z-20 border-b border-onefeed-line bg-onefeed-paper/95 backdrop-blur-md">
       <div className="mx-auto flex h-[52px] w-full max-w-[1040px] items-stretch gap-7 px-12 max-[720px]:h-14 max-[720px]:justify-between max-[720px]:px-4">
         <a
-          className="inline-flex shrink-0 items-center font-onefeed-brand text-sm font-onefeed-emphasis tracking-[.03em] text-onefeed-ink no-underline focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-onefeed-focus"
+          className={`inline-flex shrink-0 items-center font-onefeed-brand text-sm font-onefeed-emphasis tracking-[.03em] text-onefeed-ink no-underline focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-onefeed-focus ${searchOpen ? 'max-[420px]:hidden' : ''}`}
           href={activePlatform?.homeUrl || '#'}
         >
           <DiaTextReveal text="OneFeed" />
         </a>
 
-        <nav className="flex min-w-0 items-stretch gap-1 max-[720px]:hidden" aria-label={i18n.t('platformBar.switchPlatform')}>
-          {renderSupportedLinks()}
-          <span className="mx-1.5 my-auto h-[18px] w-px bg-onefeed-line" aria-hidden="true" />
-          {renderPlannedItems()}
-        </nav>
+        {searchOpen && onSearch ? (
+          <form
+            className="flex min-w-0 flex-1 items-center gap-3 max-[720px]:gap-2"
+            role="search"
+            aria-label={i18n.t('platformBar.searchForm', [
+              activePlatformName || i18n.t('common.currentWebsite'),
+            ])}
+            onSubmit={handleSearchSubmit}
+          >
+            <label
+              className="shrink-0 font-onefeed-brand text-[9px] tracking-[.12em] text-onefeed-blue max-[720px]:sr-only"
+              htmlFor="onefeed-site-search"
+            >
+              {i18n.t('platformBar.searchScope', [
+                activePlatformName || i18n.t('common.currentWebsite'),
+              ])}
+            </label>
+            <span className="flex min-w-0 flex-1 items-center gap-2 border-b border-onefeed-line-strong focus-within:border-onefeed-blue">
+              <MagnifyingGlass className="shrink-0 text-onefeed-muted" size={14} aria-hidden="true" />
+              <input
+                ref={searchInputRef}
+                id="onefeed-site-search"
+                className="h-9 min-w-0 flex-1 border-0 bg-transparent p-0 text-[13px] text-onefeed-ink outline-none placeholder:text-onefeed-faint"
+                type="search"
+                value={searchQuery}
+                placeholder={i18n.t('platformBar.searchPlaceholder', [
+                  activePlatformName || i18n.t('common.currentWebsite'),
+                ])}
+                required
+                onChange={(event) => setSearchQuery(event.currentTarget.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') closeSearch();
+                }}
+              />
+            </span>
+            <button
+              className="min-h-9 shrink-0 cursor-pointer border-0 bg-transparent px-1 text-[11px] font-onefeed-emphasis text-onefeed-blue focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-onefeed-focus"
+              type="submit"
+            >
+              {i18n.t('platformBar.searchSubmit')}
+            </button>
+          </form>
+        ) : (
+          <nav className="flex min-w-0 items-stretch gap-1 max-[720px]:hidden" aria-label={i18n.t('platformBar.switchPlatform')}>
+            {renderSupportedLinks()}
+          </nav>
+        )}
 
         <div className="ml-auto flex shrink-0 items-center gap-2">
-          {hiddenItemCount > 0 && (
+          {hiddenItemCount > 0 && !searchOpen && (
             <span
               className="inline-flex items-center gap-1 text-[9px] leading-none tabular-nums text-onefeed-faint"
               role="status"
@@ -275,6 +339,34 @@ export function PlatformBar({
               <span aria-hidden="true">{formatNumber(hiddenItemCount)}</span>
             </span>
           )}
+          {onSearch && (
+            <button
+              ref={searchButtonRef}
+              className={`grid size-8 shrink-0 cursor-pointer place-items-center rounded-md border-0 bg-transparent p-0 transition-colors duration-150 hover:bg-onefeed-blue-soft focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-onefeed-focus ${searchOpen || initialSearchQuery ? 'text-onefeed-blue' : 'text-onefeed-ink'}`}
+              type="button"
+              aria-label={searchOpen
+                ? i18n.t('platformBar.closeSearch')
+                : i18n.t('platformBar.openSearch', [
+                    activePlatformName || i18n.t('common.currentWebsite'),
+                  ])}
+              aria-expanded={searchOpen}
+              aria-controls={searchOpen ? 'onefeed-site-search' : undefined}
+              onClick={() => {
+                if (searchOpen) {
+                  closeSearch();
+                  return;
+                }
+                setMenuOpen(false);
+                setChannelMenuOpen(false);
+                focusSearchRef.current = true;
+                setSearchOpen(true);
+              }}
+            >
+              {searchOpen
+                ? <X size={16} weight="bold" aria-hidden="true" />
+                : <MagnifyingGlass size={16} aria-hidden="true" />}
+            </button>
+          )}
           <GitHubLink />
           <span className="h-4 w-px shrink-0 bg-onefeed-line" aria-hidden="true" />
           <ThemeSwitch
@@ -282,7 +374,7 @@ export function PlatformBar({
             disabled={!themeReady}
             onChange={onColorSchemeChange}
           />
-          <button
+          {!searchOpen && <button
             ref={menuButtonRef}
             className="ml-2 hidden cursor-pointer items-center gap-3 border-0 bg-transparent p-0 text-[11px] focus-visible:outline-3 focus-visible:outline-offset-4 focus-visible:outline-onefeed-focus max-[720px]:inline-flex max-[420px]:ml-1 max-[420px]:gap-1.5"
             type="button"
@@ -301,7 +393,7 @@ export function PlatformBar({
             <strong className="text-[11px] font-onefeed-emphasis text-onefeed-blue">
               {i18n.t('platformBar.switchPlatform')}
             </strong>
-          </button>
+          </button>}
         </div>
       </div>
 
@@ -368,12 +460,6 @@ export function PlatformBar({
                 </div>
               </>
             )}
-            <p className="mt-[18px] mb-[5px] text-[10px] tracking-[.08em] text-onefeed-muted">
-              {i18n.t('platformBar.planned')}
-            </p>
-            <div className="grid">
-              {renderPlannedItems(true)}
-            </div>
           </section>
         </div>
       )}

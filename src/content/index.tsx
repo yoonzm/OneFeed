@@ -164,24 +164,31 @@ function mount(
       let channels: FeedChannel[] = [];
       let initialized = false;
       let channelRevision = 0;
-      const renderFeed = () => root?.render(
-        <FeedApp
-          key={`feed-channel-${channelRevision}`}
-          {...sharedProps}
-          activePlatformId={activeAdapter.source.id}
-          channels={channels}
-          onFeedChannelSelect={(channelId) => {
-            const handled = activeAdapter.adapter.triggerFeedChannel(channelId);
-            if (handled) {
-              useFeedStore.getState().clear();
-              channelRevision += 1;
-              renderFeed();
-            }
-            return handled;
-          }}
-          onLoadMore={() => activeAdapter.adapter.requestMore()}
-        />,
-      );
+      const renderFeed = () => {
+        const initialSearchQuery = activeAdapter.adapter.getInitialSearchQuery();
+        root?.render(
+          <FeedApp
+            key={`feed-channel-${channelRevision}`}
+            {...sharedProps}
+            activePlatformId={activeAdapter.source.id}
+            channels={channels}
+            initialSearchQuery={initialSearchQuery}
+            onFeedChannelSelect={(channelId) => {
+              const handled = activeAdapter.adapter.triggerFeedChannel(channelId);
+              if (handled) {
+                useFeedStore.getState().clear();
+                channelRevision += 1;
+                renderFeed();
+              }
+              return handled;
+            }}
+            onSearch={initialSearchQuery === undefined
+              ? undefined
+              : (query) => activeAdapter.adapter.triggerSearch(query)}
+            onLoadMore={() => activeAdapter.adapter.requestMore()}
+          />,
+        );
+      };
       activeAdapter.adapter.setFeedChannelsListener((nextChannels) => {
         channels = nextChannels;
         if (initialized) renderFeed();

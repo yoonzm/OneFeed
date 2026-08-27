@@ -12,6 +12,8 @@ interface OneFeedShellProps {
   scrollElement: HTMLElement;
   initialColorScheme?: ColorScheme;
   hiddenItemCount?: number;
+  initialSearchQuery?: string;
+  onSearch?: (query: string) => boolean;
   children: ReactNode;
 }
 
@@ -23,6 +25,8 @@ export function OneFeedShell({
   scrollElement,
   initialColorScheme,
   hiddenItemCount = 0,
+  initialSearchQuery,
+  onSearch,
   children,
 }: OneFeedShellProps) {
   const { colorScheme, ready, setColorScheme } = useColorScheme(initialColorScheme);
@@ -41,7 +45,9 @@ export function OneFeedShell({
         colorScheme={colorScheme}
         themeReady={ready}
         hiddenItemCount={hiddenItemCount}
+        initialSearchQuery={initialSearchQuery}
         onColorSchemeChange={setColorScheme}
+        onSearch={onSearch}
       />
       {children}
     </div>

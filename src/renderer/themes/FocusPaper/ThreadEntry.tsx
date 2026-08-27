@@ -42,7 +42,20 @@ export function ThreadEntry({ item, index, onAction }: ThreadEntryProps) {
         <ItemTitle item={item} />
         <ItemBody blocks={contentBlocks} expanded={contentExpanded} onPreview={setPreview} />
 
-        <ItemMeta item={item} index={index}>
+        <ItemMeta
+          item={item}
+          index={index}
+          afterTime={isAnswer ? (
+            <a
+              className="card-detail-link"
+              href={item.originalUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {openAction?.label || i18n.t('reader.viewDetails')}
+            </a>
+          ) : undefined}
+        >
           {expandable && (
             <button
               className="text-action"
@@ -52,17 +65,6 @@ export function ThreadEntry({ item, index, onAction }: ThreadEntryProps) {
             >
               {expanded ? i18n.t('reader.collapse') : i18n.t('reader.expandFull')}
             </button>
-          )}
-
-          {isAnswer && (
-            <a
-              className="card-detail-link thread-answer-detail-link"
-              href={item.originalUrl}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {openAction?.label || i18n.t('reader.viewDetails')}
-            </a>
           )}
 
           <ActionBar

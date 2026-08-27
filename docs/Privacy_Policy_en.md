@@ -2,7 +2,7 @@
 
 Effective date: August 26, 2026
 
-OneFeed is a browser extension that rearranges feeds from supported websites into a unified reading interface. This policy explains how version `0.1.12` processes data. The current version supports Zhihu, V2EX, Linux DO, Hacker News, and 36Kr. This policy and the relevant permission disclosures will be updated when support for additional websites is released.
+OneFeed is a browser extension that rearranges feeds from supported websites into a unified reading interface. This policy explains how version `0.1.13` processes data. The current version supports Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, and 36Kr. This policy and the relevant permission disclosures will be updated when support for additional websites is released.
 
 ## Data processed
 
@@ -34,10 +34,14 @@ OneFeed does not maintain a cloud user database. The enabled state, theme prefer
 ## Permissions
 
 - **storage:** Saves the enabled state, theme preferences, recently used platforms, display-filter rules, and opened-item identifiers locally.
+- **Weibo site access:** Reads and rearranges supported Weibo trending feeds opened by the user.
+- **X site access:** Reads and rearranges the supported X home timeline and its feed channels opened by the user.
+- **Xiaohongshu site access:** Reads and rearranges supported Xiaohongshu Explore feeds and content channels opened by the user.
+- **Reddit site access:** Reads and rearranges supported Reddit home, sorted, and community feeds opened by the user.
 - **Zhihu site access:** Reads and rearranges supported Zhihu feeds, questions, answers, answer comments and replies, and article pages opened by the user.
-- **V2EX site access:** Reads and rearranges supported V2EX topic lists and topic reply pages opened by the user.
-- **Linux DO site access:** Reads and rearranges supported Linux DO topic lists and topic reply pages opened by the user.
 - **Hacker News site access:** Reads and rearranges public news, Ask, Show, and Jobs lists opened by the user, and loads public pagination locally.
+- **Linux DO site access:** Reads and rearranges supported Linux DO topic lists and topic reply pages opened by the user.
+- **V2EX site access:** Reads and rearranges supported V2EX topic lists and topic reply pages opened by the user.
 - **36Kr site access:** Reads and rearranges supported 36Kr feeds and article pages opened by the user.
 
 The extension does not run outside these supported websites.

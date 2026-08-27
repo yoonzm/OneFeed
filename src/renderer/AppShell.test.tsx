@@ -30,18 +30,36 @@ describe('reader app shells', () => {
     expect(markup).toContain('aria-label="切换到深色主题"');
     expect(markup).toContain('href="https://github.com/yoonzm/OneFeed"');
     expect(markup).toContain('href="https://www.zhihu.com/"');
+    expect(markup).toContain('href="https://x.com/home"');
     expect(markup).toContain('aria-current="page"');
-    expect(markup.indexOf('Hacker News')).toBeLessThan(
-      markup.indexOf('aria-label="X，敬请期待"'),
-    );
-    expect(markup.indexOf('aria-label="X，敬请期待"')).toBeLessThan(markup.indexOf('微博'));
-    expect(markup.indexOf('微博')).toBeLessThan(markup.indexOf('小红书'));
-    expect(markup.indexOf('小红书')).toBeLessThan(markup.indexOf('Reddit'));
-    expect(markup.indexOf('Reddit')).toBeLessThan(markup.indexOf('哔哩哔哩'));
-    expect(markup.indexOf('哔哩哔哩')).toBeLessThan(markup.indexOf('YouTube'));
-    expect(markup).not.toContain('href="https://www.reddit.com/"');
-    expect(markup).toContain('aria-label="Reddit，敬请期待"');
-    expect(markup).toContain('title="敬请期待"');
+    const rankedPlatformUrls = [
+      'https://weibo.com/',
+      'https://x.com/home',
+      'https://www.xiaohongshu.com/',
+      'https://www.reddit.com/',
+      'https://www.zhihu.com/',
+      'https://news.ycombinator.com/',
+      'https://linux.do/',
+      'https://www.v2ex.com/',
+      'https://36kr.com/information/web_news/',
+    ];
+    const platformNavigationIndex = markup.indexOf('aria-label="切换平台"');
+    rankedPlatformUrls.slice(1).forEach((url, index) => {
+      expect(markup.indexOf(
+        `href="${rankedPlatformUrls[index]}"`,
+        platformNavigationIndex,
+      )).toBeLessThan(
+        markup.indexOf(`href="${url}"`, platformNavigationIndex),
+      );
+    });
+    expect(markup).not.toContain('aria-label="X，敬请期待"');
+    expect(markup).toContain('href="https://weibo.com/"');
+    expect(markup).toContain('href="https://www.xiaohongshu.com/"');
+    expect(markup).toContain('href="https://www.reddit.com/"');
+    expect(markup).not.toContain('aria-label="Reddit，敬请期待"');
+    expect(markup).not.toContain('哔哩哔哩');
+    expect(markup).not.toContain('YouTube');
+    expect(markup).not.toContain('敬请期待');
     expect(markup).not.toContain('待支持 · 第');
   });
 

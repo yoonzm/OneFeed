@@ -141,6 +141,17 @@ export abstract class BaseAdapter {
   abstract parseCard(element: Element, context: FeedPageContext): FeedItem | null;
   abstract triggerAction(itemId: string, actionId: string): boolean;
 
+  /** 返回 undefined 表示当前 Feed Adapter 尚未提供原站检索能力。 */
+  getInitialSearchQuery(): string | undefined {
+    return undefined;
+  }
+
+  /** 检索必须交给原站执行；BaseAdapter 不提供本地条目过滤回退。 */
+  triggerSearch(query: string): boolean {
+    void query;
+    return false;
+  }
+
   setFeedChannelsListener(listener: FeedChannelsListener): void {
     this.feedChannelsListener = listener;
     listener(this.getFeedChannels());

@@ -5,19 +5,27 @@ import type { DetailAdapter, DetailAdapterDefinition } from './detail';
 import { hackerNewsAdapterDefinition } from './hackerNews';
 import { linuxDoAdapterDefinition } from './linuxDo';
 import { linuxDoThreadAdapterDefinition } from './linuxDoThread';
+import { redditAdapterDefinition } from './reddit';
 import { thirtySixKrAdapterDefinition } from './thirtySixKr';
 import { thirtySixKrDetailAdapterDefinition } from './thirtySixKrDetail';
+import { twitterAdapterDefinition } from './twitter';
 import { v2exAdapterDefinition } from './v2ex';
 import { v2exThreadAdapterDefinition } from './v2exThread';
+import { weiboAdapterDefinition } from './weibo';
+import { xiaohongshuAdapterDefinition } from './xiaohongshu';
 import { zhihuAdapterDefinition } from './zhihu';
 import { zhihuDetailAdapterDefinition } from './zhihuDetail';
 import { zhihuThreadAdapterDefinition } from './zhihuThread';
 
 const feedAdapterDefinitions: AdapterDefinition[] = [
+  weiboAdapterDefinition,
+  twitterAdapterDefinition,
+  xiaohongshuAdapterDefinition,
+  redditAdapterDefinition,
   zhihuAdapterDefinition,
-  v2exAdapterDefinition,
-  linuxDoAdapterDefinition,
   hackerNewsAdapterDefinition,
+  linuxDoAdapterDefinition,
+  v2exAdapterDefinition,
   thirtySixKrAdapterDefinition,
 ];
 

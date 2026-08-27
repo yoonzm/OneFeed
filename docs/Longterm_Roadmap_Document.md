@@ -40,7 +40,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 ### Phase 2: 渲染引擎强化与平台扩张 (当前阶段)
 
-当前产品界面支持英文与简体中文，使用浏览器原生国际化机制自动跟随 Chrome 界面语言；英文作为其他未翻译语言的默认回退。OneFeed 自身生成的导航、状态、设置和 Adapter 通用操作文案必须使用语义化翻译 key，原站内容与动态频道名称保持原样。具体约束见 [国际化设计](Internationalization_Design.md)。
+当前产品界面支持英文与简体中文，使用浏览器原生国际化机制自动跟随 Chrome 界面语言；英文作为其他未翻译语言的默认回退。OneFeed 自身生成的导航、状态、设置和 Adapter 通用操作文案必须使用语义化翻译 key，原站内容与动态频道名称保持原样。
 
 #### 1. 目标平台扩展 (Platform Expansion)
 
@@ -54,11 +54,10 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 | 产品类型 | 可覆盖产品 | 主要映射 |
 | :--- | :--- | :--- |
-| 短动态与开放社交 | Twitter/X、微博、Threads、Bluesky、Mastodon | `post` + `richText/gallery/video/linkPreview/quote/poll` |
+| 短动态与开放社交 | X、微博 | `post` + `richText/gallery/video/linkPreview/quote/poll` |
 | 论坛与社区 | Reddit、V2EX、Linux DO/Discourse、Hacker News、知乎问题 | Feed 使用 `discussion`；详情使用 `ThreadDetail` 的 `topic/question -> reply/answer` 角色关系 |
-| 长文与订阅内容 | 知乎专栏、Medium、Substack、WordPress、RSS/Atom、微信公众号网页版 | Feed 使用 `article + previewBlocks`；受支持详情使用 `ArticleDetail.body` |
-| 视频与图片 Feed | YouTube Home、B站首页/动态、Instagram 基础 Feed、小红书基础 Feed、Pinterest | `post/article` + `gallery/video`；只覆盖 Feed 卡片，不承诺完整播放器体验 |
-| 职业内容 Feed | LinkedIn 基础动态、文章、图片、视频和投票 | `post/article` + Context + 标准 Blocks；文档、职位和活动卡片另行扩展 |
+| 长文内容 | 知乎专栏、36Kr 文章 | Feed 使用 `article + previewBlocks`；受支持详情使用 `ArticleDetail.body` |
+| 图片 Feed | 微博、小红书、Reddit | `post/article` + `gallery/video`；只覆盖 Feed 卡片，不承诺完整播放器体验 |
 
 以上平台“可覆盖”仅表示统一数据和 UI 协议足以表达其主要 Feed 内容，不表示已经完成目标站点适配，也不表示其所有操作都可以在 Shadow DOM 中可靠代理。
 
@@ -66,12 +65,12 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 | 标准扩展 | 代表产品 | 新增能力 |
 | :--- | :--- | :--- |
-| `live` | Twitch、YouTube Live、B站直播 | 直播中/预告/结束、实时观看人数、计划时间、直播间入口 |
-| `audio` | Spotify、Apple Podcasts、SoundCloud、Tumblr Audio | 音频源、时长、节目/专辑、播放进度 |
-| `document` | LinkedIn Document、SlideShare、论坛附件 | 文件类型、页数、大小、预览与下载/原文回退 |
-| `verticalVideo` 展示策略 | TikTok、抖音、Reels、Shorts | 竖屏比例、自动播放策略、上下切换和播放状态；底层仍复用 `video` 数据 |
-| `product` | Pinterest Product Pins、Instagram Shopping、小红书商品笔记 | 商品、价格、商家、库存/时效提示和外部购买入口 |
-| `reference` | LinkedIn 职位/活动、社区事件卡片 | 引用对象类型、状态、时间地点和主操作 |
+| `live` | 直播信息流 | 直播中/预告/结束、实时观看人数、计划时间、直播间入口 |
+| `audio` | 音频信息流 | 音频源、时长、节目/专辑、播放进度 |
+| `document` | 文档与论坛附件 | 文件类型、页数、大小、预览与下载/原文回退 |
+| `verticalVideo` 展示策略 | 竖屏视频信息流 | 竖屏比例、自动播放策略、上下切换和播放状态；底层仍复用 `video` 数据 |
+| `product` | 商品笔记与商品卡片 | 商品、价格、商家、库存/时效提示和外部购买入口 |
+| `reference` | 职位、活动与社区事件卡片 | 引用对象类型、状态、时间地点和主操作 |
 
 ##### 不纳入通用 Card 的产品
 
@@ -85,13 +84,12 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 | :--- | :--- | :--- | :--- |
 | **基础能力（已完成）** | 完成 Schema、Surface 与 Renderer 解耦 | 知乎、V2EX、Linux DO、Hacker News | `FeedItem`/`ArticleDetail`/`ThreadDetail` 可序列化；URL 路由互斥；SPA 切换清理旧 Surface；Block Registry 与 Action Bar 跨 Surface 复用 |
 | **2.1 综合资讯扩展（已完成）** | 验证多频道资讯列表、同文档增量加载与完整文章阅读 | 36Kr | 资讯频道、标题、摘要、封面、作者、主题、“查看更多”加载与文章详情正文 |
-| **2.2 开放订阅扩展** | 优先扩展近乎纯文字的信息源 | RSS/Atom | Feed 摘要与全文解析；作者与来源、发布时间、已读/稍后读和重复文章处理 |
-| **2.3 长文平台扩展** | 验证不同长文站点的正文与列表结构 | Medium、Substack、WordPress | 文章列表、正文、作者、发布时间与原文回退，避免引入播放器和复杂社交操作 |
-| **后续待排期** | 文字型平台稳定后再评估开放社交与富媒体 | X、微博、小红书、Reddit、哔哩哔哩、YouTube | 根据真实用户需求、目标站点政策、DOM 稳定性和互动代理成本确定顺序 |
+| **2.2 开放社交时间线（已完成）** | 验证动态 DOM、富媒体短动态与原站频道/互动代理 | X | 登录后的 `/home` 时间线、“为你推荐”与“正在关注”频道、文本、图片、视频封面、外链预览及互动统计；详情页和无可靠永久链接的推广卡片不接管 |
+| **2.3 社交与图片 Feed（已完成）** | 在不修改列表 Renderer 的前提下验证现有协议的跨类型复用 | 微博、小红书、Reddit | 微博热门首页、小红书发现页与频道、Reddit 首页/排序页/社区 Feed；文本、封面、作者、社区、推荐原因和互动统计；详情页与广告卡片不接管 |
 
-Phase 2 前期不以 Adapter 数量为 KPI，而以文字阅读链路的稳定性为先。当前正式支持知乎、V2EX、Linux DO、Hacker News 与 36Kr 资讯频道及文章详情；X、微博、小红书、Reddit、哔哩哔哩和 YouTube 均为待支持平台。Schema 理论上能够表达某个平台，不代表已经交付该平台适配；平台支持状态和适配进度以 README 为准。
+Phase 2 前期不以 Adapter 数量为 KPI，而以阅读链路的稳定性为先。当前正式支持微博热门首页、X 首页时间线、小红书发现页、Reddit 首页/排序页/社区 Feed、知乎、Hacker News、Linux DO、V2EX，以及 36Kr 资讯频道及文章详情。Schema 理论上能够表达某类内容，不代表已经交付对应平台适配；平台支持状态以 README 为准。
 
-建模依据包括 [ActivityStreams 2.0](https://www.w3.org/TR/activitystreams-core/)、[Mastodon Status](https://docs.joinmastodon.org/entities/Status/)、[Bluesky Posts](https://docs.bsky.app/docs/advanced-guides/posts)、[Reddit Post](https://developers.reddit.com/docs/api/redditapi/models/classes/Post)、[Hacker News API](https://github.com/HackerNews/API)、[LinkedIn Posts API](https://learn.microsoft.com/en-us/linkedin/marketing/community-management/shares/posts-api)、[YouTube Video](https://developers.google.com/youtube/v3/docs/videos)、[Twitch API](https://dev.twitch.tv/docs/api/reference/) 与 [Atom RFC 4287](https://www.rfc-editor.org/rfc/rfc4287)。
+建模依据包括 [ActivityStreams 2.0](https://www.w3.org/TR/activitystreams-core/)、[Reddit Post](https://developers.reddit.com/docs/api/redditapi/models/classes/Post)、[Hacker News API](https://github.com/HackerNews/API) 与 [Atom RFC 4287](https://www.rfc-editor.org/rfc/rfc4287)。
 
 #### 3. 主题引擎 (Theme Engine & System Styles)
 主题包必须分别声明支持的 Surface。Feed 主题负责卡片密度和预览截断；Article Detail 负责单篇正文排版；Thread Detail 负责固定主题头、回答/回复列表和分页。三者共享视觉 Token 和 Block Renderer，不要求使用相同顶层布局。
@@ -111,8 +109,9 @@ Thread Detail 按内容角色决定阅读层级，而不是强制所有平台采
 #### 4. 架构优化与交互代理
 * **SPA Surface 生命周期**：使用 WXT 路由事件按完整 URL 识别页面，依次销毁旧 Adapter/Store/Renderer、恢复原 DOM，再挂载新 Surface；hash-only 跳转不重建页面。Article/Thread Detail 只有在 URL 对应的目标节点解析成功后才遮罩原页，避免 DOM 延迟或规则失效造成空白详情。
 * **原站频道代理**：Feed Adapter 从当前页面的原生导航容器动态发现频道名称、顺序与选中态，Renderer 只展示轻量描述；用户选择频道时回调原 DOM 控件，不复制站点 URL 清单或排序规则。站点在同一导航结构中增加频道后可自动进入 OneFeed，只有导航结构或 Feed 卡片结构变化时才需要更新 Adapter。
-* **文章评论代理**：Article Detail 的评论采用“静态能力描述 + 按需评论快照”，Adapter 负责驱动原站局部评论、全部评论/回复弹层与增量加载，Renderer 点击评论后统一打开 OneFeed 弹窗；点击评论回复数时在评论弹窗上方打开独立回复弹窗，关闭后保留底层评论数据和滚动位置。Renderer 不在文章底部插入评论，也不直接渲染平台 DOM。首个适配目标为知乎回答详情，具体契约与验收标准见[文章详情评论功能设计](Comment_Feature_Design.md)。
-* **视频播放器节点搬运 (Portal)**：对于 B站/YouTube 视频，通过 DOM `appendChild` 将原平台的播放器节点无缝“移驾”到新 UI 卡片中，保留原生播放状态与清晰度选项。
+* **文章评论代理**：Article Detail 的评论采用“静态能力描述 + 按需评论快照”，Adapter 负责驱动原站局部评论、全部评论/回复弹层与增量加载，Renderer 点击评论后统一打开 OneFeed 弹窗；点击评论回复数时在评论弹窗上方打开独立回复弹窗，关闭后保留底层评论数据和滚动位置。Renderer 不在文章底部插入评论，也不直接渲染平台 DOM。
+* **原站检索代理**：Renderer 只展示能力驱动的统一检索入口，查询、排序和持续加载仍由原站完成；知乎内容检索路由接管为 Feed Surface，只解析可归一化为 `FeedItem` 且具有有效原文链接的结果，不对本地 Store 做伪搜索。
+* **视频播放器节点搬运 (Portal)**：对于原站视频，通过 DOM `appendChild` 将播放器节点无缝“移驾”到新 UI 卡片中，保留原生播放状态与清晰度选项。
 * **统一触底加载 (Feed Loading)**：Feed Surface 接近底部时统一向 Adapter 请求下一批内容；Adapter 可驱动被隐藏的原页面滚动、点击同文档加载控件，或抓取并离线解析同源 HTML 下一页。文档分页使用单请求锁、稳定 ID 去重、失败重试和卸载终止，避免整页导航清空当前阅读进度。
 
 #### 5. 确定性展示过滤（已完成）

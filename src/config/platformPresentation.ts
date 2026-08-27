@@ -11,16 +11,40 @@ export interface PlatformPresentation {
 /** 启动中心与欢迎页共享平台展示信息，避免入口之间出现名称或视觉不一致。 */
 export const PLATFORM_PRESENTATIONS: PlatformPresentation[] = [
   {
+    id: 'weibo',
+    scope: i18n.t('platform.weibo.scope'),
+    access: i18n.t('platform.weibo.access'),
+    accent: '#ff8200',
+  },
+  {
+    id: 'twitter',
+    scope: i18n.t('platform.twitter.scope'),
+    access: i18n.t('platform.twitter.access'),
+    accent: '#111111',
+  },
+  {
+    id: 'xiaohongshu',
+    scope: i18n.t('platform.xiaohongshu.scope'),
+    access: i18n.t('platform.xiaohongshu.access'),
+    accent: '#ff2442',
+  },
+  {
+    id: 'reddit',
+    scope: i18n.t('platform.reddit.scope'),
+    access: i18n.t('platform.reddit.access'),
+    accent: '#ff4500',
+  },
+  {
     id: 'zhihu',
     scope: i18n.t('platform.zhihu.scope'),
     access: i18n.t('platform.zhihu.access'),
     accent: '#1677ff',
   },
   {
-    id: 'v2ex',
-    scope: i18n.t('platform.v2ex.scope'),
-    access: i18n.t('platform.v2ex.access'),
-    accent: '#77889a',
+    id: 'hacker-news',
+    scope: i18n.t('platform.hackerNews.scope'),
+    access: i18n.t('platform.hackerNews.access'),
+    accent: '#ff6600',
   },
   {
     id: 'linux-do',
@@ -29,10 +53,10 @@ export const PLATFORM_PRESENTATIONS: PlatformPresentation[] = [
     accent: '#0f8a6a',
   },
   {
-    id: 'hacker-news',
-    scope: i18n.t('platform.hackerNews.scope'),
-    access: i18n.t('platform.hackerNews.access'),
-    accent: '#ff6600',
+    id: 'v2ex',
+    scope: i18n.t('platform.v2ex.scope'),
+    access: i18n.t('platform.v2ex.access'),
+    accent: '#77889a',
   },
   {
     id: '36kr',

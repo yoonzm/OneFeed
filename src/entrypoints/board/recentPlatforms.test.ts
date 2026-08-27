@@ -14,7 +14,7 @@ describe('launch-center recency', () => {
       'zhihu',
       'twitter',
       'v2ex',
-    ])).toEqual(['zhihu', 'v2ex']);
+    ])).toEqual(['reddit', 'zhihu', 'twitter']);
   });
 
   it('falls back to a useful default when storage is missing or invalid', () => {

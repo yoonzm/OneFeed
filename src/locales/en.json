@@ -12,7 +12,6 @@
     "settings": "Settings",
     "close": "Close",
     "retry": "Retry",
-    "comingSoon": "Coming soon",
     "unknown": "Unknown",
     "currentWebsite": "Current website",
     "helpLinks": "Help links",
@@ -44,7 +43,11 @@
       "scope": "Home, Hot List, questions, and articles",
       "access": "Some pages require sign-in"
     },
-    "twitter": { "name": "X" },
+    "twitter": {
+      "name": "X",
+      "scope": "For You and Following home timelines",
+      "access": "Sign-in required"
+    },
     "v2ex": {
       "name": "V2EX",
       "scope": "Home categories, recent topics, VXNA, and topic pages",
@@ -55,8 +58,16 @@
       "scope": "Topic lists and topic pages",
       "access": "Some content requires sign-in"
     },
-    "weibo": { "name": "Weibo" },
-    "xiaohongshu": { "name": "Xiaohongshu" },
+    "weibo": {
+      "name": "Weibo",
+      "scope": "Home trending feed",
+      "access": "Trending posts are available without signing in"
+    },
+    "xiaohongshu": {
+      "name": "Xiaohongshu",
+      "scope": "Explore feed and content channels",
+      "access": "Some content requires sign-in"
+    },
     "hackerNews": {
       "name": "Hacker News",
       "scope": "News, Newest, Ask, Show, and Jobs",
@@ -67,9 +78,11 @@
       "scope": "News channels, article lists, and article pages",
       "access": "Browse without signing in"
     },
-    "reddit": { "name": "Reddit" },
-    "bilibili": { "name": "Bilibili" },
-    "youtube": { "name": "YouTube" }
+    "reddit": {
+      "name": "Reddit",
+      "scope": "Home, sorted feeds, and communities",
+      "access": "Some content requires sign-in"
+    }
   },
   "board": {
     "homeLabel": "OneFeed launch center home",
@@ -82,7 +95,6 @@
     "pausedNote": "OneFeed is paused. Websites will open with their original pages.",
     "recent": "Recently used",
     "more": "More websites",
-    "planned": "Coming soon: $1",
     "guide": "User guide",
     "feedback": "Feedback"
   },
@@ -286,7 +298,6 @@
   "platformBar": {
     "switchChannel": "Switch $1 channel. Current channel: $2",
     "channelMenu": "$1 feed channels",
-    "comingSoonPlatform": "$1, coming soon",
     "switchPlatform": "Switch platform",
     "hiddenContent": {
       "1": "1 item hidden",
@@ -298,7 +309,12 @@
     "supportedPlatforms": "Supported platforms",
     "websiteChannels": "$1 channels",
     "switchFeedChannel": "Switch feed channel",
-    "planned": "Planned"
+    "openSearch": "Search $1 content",
+    "closeSearch": "Close search",
+    "searchForm": "$1 content search",
+    "searchScope": "$1 · Search",
+    "searchPlaceholder": "Search content on $1",
+    "searchSubmit": "Search"
   },
   "comment": {
     "comments": "Comments",
@@ -352,6 +368,7 @@
     "bookmark": "Save",
     "like": "Like",
     "reply": "Reply",
+    "repost": "Repost",
     "views": "Views",
     "score": "Score",
     "reactions": "Reactions",

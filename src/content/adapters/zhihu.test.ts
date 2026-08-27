@@ -1,11 +1,54 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  createZhihuSearchUrl,
   parseCount,
   parseOrderedZhihuBlocks,
   parseZhihuCard,
   triggerZhihuAction,
   ZhihuAdapter,
 } from './zhihu';
+
+describe('Zhihu original-site search', () => {
+  it('builds the native content-search route without retaining unrelated parameters', () => {
+    const target = createZhihuSearchUrl(
+      '  人工 智能  ',
+      new URL('https://www.zhihu.com/hot?utm_source=test'),
+    );
+
+    expect(target?.origin).toBe('https://www.zhihu.com');
+    expect(target?.pathname).toBe('/search');
+    expect(target?.searchParams.get('type')).toBe('content');
+    expect(target?.searchParams.get('q')).toBe('人工 智能');
+    expect(target?.searchParams.has('utm_source')).toBe(false);
+    expect(createZhihuSearchUrl('   ', new URL('https://www.zhihu.com/'))).toBeUndefined();
+  });
+
+  it('keeps content results with original links and ignores mixed non-content cards', () => {
+    document.body.innerHTML = `
+      <div class="ContentItem" id="answer-result">
+        <h2 class="ContentItem-title">
+          <a href="/question/1/answer/42">如何减少信息噪音？</a>
+        </h2>
+        <div class="RichContent-inner"><p>先减少无效输入。</p></div>
+      </div>
+      <div class="ContentItem" id="book-result">
+        <h2 class="ContentItem-title">信息检索</h2>
+        <div class="RichContent-inner"><p>一本书的简介。</p></div>
+      </div>`;
+    const adapter = new ZhihuAdapter(vi.fn());
+    const context = {
+      root: document,
+      url: new URL('https://www.zhihu.com/search?type=content&q=%E4%BF%A1%E6%81%AF'),
+      live: true,
+    };
+
+    expect(adapter.parseCard(document.querySelector('#answer-result')!, context)).toMatchObject({
+      title: '如何减少信息噪音？',
+      originalUrl: 'http://localhost:3000/question/1/answer/42',
+    });
+    expect(adapter.parseCard(document.querySelector('#book-result')!, context)).toBeNull();
+  });
+});
 
 describe('ZhihuAdapter feed channels', () => {
   it('reads the current header channels and ignores unrelated navigation', () => {

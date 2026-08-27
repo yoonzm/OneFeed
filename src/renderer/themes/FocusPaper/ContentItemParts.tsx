@@ -22,6 +22,7 @@ interface ItemBodyProps {
 interface ItemMetaProps {
   item: ContentItemBase;
   index: number;
+  afterTime?: ReactNode;
   children?: ReactNode;
 }
 
@@ -64,8 +65,8 @@ export function ItemBody({ blocks, expanded, onPreview }: ItemBodyProps) {
   );
 }
 
-/** 两个列表 Surface 共用内容元信息，但把各自的导航和操作作为 children 注入。 */
-export function ItemMeta({ item, index, children }: ItemMetaProps) {
+/** 两个列表 Surface 共用内容元信息，并显式区分时间后的导航与尾部操作。 */
+export function ItemMeta({ item, index, afterTime, children }: ItemMetaProps) {
   const hasAuthor = Boolean(item.author.name.trim());
   const authorAvatar = item.author.avatar ? (
     <img className="card-author-avatar" src={item.author.avatar} alt="" loading="lazy" />
@@ -96,6 +97,7 @@ export function ItemMeta({ item, index, children }: ItemMetaProps) {
           <time>{formatShortDateTime(item.publishedAt)}</time>
         </span>
       )}
+      {afterTime}
 
       {(item.context?.reason || item.context?.community || item.context?.tags?.length) && (
         <span className="context-row">

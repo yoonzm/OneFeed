@@ -12,7 +12,6 @@ import {
 import {
   getPlatformById,
   getPlatformDisplayName,
-  getPlannedPlatforms,
   getSupportedPlatforms,
   type PlatformId,
 } from '../../config/platforms';
@@ -106,7 +105,6 @@ export function BoardApp() {
   const { enabled, setEnabled } = useEnabledState();
   const { recentPlatformIds, rememberPlatform } = useRecentPlatforms();
   const supportedPlatforms = useMemo(() => getSupportedPlatforms(), []);
-  const plannedPlatforms = useMemo(() => getPlannedPlatforms(), []);
   const primaryPlatformId = recentPlatformIds[0] ?? 'zhihu';
   const primaryPlatform = getPlatformById(primaryPlatformId)!;
   const secondaryPlatforms = recentPlatformIds
@@ -265,11 +263,6 @@ export function BoardApp() {
       </main>
 
       <footer className="board-footer">
-        <p>
-          {i18n.t('board.planned', [plannedPlatforms.map((platform) => (
-            getPlatformDisplayName(platform.id as PlatformId)
-          )).join(' · ')])}
-        </p>
         <nav aria-label={i18n.t('common.helpLinks')}>
           <a href={GITHUB_URL}>{i18n.t('board.guide')}</a>
           <a href={ISSUE_URL}>{i18n.t('board.feedback')}</a>
