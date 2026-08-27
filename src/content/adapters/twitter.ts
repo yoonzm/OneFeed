@@ -163,10 +163,12 @@ function extractVideos(element: Element, pageUrl: URL): FeedVideo[] {
     });
 }
 
-function extractLinkPreview(
-  element: Element,
-  pageUrl: URL,
-): Extract<FeedBlock, { type: 'linkPreview' }> | null {
+interface TwitterLinkPreview {
+  block: Extract<FeedBlock, { type: 'linkPreview' }>;
+  image?: FeedImage;
+}
+
+function extractLinkPreview(element: Element, pageUrl: URL): TwitterLinkPreview | null {
   const card = firstOwned<HTMLElement>(element, '[data-testid="card.wrapper"]');
   if (!card) return null;
 
@@ -178,12 +180,11 @@ function extractLinkPreview(
   const image = card.querySelector<HTMLImageElement>('img[src]');
   const imageUrl = absoluteUrl(image?.getAttribute('src') || '', pageUrl) || undefined;
   return {
-    type: 'linkPreview',
-    preview: {
-      url,
-      title,
-      image: imageUrl,
+    block: {
+      type: 'linkPreview',
+      preview: { url, title },
     },
+    image: imageUrl ? { url: imageUrl, alt: title || '' } : undefined,
   };
 }
 
@@ -221,15 +222,20 @@ export function parseTwitterCard(
   const previewBlocks: FeedBlock[] = [];
   if (tweetText) {
     const richText = createRichTextBlock(tweetText, pageUrl);
-    const linkTitle = linkPreview?.preview.title?.replace(/\s+/g, ' ').trim().toLocaleLowerCase();
+    const linkTitle = linkPreview?.block.preview.title
+      ?.replace(/\s+/g, ' ').trim().toLocaleLowerCase();
     const bodyText = richText?.type === 'richText'
       ? richText.plainText.replace(/\s+/g, ' ').trim().toLocaleLowerCase()
       : '';
     if (richText && (!linkTitle || bodyText !== linkTitle)) previewBlocks.push(richText);
   }
+  const linkPreviewImage = linkPreview?.image;
+  if (linkPreviewImage && !images.some((image) => image.url === linkPreviewImage.url)) {
+    images.push(linkPreviewImage);
+  }
   if (images.length) previewBlocks.push({ type: 'gallery', items: images });
   videos.forEach((media) => previewBlocks.push({ type: 'video', media }));
-  if (linkPreview) previewBlocks.push(linkPreview);
+  if (linkPreview) previewBlocks.push(linkPreview.block);
   if (!previewBlocks.length) return null;
 
   const replyControl = findActionControl(element, 'reply');

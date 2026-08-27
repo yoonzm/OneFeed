@@ -252,8 +252,7 @@ describe('FeedCard', () => {
     expect(readerStyles).toContain([
       '.feed-card-side-media .card-media-aside .media-button,',
       '  .feed-card-side-media .card-media-aside .video-player,',
-      '  .feed-card-side-media .card-media-aside .video-poster,',
-      '  .feed-card-side-media .card-media-aside .link-preview-media {',
+      '  .feed-card-side-media .card-media-aside .video-poster {',
       '    height: 144px;',
       '    max-height: 144px;',
       '    object-fit: cover;',
@@ -261,21 +260,29 @@ describe('FeedCard', () => {
     ].join('\n'));
   });
 
-  it('places a link preview image beside the whole feed item without a platform branch', () => {
+  it('renders a link preview image through the standard gallery side media', () => {
     const markup = renderToStaticMarkup(
       <FeedCard
         item={{
           ...shortReply,
           originalUrl: 'https://example.com/posts/42',
-          previewBlocks: [{
-            type: 'linkPreview',
-            preview: {
-              url: 'https://bbc.com/news/article',
-              title: 'At least one dead after car crashes into crowd',
-              siteName: 'bbc.com',
-              image: 'https://example.com/breaking.jpg',
+          previewBlocks: [
+            {
+              type: 'gallery',
+              items: [{
+                url: 'https://example.com/breaking.jpg',
+                alt: 'At least one dead after car crashes into crowd',
+              }],
             },
-          }],
+            {
+              type: 'linkPreview',
+              preview: {
+                url: 'https://bbc.com/news/article',
+                title: 'At least one dead after car crashes into crowd',
+                siteName: 'bbc.com',
+              },
+            },
+          ],
         }}
         index={0}
         onAction={vi.fn()}
@@ -283,25 +290,17 @@ describe('FeedCard', () => {
     );
 
     expect(markup).toContain('feed-card-side-media');
-    expect(markup).toContain('feed-card-link-preview-media');
+    expect(markup).not.toContain('feed-card-link-preview-media');
     expect(markup).toContain('class="link-preview"');
-    expect(markup).toContain('class="link-preview-media"');
+    expect(markup).toContain('class="media-button"');
     expect(markup).toContain('src="https://example.com/breaking.jpg"');
     expect(markup.indexOf('class="link-preview"')).toBeLessThan(
       markup.indexOf('card-media-aside'),
     );
     expect(markup.indexOf('card-media-aside')).toBeLessThan(markup.indexOf('card-meta-row'));
-    expect(readerStyles).not.toContain('grid-template-columns: minmax(0, 1fr) 276px');
-    expect(readerStyles).not.toContain('right: 296px');
-    expect(readerStyles).toContain([
-      '.feed-card-link-preview-media .card-main {',
-      '    grid-template-areas:',
-      '      "body media"',
-      '      "meta meta";',
-    ].join('\n'));
-    expect(readerStyles).toContain(
-      '.feed-card-link-preview-media .link-preview > img { display: none; }',
-    );
+    expect(readerStyles).not.toContain('feed-card-link-preview-media');
+    expect(readerStyles).not.toContain('link-preview-media');
+    expect(readerStyles).toContain('.link-preview:not(:has(img)) { display: block;');
   });
 
   it('places image-led and extreme-ratio media in the side-media region', () => {
@@ -406,8 +405,7 @@ describe('FeedCard', () => {
     expect(readerStyles).toContain([
       '.feed-card-side-media .card-media-aside .media-button,',
       '  .feed-card-side-media .card-media-aside .video-player,',
-      '  .feed-card-side-media .card-media-aside .video-poster,',
-      '  .feed-card-side-media .card-media-aside .link-preview-media {',
+      '  .feed-card-side-media .card-media-aside .video-poster {',
       '    height: min(48vw, 220px);',
       '    max-height: 220px;',
       '    object-fit: cover;',

@@ -133,11 +133,17 @@ describe('parseTwitterCard', () => {
         previewBlocks: [
           { type: 'richText', plainText: 'A useful link' },
           {
+            type: 'gallery',
+            items: [{
+              url: 'https://example.com/cover.jpg',
+              alt: 'Example article',
+            }],
+          },
+          {
             type: 'linkPreview',
             preview: {
               url: 'https://example.com/article',
               title: 'Example article',
-              image: 'https://example.com/cover.jpg',
             },
           },
         ],
@@ -160,14 +166,22 @@ describe('parseTwitterCard', () => {
 
     const item = parseTwitterCard(document.querySelector('article')!, new URL('https://x.com/home'));
 
-    expect(item?.previewBlocks).toEqual([{
-      type: 'linkPreview',
-      preview: {
-        url: 'https://bbc.com/news/article',
-        title: 'At least one dead after car crashes into crowd',
-        image: 'https://example.com/breaking.jpg',
+    expect(item?.previewBlocks).toEqual([
+      {
+        type: 'gallery',
+        items: [{
+          url: 'https://example.com/breaking.jpg',
+          alt: 'At least one dead after car crashes into crowd',
+        }],
       },
-    }]);
+      {
+        type: 'linkPreview',
+        preview: {
+          url: 'https://bbc.com/news/article',
+          title: 'At least one dead after car crashes into crowd',
+        },
+      },
+    ]);
   });
 
   it('ignores promoted cards without a timestamp permalink', () => {
