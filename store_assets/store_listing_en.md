@@ -6,7 +6,7 @@
 - **Short description:** Rearrange supported website feeds into one focused, consistent reading interface that you can pause at any time.
 - **Recommended category:** Productivity
 - **Language:** English
-- **Version:** 0.1.12
+- **Version:** 0.1.13
 
 ## Detailed description
 
