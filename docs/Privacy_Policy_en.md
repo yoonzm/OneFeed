@@ -2,7 +2,7 @@
 
 Effective date: August 26, 2026
 
-OneFeed is a browser extension that rearranges feeds from supported websites into a unified reading interface. This policy explains how version `0.1.11` processes data. The current version supports Zhihu, V2EX, Linux DO, Hacker News, and 36Kr. This policy and the relevant permission disclosures will be updated when support for additional websites is released.
+OneFeed is a browser extension that rearranges feeds from supported websites into a unified reading interface. This policy explains how version `0.1.12` processes data. The current version supports Zhihu, V2EX, Linux DO, Hacker News, and 36Kr. This policy and the relevant permission disclosures will be updated when support for additional websites is released.
 
 ## Data processed
 

@@ -6,13 +6,13 @@
 - **Short description:** Rearrange supported website feeds into one focused, consistent reading interface that you can pause at any time.
 - **Recommended category:** Productivity
 - **Language:** English
-- **Version:** 0.1.11
+- **Version:** 0.1.12
 
 ## Detailed description
 
 OneFeed turns feeds from supported websites into a clean and consistent Focus Paper reading interface. It reduces page noise while keeping the original content, scrolling behavior, and essential interactions available.
 
-Version `0.1.11` supports Zhihu, V2EX, Linux DO, Hacker News, and 36Kr feeds. X, Weibo, Xiaohongshu, Reddit, Bilibili, and YouTube are currently planned.
+Version `0.1.12` supports Zhihu, V2EX, Linux DO, Hacker News, and 36Kr feeds. X, Weibo, Xiaohongshu, Reddit, Bilibili, and YouTube are currently planned.
 
 Current features include:
 
