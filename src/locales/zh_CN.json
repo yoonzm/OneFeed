@@ -298,6 +298,12 @@
     "supportedPlatforms": "已支持平台",
     "websiteChannels": "$1频道",
     "switchFeedChannel": "切换信息流频道",
+    "openSearch": "检索$1内容",
+    "closeSearch": "关闭检索",
+    "searchForm": "$1内容检索",
+    "searchScope": "$1 · 检索",
+    "searchPlaceholder": "在$1检索内容",
+    "searchSubmit": "检索",
     "planned": "待支持"
   },
   "comment": {

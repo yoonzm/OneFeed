@@ -298,6 +298,12 @@
     "supportedPlatforms": "Supported platforms",
     "websiteChannels": "$1 channels",
     "switchFeedChannel": "Switch feed channel",
+    "openSearch": "Search $1 content",
+    "closeSearch": "Close search",
+    "searchForm": "$1 content search",
+    "searchScope": "$1 · Search",
+    "searchPlaceholder": "Search content on $1",
+    "searchSubmit": "Search",
     "planned": "Planned"
   },
   "comment": {

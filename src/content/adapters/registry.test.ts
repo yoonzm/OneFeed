@@ -32,6 +32,13 @@ describe('createAdapter', () => {
       adapter: expect.any(ZhihuAdapter),
       source: { id: 'zhihu', name: '知乎' },
     });
+    expect(createAdapter(
+      new URL('https://www.zhihu.com/search?type=content&q=%E9%98%85%E8%AF%BB'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(ZhihuAdapter),
+    });
     expect(createAdapter(new URL('https://www.v2ex.com/?tab=hot'), listeners())).toMatchObject({
       surface: 'feed',
       adapter: expect.any(V2exAdapter),
@@ -118,6 +125,11 @@ describe('createAdapter', () => {
     expect(createAdapter(new URL('https://weibo.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://www.xiaohongshu.com/explore'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://www.zhihu.com/settings/account'), listeners())).toBeNull();
+    expect(createAdapter(
+      new URL('https://www.zhihu.com/search?type=people&q=%E9%98%85%E8%AF%BB'),
+      listeners(),
+    )).toBeNull();
+    expect(createAdapter(new URL('https://www.zhihu.com/search?type=content'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://news.ycombinator.com/item?id=43876543'), listeners())).toBeNull();
     expect(createAdapter(
@@ -131,6 +143,9 @@ describe('createAdapter', () => {
 
   it('reports whether a URL supports early page takeover', () => {
     expect(isSupportedUrl(new URL('https://www.zhihu.com/'))).toBe(true);
+    expect(isSupportedUrl(new URL(
+      'https://www.zhihu.com/search?type=content&q=%E9%98%85%E8%AF%BB',
+    ))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.zhihu.com/question/1/answer/42'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.zhihu.com/settings/account'))).toBe(false);
     expect(isSupportedUrl(new URL('https://x.com/home'))).toBe(false);

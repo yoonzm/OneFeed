@@ -63,6 +63,16 @@ const ACTION_LABELS: Record<ZhihuActionId, string[]> = {
 
 export const ZHIHU_SOURCE = ZHIHU_PLATFORM;
 
+export function createZhihuSearchUrl(query: string, currentUrl: URL): URL | undefined {
+  const normalizedQuery = query.trim();
+  if (!normalizedQuery) return undefined;
+
+  const target = new URL('/search', currentUrl.origin);
+  target.searchParams.set('type', 'content');
+  target.searchParams.set('q', normalizedQuery);
+  return target;
+}
+
 function firstText(element: Element, selectors: string[]): string {
   for (const selector of selectors) {
     const text = element.querySelector(selector)?.textContent?.trim();
@@ -618,20 +628,46 @@ export class ZhihuAdapter extends BaseAdapter {
     });
   }
 
-  parseCard(element: Element): FeedItem | null {
+  parseCard(element: Element, context: { url: URL }): FeedItem | null {
+    // 综合搜索会混入热词、书籍和用户等实体；首期只接管具有原文链接的内容结果。
+    if (
+      context.url.pathname === '/search' &&
+      !element.querySelector([
+        'a[href*="/answer/"]',
+        'a[href*="/question/"]',
+        'a[href^="/p/"]',
+        'a[href*="zhuanlan.zhihu.com/p/"]',
+      ].join(', '))
+    ) return null;
+
     return parseZhihuCard(element);
   }
 
   triggerAction(itemId: string, actionId: string): boolean {
     return triggerZhihuAction(this.getRuntimeElement(itemId), actionId);
   }
+
+  override getInitialSearchQuery(): string {
+    const url = new URL(window.location.href);
+    return url.pathname === '/search' ? url.searchParams.get('q')?.trim() || '' : '';
+  }
+
+  override triggerSearch(query: string): boolean {
+    const target = createZhihuSearchUrl(query, new URL(window.location.href));
+    if (!target) return false;
+    window.location.assign(target.href);
+    return true;
+  }
 }
 
 export const zhihuAdapterDefinition: AdapterDefinition = {
   source: ZHIHU_SOURCE,
-  matches: (url) => [
-    'zhihu.com',
-    'www.zhihu.com',
-  ].includes(url.hostname) && ['/', '/follow', '/hot', '/recommend'].includes(url.pathname),
+  matches: (url) => {
+    if (!['zhihu.com', 'www.zhihu.com'].includes(url.hostname)) return false;
+    if (FEED_CHANNEL_PATHS.has(url.pathname)) return true;
+    return url.pathname === '/search' &&
+      url.searchParams.get('type') === 'content' &&
+      Boolean(url.searchParams.get('q')?.trim());
+  },
   create: (onItems) => new ZhihuAdapter(onItems),
 };

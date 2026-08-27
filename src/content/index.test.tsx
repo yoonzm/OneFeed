@@ -31,6 +31,8 @@ function activeSurface(surface: 'feed' | 'article' | 'thread') {
       disconnect: vi.fn(),
       triggerAction: vi.fn(() => false),
       triggerFeedChannel: vi.fn(() => false),
+      getInitialSearchQuery: vi.fn(() => undefined),
+      triggerSearch: vi.fn(() => false),
       setFeedChannelsListener: vi.fn((listener) => listener([])),
       requestMore: vi.fn(async () => ({ kind: 'exhausted' as const })),
     },
