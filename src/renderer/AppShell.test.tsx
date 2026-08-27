@@ -35,15 +35,17 @@ describe('reader app shells', () => {
     expect(markup.indexOf('href="https://x.com/home"')).toBeLessThan(
       markup.indexOf('href="https://www.v2ex.com/"'),
     );
-    expect(markup.indexOf('Hacker News')).toBeLessThan(markup.indexOf('微博'));
     expect(markup).not.toContain('aria-label="X，敬请期待"');
     expect(markup.indexOf('微博')).toBeLessThan(markup.indexOf('小红书'));
-    expect(markup.indexOf('小红书')).toBeLessThan(markup.indexOf('Reddit'));
-    expect(markup.indexOf('Reddit')).toBeLessThan(markup.indexOf('哔哩哔哩'));
-    expect(markup.indexOf('哔哩哔哩')).toBeLessThan(markup.indexOf('YouTube'));
-    expect(markup).not.toContain('href="https://www.reddit.com/"');
-    expect(markup).toContain('aria-label="Reddit，敬请期待"');
-    expect(markup).toContain('title="敬请期待"');
+    expect(markup.indexOf('小红书')).toBeLessThan(markup.indexOf('Hacker News'));
+    expect(markup.indexOf('Hacker News')).toBeLessThan(markup.indexOf('Reddit'));
+    expect(markup).toContain('href="https://weibo.com/"');
+    expect(markup).toContain('href="https://www.xiaohongshu.com/"');
+    expect(markup).toContain('href="https://www.reddit.com/"');
+    expect(markup).not.toContain('aria-label="Reddit，敬请期待"');
+    expect(markup).not.toContain('哔哩哔哩');
+    expect(markup).not.toContain('YouTube');
+    expect(markup).not.toContain('敬请期待');
     expect(markup).not.toContain('待支持 · 第');
   });
 

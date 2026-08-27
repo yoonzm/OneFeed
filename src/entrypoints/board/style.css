@@ -444,14 +444,10 @@ button:focus-visible {
   min-height: 70px;
   margin: 0 auto;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   border-top: 1px solid var(--color-onefeed-line);
   color: var(--color-onefeed-subtle);
   font-size: 13px;
-}
-
-.board-footer p {
-  margin: 0;
 }
 
 .board-footer nav {
@@ -525,7 +521,7 @@ button:focus-visible {
   .board-footer {
     padding: 18px 0;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: flex-end;
     gap: 14px;
   }
 }

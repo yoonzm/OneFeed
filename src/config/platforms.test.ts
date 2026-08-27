@@ -1,30 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import {
-  getPlannedPlatforms,
   getPlatformForUrl,
   getSupportedPlatforms,
   PLATFORM_CATALOG,
 } from './platforms';
 
 describe('platform catalog', () => {
-  it('keeps supported and planned platforms in product order', () => {
+  it('keeps supported platforms in product order', () => {
     expect(getSupportedPlatforms().map((platform) => platform.name)).toEqual([
       '知乎',
       'X',
       'V2EX',
       'Linux DO',
+      '微博',
+      '小红书',
       'Hacker News',
       '36Kr',
-    ]);
-    expect(getPlannedPlatforms().map((platform) => [
-      platform.name,
-      platform.plannedOrder,
-    ])).toEqual([
-      ['微博', 1],
-      ['小红书', 2],
-      ['Reddit', 3],
-      ['哔哩哔哩', 4],
-      ['YouTube', 5],
+      'Reddit',
     ]);
   });
 
@@ -45,6 +37,8 @@ describe('platform catalog', () => {
     expect(getPlatformForUrl('https://news.ycombinator.com/newest')?.id).toBe('hacker-news');
     expect(getPlatformForUrl('https://36kr.com/information/web_news/')?.id).toBe('36kr');
     expect(getPlatformForUrl('https://www.reddit.com/r/typescript/')?.id).toBe('reddit');
+    expect(getPlatformForUrl('https://www.bilibili.com/')).toBeUndefined();
+    expect(getPlatformForUrl('https://www.youtube.com/')).toBeUndefined();
     expect(getPlatformForUrl('https://linux.do.example.com/')).toBeUndefined();
     expect(getPlatformForUrl('https://news.ycombinator.com.example.com/')).toBeUndefined();
     expect(getPlatformForUrl('not-a-url')).toBeUndefined();

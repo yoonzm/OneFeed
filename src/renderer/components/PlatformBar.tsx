@@ -13,7 +13,6 @@ import {
   type MouseEvent,
 } from 'react';
 import {
-  getPlannedPlatforms,
   getPlatformById,
   getPlatformDisplayName,
   getSupportedPlatforms,
@@ -60,7 +59,6 @@ export function PlatformBar({
   onSearch,
 }: PlatformBarProps) {
   const supportedPlatforms = getSupportedPlatforms();
-  const plannedPlatforms = getPlannedPlatforms();
   const activePlatform = getPlatformById(activePlatformId);
   const activeChannel = channels.find((channel) => channel.active);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -259,22 +257,6 @@ export function PlatformBar({
     );
   });
 
-  const renderPlannedItems = (mobile = false) => plannedPlatforms.map((platform) => {
-    const displayName = getPlatformDisplayName(platform.id as PlatformId);
-    return (
-      <span
-        key={platform.id}
-        className={mobile
-          ? `${mobileItemClass} cursor-help text-onefeed-subtle`
-          : `${desktopItemClass} cursor-help text-onefeed-faint`}
-        title={i18n.t('common.comingSoon')}
-        aria-label={i18n.t('platformBar.comingSoonPlatform', [displayName])}
-      >
-        {displayName}
-      </span>
-    );
-  });
-
   const activePlatformName = activePlatform
     ? getPlatformDisplayName(activePlatform.id as PlatformId)
     : undefined;
@@ -334,8 +316,6 @@ export function PlatformBar({
         ) : (
           <nav className="flex min-w-0 items-stretch gap-1 max-[720px]:hidden" aria-label={i18n.t('platformBar.switchPlatform')}>
             {renderSupportedLinks()}
-            <span className="mx-1.5 my-auto h-[18px] w-px bg-onefeed-line" aria-hidden="true" />
-            {renderPlannedItems()}
           </nav>
         )}
 
@@ -480,12 +460,6 @@ export function PlatformBar({
                 </div>
               </>
             )}
-            <p className="mt-[18px] mb-[5px] text-[10px] tracking-[.08em] text-onefeed-muted">
-              {i18n.t('platformBar.planned')}
-            </p>
-            <div className="grid">
-              {renderPlannedItems(true)}
-            </div>
           </section>
         </div>
       )}

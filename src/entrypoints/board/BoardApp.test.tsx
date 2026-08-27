@@ -51,9 +51,9 @@ describe('launch center', () => {
     expect(container.querySelectorAll('.more-card')).toHaveLength(
       getSupportedPlatforms().length - 3,
     );
-    expect(container.textContent).toContain(
-      '即将支持：微博 · 小红书 · Reddit · 哔哩哔哩 · YouTube',
-    );
+    expect(container.textContent).not.toContain('即将支持');
+    expect(container.textContent).not.toContain('哔哩哔哩');
+    expect(container.textContent).not.toContain('YouTube');
 
     const platformLinks = [...container.querySelectorAll<HTMLAnchorElement>(
       '.resume-action, .recent-row, .more-card',

@@ -35,6 +35,18 @@ export const PLATFORM_PRESENTATIONS: PlatformPresentation[] = [
     accent: '#0f8a6a',
   },
   {
+    id: 'weibo',
+    scope: i18n.t('platform.weibo.scope'),
+    access: i18n.t('platform.weibo.access'),
+    accent: '#ff8200',
+  },
+  {
+    id: 'xiaohongshu',
+    scope: i18n.t('platform.xiaohongshu.scope'),
+    access: i18n.t('platform.xiaohongshu.access'),
+    accent: '#ff2442',
+  },
+  {
     id: 'hacker-news',
     scope: i18n.t('platform.hackerNews.scope'),
     access: i18n.t('platform.hackerNews.access'),
@@ -45,6 +57,12 @@ export const PLATFORM_PRESENTATIONS: PlatformPresentation[] = [
     scope: i18n.t('platform.thirtySixKr.scope'),
     access: i18n.t('platform.thirtySixKr.access'),
     accent: '#ff5a36',
+  },
+  {
+    id: 'reddit',
+    scope: i18n.t('platform.reddit.scope'),
+    access: i18n.t('platform.reddit.access'),
+    accent: '#ff4500',
   },
 ];
 
