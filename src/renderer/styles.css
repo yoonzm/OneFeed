@@ -314,10 +314,22 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
   .feed-card-side-media .card-meta-row { grid-area: meta; }
   .feed-card-side-media .card-media-aside .media-button,
   .feed-card-side-media .card-media-aside .video-player,
-  .feed-card-side-media .card-media-aside .video-poster {
+  .feed-card-side-media .card-media-aside .video-poster,
+  .feed-card-side-media .card-media-aside .link-preview-media {
     height: 144px;
     max-height: 144px;
     object-fit: cover;
+  }
+  .feed-card-link-preview-media .card-main {
+    grid-template-areas:
+      "body media"
+      "meta meta";
+  }
+  .feed-card-link-preview-media.item-card-titled .card-main {
+    grid-template-areas:
+      "title media"
+      "body media"
+      "meta meta";
   }
   .feed-card-side-media .card-seen-marker { right: 236px; }
 }
@@ -398,11 +410,24 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 }
 .link-preview > span { order: -1; padding: 16px 18px; }
 .link-preview img { width: 128px; height: 100%; object-fit: cover; }
+.feed-card-link-preview-media .link-preview { display: block; min-height: 0; }
+.feed-card-link-preview-media .link-preview > span { display: block; }
+.feed-card-link-preview-media .link-preview > img { display: none; }
 .link-preview small, .link-preview strong { display: block; }
 .link-preview small { color: var(--muted); font-size: 10px; }
 .link-preview strong { margin-top: 3px; font-size: 14px; line-height: 1.45; }
 .link-preview p { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 .link-preview:hover { border-color: var(--color-onefeed-line-strong); }
+.link-preview-media {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--color-onefeed-media);
+}
+.link-preview-media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.link-preview-media:hover { border-color: var(--color-onefeed-line-strong); }
 
 .quote-block {
   display: block;
@@ -553,7 +578,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--color-onefeed-f
   .media-button { height: 110px; }
   .feed-card-side-media .card-media-aside .media-button,
   .feed-card-side-media .card-media-aside .video-player,
-  .feed-card-side-media .card-media-aside .video-poster {
+  .feed-card-side-media .card-media-aside .video-poster,
+  .feed-card-side-media .card-media-aside .link-preview-media {
     height: min(48vw, 220px);
     max-height: 220px;
     object-fit: cover;

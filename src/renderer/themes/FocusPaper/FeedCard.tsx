@@ -25,10 +25,17 @@ interface FeedCardProps {
   onAction: (item: FeedItem, action: FeedActionDescriptor) => void;
 }
 
-type FeedMediaBlock = Extract<FeedBlock, { type: 'gallery' | 'video' }>;
+type FeedMediaBlock = Extract<FeedBlock, { type: 'gallery' | 'video' | 'linkPreview' }>;
 
-/** Feed 只保留首个有效内容媒体，并将图库收敛为单图右侧预览。 */
+/** 带图外链属于整条内容的视觉摘要，优先于链接卡内部的缩略图。 */
 function getSideMedia(item: FeedItem): FeedMediaBlock | undefined {
+  const linkPreview = item.previewBlocks.find(
+    (block): block is Extract<FeedBlock, { type: 'linkPreview' }> => (
+      block.type === 'linkPreview' && Boolean(block.preview.image)
+    ),
+  );
+  if (linkPreview) return linkPreview;
+
   for (const block of item.previewBlocks) {
     if (block.type === 'gallery') {
       const image = block.items[0];
@@ -57,10 +64,11 @@ export function FeedCard({
   const contentBlocks = item.previewBlocks.filter(
     (block) => block.type !== 'gallery' && block.type !== 'video',
   );
+  const hasLinkPreviewMedia = sideMedia?.type === 'linkPreview';
 
   return (
     <article
-      className={`item-card feed-card feed-card-${item.kind} feed-card-${item.role} ${item.title ? 'item-card-titled' : 'item-card-untitled'} ${sideMedia ? 'feed-card-side-media' : ''} ${densityClassName} ${isSeen ? 'feed-card-seen' : ''}`.trim()}
+      className={`item-card feed-card feed-card-${item.kind} feed-card-${item.role} ${item.title ? 'item-card-titled' : 'item-card-untitled'} ${sideMedia ? 'feed-card-side-media' : ''} ${hasLinkPreviewMedia ? 'feed-card-link-preview-media' : ''} ${densityClassName} ${isSeen ? 'feed-card-seen' : ''}`.trim()}
       data-seen={isSeen ? 'true' : undefined}
     >
       <div className="card-main">
@@ -69,12 +77,29 @@ export function FeedCard({
 
         {sideMedia && (
           <div className="card-media-aside">
-            <BlockRenderer
-              block={sideMedia}
-              expanded={false}
-              onPreview={setPreview}
-              compactGallery
-            />
+            {sideMedia.type === 'linkPreview' && sideMedia.preview.image ? (
+              <a
+                className="link-preview-media"
+                href={sideMedia.preview.url}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={sideMedia.preview.title || sideMedia.preview.url}
+                onClick={onSeen}
+              >
+                <img
+                  src={sideMedia.preview.image}
+                  alt=""
+                  loading="lazy"
+                />
+              </a>
+            ) : (
+              <BlockRenderer
+                block={sideMedia}
+                expanded={false}
+                onPreview={setPreview}
+                compactGallery
+              />
+            )}
           </div>
         )}
 

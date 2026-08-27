@@ -144,6 +144,32 @@ describe('parseTwitterCard', () => {
       });
   });
 
+  it('omits tweet text that duplicates the external link title', () => {
+    document.body.innerHTML = `
+      <article data-testid="tweet">
+        <div data-testid="User-Name"><a href="/BBCWorld">BBC News (World)</a></div>
+        <a href="/BBCWorld/status/43"><time datetime="2026-08-27T08:00:00.000Z">1h</time></a>
+        <div data-testid="tweetText">At least one dead after car crashes into crowd</div>
+        <a href="https://bbc.com/news/article">
+          <div data-testid="card.wrapper">
+            <img src="https://example.com/breaking.jpg" alt="" />
+            <span>At least one dead after car crashes into crowd</span>
+          </div>
+        </a>
+      </article>`;
+
+    const item = parseTwitterCard(document.querySelector('article')!, new URL('https://x.com/home'));
+
+    expect(item?.previewBlocks).toEqual([{
+      type: 'linkPreview',
+      preview: {
+        url: 'https://bbc.com/news/article',
+        title: 'At least one dead after car crashes into crowd',
+        image: 'https://example.com/breaking.jpg',
+      },
+    }]);
+  });
+
   it('ignores promoted cards without a timestamp permalink', () => {
     document.body.innerHTML = `
       <article data-testid="tweet">
