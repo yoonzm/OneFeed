@@ -6,14 +6,15 @@ const extensionVersion = process.env.EXTENSION_VERSION?.trim();
 export default defineConfig({
   srcDir: 'src',
   manifestVersion: 3,
-  modules: ['@wxt-dev/module-react'],
+  modules: ['@wxt-dev/module-react', '@wxt-dev/i18n/module'],
   vite: () => ({
     plugins: [tailwindcss()],
   }),
   manifest: {
     ...(extensionVersion ? { version: extensionVersion } : {}),
-    name: 'OneFeed — One way to read your feeds',
-    description: '把不同网站的信息流统一成你喜欢的阅读体验，让你重新掌握信息流的界面、内容密度与阅读方式。',
+    default_locale: 'en',
+    name: '__MSG_manifest_name__',
+    description: '__MSG_manifest_description__',
     permissions: ['storage'],
     icons: {
       16: 'icons/icon-16.png',
@@ -26,7 +27,7 @@ export default defineConfig({
         16: 'icons/icon-16.png',
         32: 'icons/icon-32.png',
       },
-      default_title: '打开 OneFeed 启动中心（已开启）',
+      default_title: '__MSG_manifest_actionEnabled__',
     },
   },
 });

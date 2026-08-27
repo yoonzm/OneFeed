@@ -4,6 +4,7 @@ import type {
   FeedImage,
   ThreadEntry as ThreadEntryItem,
 } from '../../../types/feed';
+import { i18n } from '../../../i18n';
 import { ActionBar } from '../../components/ActionBar';
 import {
   ItemBody,
@@ -49,7 +50,7 @@ export function ThreadEntry({ item, index, onAction }: ThreadEntryProps) {
               aria-expanded={expanded}
               onClick={() => setExpanded(!expanded)}
             >
-              {expanded ? '收起' : '展开全文'}
+              {expanded ? i18n.t('reader.collapse') : i18n.t('reader.expandFull')}
             </button>
           )}
 
@@ -60,7 +61,7 @@ export function ThreadEntry({ item, index, onAction }: ThreadEntryProps) {
               target="_blank"
               rel="noreferrer"
             >
-              {openAction?.label || '查看详情'}
+              {openAction?.label || i18n.t('reader.viewDetails')}
             </a>
           )}
 

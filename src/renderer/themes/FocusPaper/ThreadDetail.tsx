@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import type { ThreadDetail as ThreadDetailContent } from '../../../types/detail';
 import type { FeedActionDescriptor, FeedImage } from '../../../types/feed';
+import { formatDateTime, formatNumber, i18n } from '../../../i18n';
 import { ActionBar } from '../../components/ActionBar';
 import { BlockRenderer } from '../../components/BlockRenderer';
 import { hasExpandableText } from './contentItemUtils';
@@ -15,19 +16,6 @@ interface ThreadDetailProps {
   ) => void;
 }
 
-function formatPublishedAt(value: string | number): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
-
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
-}
-
 /** 讨论详情由独立主题头、Thread 条目和可选分页三部分组成。 */
 export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
   const [preview, setPreview] = useState<FeedImage>();
@@ -37,6 +25,12 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
   const replyMetric = content.header.metrics.find((metric) => metric.kind === 'replies');
   // 原站总数可能大于当前已解析条目数；没有可用统计值时再回退到本地长度。
   const totalEntries = replyMetric?.value || content.entries.length;
+  const entryTitle = content.entryKind === 'answer'
+    ? i18n.t('reader.answers')
+    : i18n.t('reader.replies');
+  const entryListLabel = content.entryKind === 'answer'
+    ? i18n.t('reader.answerList')
+    : i18n.t('reader.replyList');
   const isQuestion = content.header.role === 'question';
   const questionBodyHasKnownOverflow = isQuestion && (
     hasExpandableText(content.header.body) ||
@@ -85,11 +79,11 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
         )}
 
         {content.header.flags && Object.values(content.header.flags).some(Boolean) && (
-          <div className="flag-row" aria-label="内容状态">
-            {content.header.flags.pinned && <span>置顶</span>}
-            {content.header.flags.sensitive && <span>敏感内容</span>}
-            {content.header.flags.spoiler && <span>含剧透</span>}
-            {content.header.flags.locked && <span>已锁定</span>}
+          <div className="flag-row" aria-label={i18n.t('common.contentStatus')}>
+            {content.header.flags.pinned && <span>{i18n.t('common.flagPinned')}</span>}
+            {content.header.flags.sensitive && <span>{i18n.t('common.flagSensitive')}</span>}
+            {content.header.flags.spoiler && <span>{i18n.t('common.flagSpoiler')}</span>}
+            {content.header.flags.locked && <span>{i18n.t('common.flagLocked')}</span>}
           </div>
         )}
 
@@ -107,7 +101,7 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
             <div>
               <strong>{content.header.author.name}</strong>
               {content.header.publishedAt !== undefined && (
-                <span><time>{formatPublishedAt(content.header.publishedAt)}</time></span>
+                <span><time>{formatDateTime(content.header.publishedAt)}</time></span>
               )}
             </div>
           </div>
@@ -133,7 +127,9 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
             aria-expanded={questionExpanded}
             onClick={() => setQuestionExpanded(!questionExpanded)}
           >
-            {questionExpanded ? '收起问题详情' : '展开问题详情'}
+            {questionExpanded
+              ? i18n.t('reader.collapseQuestion')
+              : i18n.t('reader.expandQuestion')}
           </button>
         )}
 
@@ -150,10 +146,14 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
         />
       </article>
 
-      <section className="thread-entries" aria-label={`${content.entryLabel}列表`}>
+      <section className="thread-entries" aria-label={entryListLabel}>
         <header className="thread-list-header">
-          <h2>{content.entryLabel}</h2>
-          <span>{totalEntries.toLocaleString('zh-CN')} 条</span>
+          <h2>{entryTitle}</h2>
+          <span>{i18n.t(
+            content.entryKind === 'answer' ? 'reader.answerCount' : 'reader.replyCount',
+            totalEntries,
+            [formatNumber(totalEntries)],
+          )}</span>
         </header>
         {/* Answer 只提供详情预览；Reply 作为讨论组成部分在当前线程内阅读。 */}
         {content.entries.length ? content.entries.map((item, index) => (
@@ -165,23 +165,25 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
           />
         )) : (
           <section className="thread-empty" aria-live="polite">
-            正在整理{content.entryLabel}…
+            {i18n.t(content.entryKind === 'answer'
+              ? 'reader.loadingAnswers'
+              : 'reader.loadingReplies')}
           </section>
         )}
       </section>
 
       {/* paged 模式使用原站 URL 导航；infinite 模式由 DetailApp 的滚动同步负责。 */}
       {content.pagination && content.pagination.totalPages > 1 && (
-        <nav className="thread-pagination" aria-label="分页">
+        <nav className="thread-pagination" aria-label={i18n.t('common.pagination')}>
           {content.pagination.previousUrl ? (
-            <a href={content.pagination.previousUrl}>上一页</a>
-          ) : <span aria-disabled="true">上一页</span>}
+            <a href={content.pagination.previousUrl}>{i18n.t('common.previousPage')}</a>
+          ) : <span aria-disabled="true">{i18n.t('common.previousPage')}</span>}
           <strong>
             {content.pagination.currentPage} / {content.pagination.totalPages}
           </strong>
           {content.pagination.nextUrl ? (
-            <a href={content.pagination.nextUrl}>下一页</a>
-          ) : <span aria-disabled="true">下一页</span>}
+            <a href={content.pagination.nextUrl}>{i18n.t('common.nextPage')}</a>
+          ) : <span aria-disabled="true">{i18n.t('common.nextPage')}</span>}
         </nav>
       )}
 
@@ -190,10 +192,10 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
           className="lightbox"
           type="button"
           onClick={() => setPreview(undefined)}
-          aria-label="关闭图片预览"
+          aria-label={i18n.t('common.closeImagePreview')}
         >
-          <img src={preview.url} alt={preview.alt || '预览图片'} />
-          <span>点击任意位置关闭</span>
+          <img src={preview.url} alt={preview.alt || i18n.t('common.imagePreview')} />
+          <span>{i18n.t('common.clickAnywhereToClose')}</span>
         </button>
       )}
     </>

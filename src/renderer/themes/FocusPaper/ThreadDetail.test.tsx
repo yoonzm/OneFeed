@@ -60,7 +60,7 @@ const content: ThreadDetailContent = {
     metrics: [],
     actions: [{ id: 'open', kind: 'open', label: '查看详情', enabled: true }],
   }],
-  entryLabel: '回答',
+  entryKind: 'answer',
   loadingMode: 'infinite',
 };
 

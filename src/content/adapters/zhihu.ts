@@ -1,5 +1,6 @@
 import DOMPurify from 'dompurify';
 import { ZHIHU_PLATFORM } from '../../config/platforms';
+import { i18n } from '../../i18n';
 import type {
   FeedActionDescriptor,
   FeedAuthor,
@@ -451,7 +452,7 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
       id: 'react',
       kind: 'react',
       variant: 'agree',
-      label: '赞同',
+      label: i18n.t('adapter.agree'),
       count: agrees,
       enabled: true,
       fallback: 'openOriginal',
@@ -463,7 +464,7 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
       id: 'downvote',
       kind: 'react',
       variant: 'downvote',
-      label: '踩',
+      label: i18n.t('adapter.downvote'),
       count: downvotes,
       enabled: true,
       fallback: 'openOriginal',
@@ -473,7 +474,7 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
     {
       id: 'reply',
       kind: 'reply',
-      label: '评论',
+      label: i18n.t('adapter.comments'),
       count: comments,
       enabled: true,
       fallback: 'openOriginal',
@@ -481,7 +482,7 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
     {
       id: 'bookmark',
       kind: 'bookmark',
-      label: '收藏',
+      label: i18n.t('adapter.bookmark'),
       count: bookmarks,
       enabled: true,
       fallback: 'openOriginal',
@@ -490,12 +491,12 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
       id: 'like',
       kind: 'react',
       variant: 'like',
-      label: '喜欢',
+      label: i18n.t('adapter.like'),
       count: likes,
       enabled: true,
       fallback: 'openOriginal',
     },
-    { id: 'open', kind: 'open', label: '查看原文', enabled: true },
+    { id: 'open', kind: 'open', label: i18n.t('adapter.openOriginal'), enabled: true },
   );
 
   return {
@@ -504,7 +505,7 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
     title: title || undefined,
     role,
     author: {
-      name: authorName || '知乎用户',
+      name: authorName || i18n.t('adapter.zhihuUser'),
       avatar,
       link: absoluteUrl(firstAttribute(element, ['.AuthorInfo-name a', '.UserLink-link'], 'href')) || undefined,
     },
@@ -514,8 +515,8 @@ export function parseZhihuContent(element: Element): ParsedZhihuContent | null {
     updatedAt: metadata.dateModified ?? (structuredUpdatedAt || undefined),
     blocks,
     metrics: [
-      { kind: 'reactions', value: agrees, label: '赞同' },
-      { kind: 'replies', value: comments, label: '评论' },
+      { kind: 'reactions', value: agrees, label: i18n.t('adapter.agree') },
+      { kind: 'replies', value: comments, label: i18n.t('adapter.comments') },
     ],
     actions,
   };
@@ -548,14 +549,14 @@ export function parseZhihuCard(element: Element): FeedItem | null {
       title,
       author: { name: '', avatar: '' },
       sequence: parseCount(firstText(element, ['.HotItem-index'])) || undefined,
-      context: { reason: { type: 'recommended', label: '热榜' } },
+      context: { reason: { type: 'recommended', label: i18n.t('adapter.hotList') } },
       previewBlocks,
       metrics: [{
         kind: 'score',
         value: parseCount(firstText(element, ['.HotItem-metrics'])),
-        label: '热度',
+        label: i18n.t('adapter.popularity'),
       }],
-      actions: [{ id: 'open', kind: 'open', label: '查看原文', enabled: true }],
+      actions: [{ id: 'open', kind: 'open', label: i18n.t('adapter.openOriginal'), enabled: true }],
     };
   }
 

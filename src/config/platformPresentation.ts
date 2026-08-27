@@ -1,4 +1,5 @@
 import type { PlatformId } from './platforms';
+import { i18n } from '../i18n';
 
 export interface PlatformPresentation {
   id: PlatformId;
@@ -11,32 +12,32 @@ export interface PlatformPresentation {
 export const PLATFORM_PRESENTATIONS: PlatformPresentation[] = [
   {
     id: 'zhihu',
-    scope: '首页、热榜、问题与文章',
-    access: '部分页面需登录',
+    scope: i18n.t('platform.zhihu.scope'),
+    access: i18n.t('platform.zhihu.access'),
     accent: '#1677ff',
   },
   {
     id: 'v2ex',
-    scope: '首页分类、最近主题、VXNA 与主题详情',
-    access: '无需登录即可体验',
+    scope: i18n.t('platform.v2ex.scope'),
+    access: i18n.t('platform.v2ex.access'),
     accent: '#77889a',
   },
   {
     id: 'linux-do',
-    scope: '话题列表与话题详情',
-    access: '部分内容需登录',
+    scope: i18n.t('platform.linuxDo.scope'),
+    access: i18n.t('platform.linuxDo.access'),
     accent: '#0f8a6a',
   },
   {
     id: 'hacker-news',
-    scope: 'News、Newest、Ask、Show 与 Jobs',
-    access: '无需登录即可体验',
+    scope: i18n.t('platform.hackerNews.scope'),
+    access: i18n.t('platform.hackerNews.access'),
     accent: '#ff6600',
   },
   {
     id: '36kr',
-    scope: '资讯频道、文章列表与文章详情',
-    access: '无需登录即可浏览',
+    scope: i18n.t('platform.thirtySixKr.scope'),
+    access: i18n.t('platform.thirtySixKr.access'),
     accent: '#ff5a36',
   },
 ];

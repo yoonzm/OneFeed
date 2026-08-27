@@ -1,4 +1,5 @@
 import { HACKER_NEWS_PLATFORM } from '../../config/platforms';
+import { i18n } from '../../i18n';
 import type { FeedItem } from '../../types/feed';
 import {
   BaseAdapter,
@@ -105,25 +106,25 @@ export function parseHackerNewsCard(
     publishedAt: parsePublishedAt(metadataRow),
     title,
     previewBlocks: [],
-    metrics: scoreElement ? [{ kind: 'score', value: score, label: '分数' }] : [],
+    metrics: scoreElement ? [{ kind: 'score', value: score, label: i18n.t('adapter.score') }] : [],
     actions: [
       ...(voteLink ? [{
         id: 'react',
         kind: 'react' as const,
         variant: 'upvote' as const,
-        label: '赞同',
+        label: i18n.t('adapter.agree'),
         enabled: true,
         fallback: 'openOriginal' as const,
       }] : []),
       ...(commentsLink ? [{
         id: 'reply',
         kind: 'reply' as const,
-        label: '评论',
+        label: i18n.t('adapter.comments'),
         count: replies,
         enabled: true,
         fallback: 'openOriginal' as const,
       }] : []),
-      { id: 'open', kind: 'open', label: '查看原文', enabled: true },
+      { id: 'open', kind: 'open', label: i18n.t('adapter.openOriginal'), enabled: true },
     ],
   };
 }

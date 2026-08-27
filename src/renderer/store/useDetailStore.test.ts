@@ -40,7 +40,7 @@ describe('useDetailStore', () => {
         actions: [],
       },
       entries: [],
-      entryLabel: '回复',
+      entryKind: 'reply',
       loadingMode: 'paged',
     };
 

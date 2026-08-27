@@ -4,6 +4,7 @@ import type {
   CommentRequestResult,
   CommentSnapshot,
 } from '../../types/comments';
+import { i18n } from '../../i18n';
 import type { FeedMetric } from '../../types/feed';
 import {
   parseCount,
@@ -73,7 +74,7 @@ function parseZhihuComment(item: Element): CommentItem | null {
   const authorLink = ownedElements<HTMLAnchorElement>(item, 'a[href*="/people/"]')
     .find((link) => normalizedText(link));
   const avatar = ownedElements<HTMLImageElement>(item, 'img.Avatar')[0];
-  const authorName = normalizedText(authorLink || null) || avatar?.alt?.trim() || '知乎用户';
+  const authorName = normalizedText(authorLink || null) || avatar?.alt?.trim() || i18n.t('adapter.zhihuUser');
   const parent = item.parentElement?.closest('[data-id]');
   const buttons = ownedElements<HTMLButtonElement>(item, 'button, [role="button"]');
   const reactionButton = buttons.find((button) => (
@@ -91,7 +92,7 @@ function parseZhihuComment(item: Element): CommentItem | null {
       return /^展开其他/.test(label) ? loadedReplyCount + count : count;
     }));
   const metrics: FeedMetric[] = reactions
-    ? [{ kind: 'reactions', value: reactions, label: '赞' }]
+    ? [{ kind: 'reactions', value: reactions, label: i18n.t('adapter.reactions') }]
     : [];
 
   return {

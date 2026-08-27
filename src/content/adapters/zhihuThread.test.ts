@@ -47,7 +47,7 @@ describe('Zhihu question thread', () => {
     expect(thread).toMatchObject({
       id: 'zhihu_question_1',
       kind: 'thread',
-      entryLabel: '回答',
+      entryKind: 'answer',
       loadingMode: 'infinite',
       header: {
         role: 'question',

@@ -1,4 +1,5 @@
 import DOMPurify from 'dompurify';
+import { i18n } from '../../i18n';
 import type { ThreadDetail, ThreadHeader, ThreadPagination } from '../../types/detail';
 import type { FeedBlock, FeedImage, ThreadEntry } from '../../types/feed';
 import type { DetailAdapterDefinition, DetailListener } from './detail';
@@ -86,7 +87,7 @@ export function parseV2exReply(element: Element, url: URL): ThreadEntry | null {
 
   const authorLink = firstNonEmptyLink(element, 'a.dark[href^="/member/"]');
   const avatar = element.querySelector<HTMLImageElement>('img.avatar');
-  const authorName = authorLink?.textContent?.trim() || avatar?.alt?.trim() || 'V2EX 用户';
+  const authorName = authorLink?.textContent?.trim() || avatar?.alt?.trim() || i18n.t('adapter.v2exUser');
   const originalUrl = new URL(url.href);
   originalUrl.hash = element.id;
   const reactions = parseV2exCount(element.querySelector('.small.fade')?.textContent || '');
@@ -108,7 +109,7 @@ export function parseV2exReply(element: Element, url: URL): ThreadEntry | null {
     },
     publishedAt: element.querySelector('.ago')?.getAttribute('title') || undefined,
     body: parseBlocks(body),
-    metrics: reactions ? [{ kind: 'reactions', value: reactions, label: '喜欢' }] : [],
+    metrics: reactions ? [{ kind: 'reactions', value: reactions, label: i18n.t('adapter.like') }] : [],
     actions: [],
   };
 }
@@ -145,7 +146,7 @@ export function parseV2exThread(
     originalUrl: url.href,
     title,
     author: {
-      name: authorLink?.textContent?.trim() || avatar?.alt?.trim() || 'V2EX 用户',
+      name: authorLink?.textContent?.trim() || avatar?.alt?.trim() || i18n.t('adapter.v2exUser'),
       avatar: absoluteUrl(avatar?.getAttribute('src') || ''),
       link: authorLink
         ? absoluteUrl(authorLink.getAttribute('href') || '') || undefined
@@ -161,21 +162,21 @@ export function parseV2exThread(
       tags,
     } : undefined,
     metrics: [
-      ...(reactions ? [{ kind: 'reactions' as const, value: reactions, label: '赞同' }] : []),
-      { kind: 'replies', value: replies, label: '回复' },
-      ...(views ? [{ kind: 'views' as const, value: views, label: '浏览' }] : []),
+      ...(reactions ? [{ kind: 'reactions' as const, value: reactions, label: i18n.t('adapter.agree') }] : []),
+      { kind: 'replies', value: replies, label: i18n.t('adapter.reply') },
+      ...(views ? [{ kind: 'views' as const, value: views, label: i18n.t('adapter.views') }] : []),
     ],
     actions: [
       ...(headerElement.querySelector('.votes .vote') ? [{
         id: 'react',
         kind: 'react' as const,
         variant: 'agree' as const,
-        label: '赞同',
+        label: i18n.t('adapter.agree'),
         count: reactions,
         enabled: true,
         fallback: 'openOriginal' as const,
       }] : []),
-      { id: 'open', kind: 'open', label: '查看原主题', enabled: true },
+      { id: 'open', kind: 'open', label: i18n.t('adapter.openTopic'), enabled: true },
     ],
   };
   const entries = Array.from(root.querySelectorAll('#Main .cell[id^="r_"]'))
@@ -190,7 +191,7 @@ export function parseV2exThread(
     kind: 'thread',
     header,
     entries,
-    entryLabel: '回复',
+    entryKind: 'reply',
     loadingMode: 'paged',
     pagination: parsePagination(root, url),
   };

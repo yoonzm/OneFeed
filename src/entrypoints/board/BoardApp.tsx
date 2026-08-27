@@ -11,12 +11,14 @@ import {
 } from '../../config/platformPresentation';
 import {
   getPlatformById,
+  getPlatformDisplayName,
   getPlannedPlatforms,
   getSupportedPlatforms,
   type PlatformId,
 } from '../../config/platforms';
 import { DiaTextReveal } from '../../components/DiaTextReveal';
 import { PlatformIcon } from '../../components/PlatformIcon';
+import { i18n } from '../../i18n';
 import { useColorScheme } from '../../theme/useColorScheme';
 import {
   DEFAULT_RECENT_PLATFORM_IDS,
@@ -117,10 +119,10 @@ export function BoardApp() {
 
   return (
     <div className="board-page" data-onefeed-theme={colorScheme}>
-      <a className="skip-link" href="#main">跳到主要内容</a>
+      <a className="skip-link" href="#main">{i18n.t('common.skipToMain')}</a>
 
       <header className="board-header">
-        <a className="board-brand" href="#main" aria-label="OneFeed 启动中心首页">
+        <a className="board-brand" href="#main" aria-label={i18n.t('board.homeLabel')}>
           <img src="/icons/icon-128.png" alt="" />
           <DiaTextReveal text="OneFeed" />
         </a>
@@ -135,7 +137,9 @@ export function BoardApp() {
           >
             <span className="enabled-label">
               <i aria-hidden="true" />
-              OneFeed {enabled ? '已开启' : '已暂停'}
+              {i18n.t('board.status', [
+                enabled ? i18n.t('common.enabled') : i18n.t('common.paused'),
+              ])}
             </span>
             <span className="switch-track" aria-hidden="true"><i /></span>
           </button>
@@ -143,8 +147,12 @@ export function BoardApp() {
           <button
             className="icon-action"
             type="button"
-            aria-label={`切换到${nextColorScheme === 'dark' ? '深色' : '浅色'}主题`}
-            title={`切换到${nextColorScheme === 'dark' ? '深色' : '浅色'}主题`}
+            aria-label={nextColorScheme === 'dark'
+              ? i18n.t('common.themeSwitchDark')
+              : i18n.t('common.themeSwitchLight')}
+            title={nextColorScheme === 'dark'
+              ? i18n.t('common.themeSwitchDark')
+              : i18n.t('common.themeSwitchLight')}
             disabled={!ready}
             onClick={() => setColorScheme(nextColorScheme)}
           >
@@ -153,18 +161,18 @@ export function BoardApp() {
 
           <button className="settings-action" type="button" onClick={openExtensionSettings}>
             <GearSix size={23} />
-            <span>设置</span>
+            <span>{i18n.t('common.settings')}</span>
           </button>
         </div>
       </header>
 
       <main className="board-main" id="main">
         <section className="board-intro" aria-labelledby="board-title">
-          <h1 id="board-title">继续上次的阅读。</h1>
-          <p>选择一个网站，继续你的专注阅读。</p>
+          <h1 id="board-title">{i18n.t('board.introTitle')}</h1>
+          <p>{i18n.t('board.introDescription')}</p>
         </section>
 
-        <section className="resume-section" aria-label="继续阅读">
+        <section className="resume-section" aria-label={i18n.t('board.resume')}>
           <div className="resume-platform">
             <span
               className="platform-mark resume-mark"
@@ -176,7 +184,7 @@ export function BoardApp() {
               <PlatformIcon platformId={primaryPlatform.id as PlatformId} />
             </span>
             <span className="resume-copy">
-              <strong>{primaryPlatform.name}</strong>
+              <strong>{getPlatformDisplayName(primaryPlatform.id as PlatformId)}</strong>
               <span>{getPlatformPresentation(primaryPlatform.id as PlatformId).scope}</span>
             </span>
           </div>
@@ -188,19 +196,21 @@ export function BoardApp() {
               '--platform-accent': getPlatformPresentation(primaryPlatform.id as PlatformId).accent,
             } as CSSProperties}
           >
-            打开{primaryPlatform.name}
+            {i18n.t('board.openPlatform', [
+              getPlatformDisplayName(primaryPlatform.id as PlatformId),
+            ])}
             <ArrowRight size={23} weight="regular" aria-hidden="true" />
           </a>
           <p className={`state-note ${enabled ? '' : 'is-paused'}`}>
             <Info size={20} aria-hidden="true" />
             {enabled
-              ? '暂停后，所有网站立即恢复原页面。'
-              : 'OneFeed 已暂停，打开网站后将显示原页面。'}
+              ? i18n.t('board.enabledNote')
+              : i18n.t('board.pausedNote')}
           </p>
         </section>
 
         <section className="platform-section" aria-labelledby="recent-title">
-          <h2 id="recent-title">最近使用</h2>
+          <h2 id="recent-title">{i18n.t('board.recent')}</h2>
           <div className="recent-list">
             {secondaryPlatforms.map((platform) => {
               const presentation = getPlatformPresentation(platform.id as PlatformId);
@@ -216,7 +226,7 @@ export function BoardApp() {
                     <PlatformIcon platformId={platform.id as PlatformId} />
                   </span>
                   <span>
-                    <strong>{platform.name}</strong>
+                    <strong>{getPlatformDisplayName(platform.id as PlatformId)}</strong>
                     <small>{presentation.scope}</small>
                   </span>
                   <ArrowRight className="card-arrow" size={21} aria-hidden="true" />
@@ -227,7 +237,7 @@ export function BoardApp() {
         </section>
 
         <section className="platform-section more-section" aria-labelledby="more-title">
-          <h2 id="more-title">更多网站</h2>
+          <h2 id="more-title">{i18n.t('board.more')}</h2>
           <div className="more-grid">
             {morePlatforms.map((platform) => {
               const presentation = getPlatformPresentation(platform.id as PlatformId);
@@ -243,7 +253,7 @@ export function BoardApp() {
                     <PlatformIcon platformId={platform.id as PlatformId} />
                   </span>
                   <span>
-                    <strong>{platform.name}</strong>
+                    <strong>{getPlatformDisplayName(platform.id as PlatformId)}</strong>
                     <small>{presentation.scope}</small>
                   </span>
                   <ArrowRight className="card-arrow" size={19} aria-hidden="true" />
@@ -256,11 +266,13 @@ export function BoardApp() {
 
       <footer className="board-footer">
         <p>
-          即将支持：{plannedPlatforms.map((platform) => platform.name).join(' · ')}
+          {i18n.t('board.planned', [plannedPlatforms.map((platform) => (
+            getPlatformDisplayName(platform.id as PlatformId)
+          )).join(' · ')])}
         </p>
-        <nav aria-label="帮助链接">
-          <a href={GITHUB_URL}>使用指南</a>
-          <a href={ISSUE_URL}>反馈</a>
+        <nav aria-label={i18n.t('common.helpLinks')}>
+          <a href={GITHUB_URL}>{i18n.t('board.guide')}</a>
+          <a href={ISSUE_URL}>{i18n.t('board.feedback')}</a>
         </nav>
       </footer>
     </div>

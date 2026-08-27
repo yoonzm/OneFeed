@@ -1,5 +1,6 @@
 import type { ArticleDetail } from '../../types/detail';
 import type { CommentCommand, CommentRequestResult } from '../../types/comments';
+import { formatNumber, i18n } from '../../i18n';
 import type { DetailAdapterDefinition, DetailListener } from './detail';
 import {
   findZhihuContentBody,
@@ -99,16 +100,19 @@ function questionNavigation(
       if (!/^查看全部.*回答$/.test(label)) return false;
 
       try {
-        // 仅采纳当前问题的入口，避免误用页面中其他问题或回答链接。
+        // 页面可能包含其他问题入口；数量只采信当前问题自己的导航链接。
         return new URL(link.getAttribute('href') || '', url.href).pathname.replace(/\/$/, '') ===
           questionPath;
       } catch {
         return false;
       }
     });
+  const answerCount = parseCount(originalLink?.textContent || '');
 
   return {
-    label: originalLink?.textContent?.replace(/\s+/g, ' ').trim() || '查看全部回答',
+    label: answerCount > 0
+      ? i18n.t('adapter.viewAllAnswersCount', answerCount, [formatNumber(answerCount)])
+      : i18n.t('adapter.viewAllAnswers'),
     url: new URL(questionPath, url.origin).href,
   };
 }
@@ -202,12 +206,12 @@ export function parseZhihuDetail(
           {
             kind: 'reactions',
             value: metricValue(metadata.upvoteCount, reactions),
-            label: '赞同',
+            label: i18n.t('adapter.agree'),
           },
           {
             kind: 'replies',
             value: commentCount,
-            label: '评论',
+            label: i18n.t('adapter.comments'),
           },
         ],
         actions: parsed.actions

@@ -40,6 +40,8 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 ### Phase 2: 渲染引擎强化与平台扩张 (当前阶段)
 
+当前产品界面支持英文与简体中文，使用浏览器原生国际化机制自动跟随 Chrome 界面语言；英文作为其他未翻译语言的默认回退。OneFeed 自身生成的导航、状态、设置和 Adapter 通用操作文案必须使用语义化翻译 key，原站内容与动态频道名称保持原样。具体约束见 [国际化设计](Internationalization_Design.md)。
+
 #### 1. 目标平台扩展 (Platform Expansion)
 
 平台覆盖分为三个层级：

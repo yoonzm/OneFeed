@@ -237,7 +237,7 @@ describe('content surface lifecycle', () => {
             actions: [],
           },
           entries: [],
-          entryLabel: '回复',
+          entryKind: 'reply',
           loadingMode: 'paged',
         });
       });

@@ -3,10 +3,13 @@ import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import {
   getPlannedPlatforms,
   getPlatformById,
+  getPlatformDisplayName,
   getSupportedPlatforms,
   type PlatformDefinition,
+  type PlatformId,
 } from '../../config/platforms';
 import { DiaTextReveal } from '../../components/DiaTextReveal';
+import { formatNumber, i18n } from '../../i18n';
 import type { ColorScheme } from '../../theme/useColorScheme';
 import type { FeedChannel } from '../../types/feed';
 import { GitHubLink } from './GitHubLink';
@@ -120,6 +123,7 @@ export function PlatformBar({
 
   const renderSupportedLinks = (mobile = false) => supportedPlatforms.map((platform) => {
     const active = platform.id === activePlatformId;
+    const displayName = getPlatformDisplayName(platform.id as PlatformId);
     const showDesktopChannelControl = active && !mobile && channels.length > 1;
     const platformLink = (
       <a
@@ -136,7 +140,7 @@ export function PlatformBar({
         aria-current={active ? 'page' : undefined}
         onClick={(event) => handleSupportedClick(event, platform)}
       >
-        <span className={showDesktopChannelControl ? 'leading-none' : undefined}>{platform.name}</span>
+        <span className={showDesktopChannelControl ? 'leading-none' : undefined}>{displayName}</span>
         {showDesktopChannelControl && activeChannel && (
           <span
             data-onefeed-channel-label="true"
@@ -169,7 +173,10 @@ export function PlatformBar({
           ref={channelButtonRef}
           className="mr-1 inline-flex w-5 cursor-pointer items-center justify-center self-stretch border-0 bg-transparent p-0 text-onefeed-blue transition-colors hover:text-onefeed-ink focus-visible:outline-3 focus-visible:outline-offset-[-3px] focus-visible:outline-onefeed-focus"
           type="button"
-          aria-label={`切换${platform.name}频道，当前${activeChannel?.label || '未识别'}`}
+          aria-label={i18n.t('platformBar.switchChannel', [
+            displayName,
+            activeChannel?.label || i18n.t('common.unknown'),
+          ])}
           aria-haspopup="menu"
           aria-expanded={channelMenuOpen}
           aria-controls="onefeed-channel-menu"
@@ -187,7 +194,7 @@ export function PlatformBar({
             id="onefeed-channel-menu"
             className="absolute top-[58px] left-2 z-30 grid min-w-[116px] overflow-hidden rounded-[4px] border border-onefeed-line bg-onefeed-surface p-1 shadow-[0_12px_32px_rgb(15_22_34_/_16%)]"
             role="menu"
-            aria-label={`${platform.name}信息流频道`}
+            aria-label={i18n.t('platformBar.channelMenu', [displayName])}
           >
             {channels.map((channel) => (
               <button
@@ -212,18 +219,25 @@ export function PlatformBar({
     );
   });
 
-  const renderPlannedItems = (mobile = false) => plannedPlatforms.map((platform) => (
-    <span
-      key={platform.id}
-      className={mobile
-        ? `${mobileItemClass} cursor-help text-onefeed-subtle`
-        : `${desktopItemClass} cursor-help text-onefeed-faint`}
-      title="敬请期待"
-      aria-label={`${platform.name}，敬请期待`}
-    >
-      {platform.name}
-    </span>
-  ));
+  const renderPlannedItems = (mobile = false) => plannedPlatforms.map((platform) => {
+    const displayName = getPlatformDisplayName(platform.id as PlatformId);
+    return (
+      <span
+        key={platform.id}
+        className={mobile
+          ? `${mobileItemClass} cursor-help text-onefeed-subtle`
+          : `${desktopItemClass} cursor-help text-onefeed-faint`}
+        title={i18n.t('common.comingSoon')}
+        aria-label={i18n.t('platformBar.comingSoonPlatform', [displayName])}
+      >
+        {displayName}
+      </span>
+    );
+  });
+
+  const activePlatformName = activePlatform
+    ? getPlatformDisplayName(activePlatform.id as PlatformId)
+    : undefined;
 
   return (
     <header className="sticky top-0 z-20 border-b border-onefeed-line bg-onefeed-paper/95 backdrop-blur-md">
@@ -235,7 +249,7 @@ export function PlatformBar({
           <DiaTextReveal text="OneFeed" />
         </a>
 
-        <nav className="flex min-w-0 items-stretch gap-1 max-[720px]:hidden" aria-label="切换平台">
+        <nav className="flex min-w-0 items-stretch gap-1 max-[720px]:hidden" aria-label={i18n.t('platformBar.switchPlatform')}>
           {renderSupportedLinks()}
           <span className="mx-1.5 my-auto h-[18px] w-px bg-onefeed-line" aria-hidden="true" />
           {renderPlannedItems()}
@@ -246,11 +260,19 @@ export function PlatformBar({
             <span
               className="inline-flex items-center gap-1 text-[9px] leading-none tabular-nums text-onefeed-faint"
               role="status"
-              aria-label={`已隐藏 ${hiddenItemCount} 条内容`}
-              title={`已隐藏 ${hiddenItemCount} 条内容`}
+              aria-label={i18n.t(
+                'platformBar.hiddenContent',
+                hiddenItemCount,
+                [formatNumber(hiddenItemCount)],
+              )}
+              title={i18n.t(
+                'platformBar.hiddenContent',
+                hiddenItemCount,
+                [formatNumber(hiddenItemCount)],
+              )}
             >
               <EyeSlash size={12} aria-hidden="true" />
-              <span aria-hidden="true">{hiddenItemCount}</span>
+              <span aria-hidden="true">{formatNumber(hiddenItemCount)}</span>
             </span>
           )}
           <GitHubLink />
@@ -272,10 +294,12 @@ export function PlatformBar({
             }}
           >
             <span className="text-onefeed-muted max-[420px]:hidden">
-              当前：{activePlatform?.name || '未识别'}
+              {i18n.t('platformBar.current', [
+                activePlatformName || i18n.t('common.unknown'),
+              ])}
             </span>
             <strong className="text-[11px] font-onefeed-emphasis text-onefeed-blue">
-              切换平台
+              {i18n.t('platformBar.switchPlatform')}
             </strong>
           </button>
         </div>
@@ -286,7 +310,7 @@ export function PlatformBar({
           <button
             className="absolute inset-0 h-full w-full border-0 bg-onefeed-overlay/48 p-0"
             type="button"
-            aria-label="关闭平台菜单"
+            aria-label={i18n.t('platformBar.closeMenu')}
             onClick={closeMenu}
           />
           <section
@@ -301,7 +325,7 @@ export function PlatformBar({
                 id="platform-menu-title"
                 className="font-onefeed-reading text-lg leading-snug font-onefeed-emphasis"
               >
-                切换平台
+                {i18n.t('platformBar.switchPlatform')}
               </strong>
               <button
                 ref={closeButtonRef}
@@ -309,21 +333,23 @@ export function PlatformBar({
                 type="button"
                 onClick={closeMenu}
               >
-                关闭
+                {i18n.t('common.close')}
               </button>
             </div>
             <p className="mt-[18px] mb-[5px] text-[10px] tracking-[.08em] text-onefeed-muted">
-              已支持
+              {i18n.t('platformBar.supported')}
             </p>
-            <nav className="grid" aria-label="已支持平台">
+            <nav className="grid" aria-label={i18n.t('platformBar.supportedPlatforms')}>
               {renderSupportedLinks(true)}
             </nav>
             {channels.length > 1 && (
               <>
                 <p className="mt-[18px] mb-[8px] text-[10px] tracking-[.08em] text-onefeed-muted">
-                  {activePlatform?.name || '当前网站'}频道
+                  {i18n.t('platformBar.websiteChannels', [
+                    activePlatformName || i18n.t('common.currentWebsite'),
+                  ])}
                 </p>
-                <div className="grid grid-cols-2 gap-2" role="group" aria-label="切换信息流频道">
+                <div className="grid grid-cols-2 gap-2" role="group" aria-label={i18n.t('platformBar.switchFeedChannel')}>
                   {channels.map((channel) => (
                     <button
                       key={channel.id}
@@ -343,7 +369,7 @@ export function PlatformBar({
               </>
             )}
             <p className="mt-[18px] mb-[5px] text-[10px] tracking-[.08em] text-onefeed-muted">
-              待支持
+              {i18n.t('platformBar.planned')}
             </p>
             <div className="grid">
               {renderPlannedItems(true)}

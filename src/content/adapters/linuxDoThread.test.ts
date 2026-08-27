@@ -88,7 +88,7 @@ describe('Linux DO topic thread', () => {
       id: 'linux-do_topic_2735915',
       platform: 'linux-do',
       kind: 'thread',
-      entryLabel: '回复',
+      entryKind: 'reply',
       loadingMode: 'infinite',
       header: {
         role: 'topic',

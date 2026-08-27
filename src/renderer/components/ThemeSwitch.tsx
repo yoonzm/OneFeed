@@ -1,4 +1,5 @@
 import type { ColorScheme } from '../../theme/useColorScheme';
+import { i18n } from '../../i18n';
 
 interface ThemeSwitchProps {
   colorScheme: ColorScheme;
@@ -12,7 +13,9 @@ export function ThemeSwitch({
   onChange,
 }: ThemeSwitchProps) {
   const nextColorScheme = colorScheme === 'light' ? 'dark' : 'light';
-  const label = nextColorScheme === 'dark' ? '切换到深色主题' : '切换到浅色主题';
+  const label = nextColorScheme === 'dark'
+    ? i18n.t('common.themeSwitchDark')
+    : i18n.t('common.themeSwitchLight');
 
   return (
     <button

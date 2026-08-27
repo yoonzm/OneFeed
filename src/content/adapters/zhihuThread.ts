@@ -1,4 +1,5 @@
 import type { ThreadDetail, ThreadHeader } from '../../types/detail';
+import { i18n } from '../../i18n';
 import type { ThreadEntry } from '../../types/feed';
 import type { DetailAdapterDefinition, DetailListener } from './detail';
 import {
@@ -51,7 +52,7 @@ export function parseZhihuThreadAnswer(element: Element): ThreadEntry | null {
       if (action.kind === 'reply') {
         return { ...action, enabled: false, fallback: undefined };
       }
-      if (action.kind === 'open') return { ...action, label: '查看详情' };
+      if (action.kind === 'open') return { ...action, label: i18n.t('adapter.viewDetails') };
       return action;
     }),
   };
@@ -78,8 +79,8 @@ export function parseZhihuThread(
     originalUrl: url.href,
     title,
     body: description ? parseZhihuBlocks(description) : [],
-    metrics: [{ kind: 'replies', value: answerCount, label: '回答' }],
-    actions: [{ id: 'open', kind: 'open', label: '查看原问题', enabled: true }],
+    metrics: [{ kind: 'replies', value: answerCount, label: i18n.t('reader.answers') }],
+    actions: [{ id: 'open', kind: 'open', label: i18n.t('adapter.openQuestion'), enabled: true }],
   };
 
   return {
@@ -90,7 +91,7 @@ export function parseZhihuThread(
     kind: 'thread',
     header,
     entries: answers,
-    entryLabel: '回答',
+    entryKind: 'answer',
     loadingMode: 'infinite',
   };
 }

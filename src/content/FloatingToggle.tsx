@@ -1,4 +1,5 @@
 import type { ColorScheme } from '../theme/useColorScheme';
+import { i18n } from '../i18n';
 
 interface FloatingToggleProps {
   enabled: boolean;
@@ -14,14 +15,14 @@ export function FloatingToggle({
   onToggle,
 }: FloatingToggleProps) {
   const label = enabled
-    ? '关闭 OneFeed，显示原页面'
-    : '开启 OneFeed 专注阅读';
+    ? i18n.t('toggle.disableLabel')
+    : i18n.t('toggle.enableLabel');
 
   return (
     <div className="floating-toggle" data-onefeed-theme={colorScheme}>
       <span className="toggle-tip" role="status">
-        <strong>{enabled ? 'OneFeed 已开启' : 'OneFeed 已暂停'}</strong>
-        <small>{enabled ? '点击显示原页面' : '点击开启专注阅读'}</small>
+        <strong>{enabled ? i18n.t('toggle.enabledTitle') : i18n.t('toggle.pausedTitle')}</strong>
+        <small>{enabled ? i18n.t('toggle.showOriginal') : i18n.t('toggle.enableFocused')}</small>
       </span>
       <button
         className={`toggle-button ${enabled ? 'toggle-enabled' : 'toggle-disabled'}`}
