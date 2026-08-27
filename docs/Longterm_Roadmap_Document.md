@@ -87,7 +87,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 | **2.2 开放社交时间线（已完成）** | 验证动态 DOM、富媒体短动态与原站频道/互动代理 | X | 登录后的 `/home` 时间线、“为你推荐”与“正在关注”频道、文本、图片、视频封面、外链预览及互动统计；详情页和无可靠永久链接的推广卡片不接管 |
 | **2.3 社交与图片 Feed（已完成）** | 在不修改列表 Renderer 的前提下验证现有协议的跨类型复用 | 微博、小红书、Reddit | 微博热门首页、小红书发现页与频道、Reddit 首页/排序页/社区 Feed；文本、封面、作者、社区、推荐原因和互动统计；详情页与广告卡片不接管 |
 
-Phase 2 前期不以 Adapter 数量为 KPI，而以阅读链路的稳定性为先。当前正式支持知乎、X 首页时间线、V2EX、Linux DO、微博热门首页、小红书发现页、Hacker News、36Kr 资讯频道及文章详情，以及 Reddit 首页、排序页和社区 Feed。Schema 理论上能够表达某类内容，不代表已经交付对应平台适配；平台支持状态以 README 为准。
+Phase 2 前期不以 Adapter 数量为 KPI，而以阅读链路的稳定性为先。当前正式支持微博热门首页、X 首页时间线、小红书发现页、Reddit 首页/排序页/社区 Feed、知乎、Hacker News、Linux DO、V2EX，以及 36Kr 资讯频道及文章详情。Schema 理论上能够表达某类内容，不代表已经交付对应平台适配；平台支持状态以 README 为准。
 
 建模依据包括 [ActivityStreams 2.0](https://www.w3.org/TR/activitystreams-core/)、[Reddit Post](https://developers.reddit.com/docs/api/redditapi/models/classes/Post)、[Hacker News API](https://github.com/HackerNews/API) 与 [Atom RFC 4287](https://www.rfc-editor.org/rfc/rfc4287)。
 

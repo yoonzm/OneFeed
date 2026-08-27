@@ -1,9 +1,9 @@
 import { getSupportedPlatforms, type PlatformId } from '../../config/platforms';
 
 export const DEFAULT_RECENT_PLATFORM_IDS: PlatformId[] = [
-  'zhihu',
-  'hacker-news',
-  'v2ex',
+  'weibo',
+  'twitter',
+  'xiaohongshu',
 ];
 
 const supportedPlatformIds = new Set(

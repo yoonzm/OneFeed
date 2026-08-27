@@ -6,17 +6,20 @@ import {
 } from './platforms';
 
 describe('platform catalog', () => {
-  it('keeps supported platforms in product order', () => {
+  it('keeps supported platforms in descending daily-active-user order', () => {
     expect(getSupportedPlatforms().map((platform) => platform.name)).toEqual([
-      '知乎',
-      'X',
-      'V2EX',
-      'Linux DO',
       '微博',
+      'X',
       '小红书',
-      'Hacker News',
-      '36Kr',
       'Reddit',
+      '知乎',
+      'Hacker News',
+      'Linux DO',
+      'V2EX',
+      '36Kr',
+    ]);
+    expect(getSupportedPlatforms().map((platform) => platform.navOrder)).toEqual([
+      1, 2, 3, 4, 5, 6, 7, 8, 9,
     ]);
   });
 

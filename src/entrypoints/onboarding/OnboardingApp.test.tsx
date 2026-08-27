@@ -28,5 +28,13 @@ describe('OnboardingApp', () => {
       expect(markup).toContain(`href="${platform.homeUrl}"`);
       expect(markup).toContain(`>${platform.name}<`);
     }
+
+    const container = document.createElement('div');
+    container.innerHTML = markup;
+    const platformCardUrls = [...container.querySelectorAll<HTMLAnchorElement>('.platform-card')]
+      .map((link) => link.href);
+    expect(platformCardUrls).toEqual(
+      getSupportedPlatforms().map((platform) => platform.homeUrl),
+    );
   });
 });

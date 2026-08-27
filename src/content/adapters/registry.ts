@@ -18,15 +18,15 @@ import { zhihuDetailAdapterDefinition } from './zhihuDetail';
 import { zhihuThreadAdapterDefinition } from './zhihuThread';
 
 const feedAdapterDefinitions: AdapterDefinition[] = [
-  zhihuAdapterDefinition,
-  twitterAdapterDefinition,
-  v2exAdapterDefinition,
-  linuxDoAdapterDefinition,
   weiboAdapterDefinition,
+  twitterAdapterDefinition,
   xiaohongshuAdapterDefinition,
-  hackerNewsAdapterDefinition,
-  thirtySixKrAdapterDefinition,
   redditAdapterDefinition,
+  zhihuAdapterDefinition,
+  hackerNewsAdapterDefinition,
+  linuxDoAdapterDefinition,
+  v2exAdapterDefinition,
+  thirtySixKrAdapterDefinition,
 ];
 
 const detailAdapterDefinitions: DetailAdapterDefinition[] = [

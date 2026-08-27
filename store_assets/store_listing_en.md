@@ -12,7 +12,7 @@
 
 OneFeed turns feeds from supported websites into a clean and consistent Focus Paper reading interface. It reduces page noise while keeping the original content, scrolling behavior, and essential interactions available.
 
-The current version supports feeds from Zhihu, X, V2EX, Linux DO, Weibo, Xiaohongshu, Hacker News, 36Kr, and Reddit.
+The current version supports feeds from Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, and 36Kr.
 
 Current features include:
 
@@ -26,7 +26,7 @@ Current features include:
 - English and Simplified Chinese interfaces that follow Chrome's display language;
 - page parsing and rendering performed locally in the browser.
 
-OneFeed is an independently developed third-party extension and is not affiliated with, authorized by, or endorsed by Zhihu, X, V2EX, Linux DO, Weibo, Xiaohongshu, Hacker News, 36Kr, Reddit, or their affiliates.
+OneFeed is an independently developed third-party extension and is not affiliated with, authorized by, or endorsed by Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, 36Kr, or their affiliates.
 
 ## Single-purpose statement
 
@@ -40,7 +40,7 @@ Stores the enabled state, theme preferences, recently used platforms, display-fi
 
 ### Supported website access
 
-Access to `zhihu.com`, `x.com`, `twitter.com`, `v2ex.com`, `linux.do`, `weibo.com`, `xiaohongshu.com`, `news.ycombinator.com`, `36kr.com`, and `reddit.com` is used only to read supported pages opened by the user, create the unified reading interface, and delegate interactions explicitly triggered by the user. The extension does not run outside supported websites.
+Access to `weibo.com`, `x.com`, `twitter.com`, `xiaohongshu.com`, `reddit.com`, `zhihu.com`, `news.ycombinator.com`, `linux.do`, `v2ex.com`, and `36kr.com` is used only to read supported pages opened by the user, create the unified reading interface, and delegate interactions explicitly triggered by the user. The extension does not run outside supported websites.
 
 ## Data disclosure
 

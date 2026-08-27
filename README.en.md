@@ -14,7 +14,7 @@ OneFeed adds a personal interface between you and those platforms. It is designe
 
 ## What it supports
 
-- **Supported now:** Zhihu, the X home timeline, V2EX, Linux DO, the Weibo trending home feed, Xiaohongshu Explore, Hacker News, 36Kr news feeds and article pages, plus Reddit home, sorted, and community feeds.
+- **Supported now:** the Weibo trending home feed, the X home timeline, Xiaohongshu Explore, Reddit home/sorted/community feeds, Zhihu, Hacker News, Linux DO, V2EX, and 36Kr news feeds and article pages.
 - **Display filters:** Hide read content, platform recommendations, keywords, authors, platforms, and content types. All rules run locally.
 - **Original-site search:** Search Zhihu content through Zhihu's native search and continue reading the returned content results in OneFeed.
 - **Appearance:** Focus Paper with light and dark modes.

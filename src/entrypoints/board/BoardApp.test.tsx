@@ -43,7 +43,7 @@ describe('launch center', () => {
     expect(brandText?.textContent).toBe('OneFeed');
     expect(brandText?.style.backgroundClip).toBe('text');
     expect(container.querySelector('h1')?.textContent).toBe('继续上次的阅读。');
-    expect(container.querySelector('.resume-platform strong')?.textContent).toBe('知乎');
+    expect(container.querySelector('.resume-platform strong')?.textContent).toBe('微博');
     expect(container.querySelectorAll('.platform-mark .platform-icon')).toHaveLength(
       getSupportedPlatforms().length,
     );
@@ -59,6 +59,9 @@ describe('launch center', () => {
       '.resume-action, .recent-row, .more-card',
     )];
     expect(platformLinks).toHaveLength(getSupportedPlatforms().length);
+    expect(platformLinks.map((link) => link.href)).toEqual(
+      getSupportedPlatforms().map((platform) => platform.homeUrl),
+    );
     expect(new Set(platformLinks.map((link) => link.href)).size).toBe(
       getSupportedPlatforms().length,
     );

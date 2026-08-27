@@ -10,13 +10,13 @@
 
 ## 详细说明
 
-OneFeed 面向多平台信息流，将受支持网站的内容转换为简洁、一致的 Focus Paper 阅读界面，帮助你减少页面噪音，把注意力留给内容本身。当前版本支持知乎、X、V2EX、Linux DO、微博、小红书、Hacker News、36氪与 Reddit 信息流。
+OneFeed 面向多平台信息流，将受支持网站的内容转换为简洁、一致的 Focus Paper 阅读界面，帮助你减少页面噪音，把注意力留给内容本身。当前版本支持微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX 与 36氪信息流。
 
 当前版本提供：
 
 - 首次安装后展示欢迎页，可直接打开无需登录的 Hacker News 体验 OneFeed；
 - 点击浏览器工具栏图标打开 Launch Center，可查看最近使用的平台、打开受支持网站并统一控制启用状态与外观；
-- 重新排版知乎、X、V2EX、Linux DO、微博、小红书、Hacker News、36氪与 Reddit 信息流，以及知乎问题/回答/专栏、V2EX 主题、Linux DO 话题和 36氪文章详情；
+- 重新排版微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX 与 36氪信息流，以及知乎问题/回答/专栏、Linux DO 话题、V2EX 主题和 36氪文章详情；
 - 在知乎回答详情中通过 OneFeed 弹窗统一阅读评论与回复，并支持继续加载；
 - 统一展示标题、作者、两行正文摘要、紧凑图片预览和互动数量；
 - 在本地标记用户已经打开过的信息流条目，返回列表时更容易识别阅读进度；
@@ -28,7 +28,7 @@ OneFeed 面向多平台信息流，将受支持网站的内容转换为简洁、
 - 可通过浏览器工具栏图标或页面悬浮开关随时暂停或重新开启；
 - 所有页面解析和渲染均在浏览器本地完成。
 
-OneFeed 是独立开发的第三方扩展，与知乎、X、V2EX、Linux DO、微博、小红书、Hacker News、36氪、Reddit 及其关联方不存在隶属、授权或背书关系。
+OneFeed 是独立开发的第三方扩展，与微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX、36氪及其关联方不存在隶属、授权或背书关系。
 
 ## 单一用途说明
 
@@ -42,7 +42,7 @@ OneFeed 是独立开发的第三方扩展，与知乎、X、V2EX、Linux DO、�
 
 ### 受支持网站访问
 
-对 `zhihu.com`、`x.com`、`twitter.com`、`v2ex.com`、`linux.do`、`weibo.com`、`xiaohongshu.com`、`news.ycombinator.com`、`36kr.com` 和 `reddit.com` 的访问权限，仅用于读取用户当前打开的受支持信息流与详情内容，生成统一阅读界面，并代理用户主动触发的原页面互动。扩展不会在这些受支持网站之外运行。
+对 `weibo.com`、`x.com`、`twitter.com`、`xiaohongshu.com`、`reddit.com`、`zhihu.com`、`news.ycombinator.com`、`linux.do`、`v2ex.com` 和 `36kr.com` 的访问权限，仅用于读取用户当前打开的受支持信息流与详情内容，生成统一阅读界面，并代理用户主动触发的原页面互动。扩展不会在这些受支持网站之外运行。
 
 ## 数据披露建议
 
