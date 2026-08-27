@@ -6,6 +6,7 @@ import type {
   FeedImage,
   FeedItem,
 } from '../../../types/feed';
+import { i18n } from '../../../i18n';
 import { ActionBar } from '../../components/ActionBar';
 import { BlockRenderer } from '../../components/BlockRenderer';
 import {
@@ -86,7 +87,7 @@ export function FeedCard({
               rel="noreferrer"
               onClick={onSeen}
             >
-              查看详情 ↗
+              {i18n.t('reader.viewDetails')} ↗
             </a>
           )}
 
@@ -102,7 +103,7 @@ export function FeedCard({
       {isSeen && (
         <span className="card-seen-marker">
           <Check size={10} weight="bold" aria-hidden="true" />
-          已看过
+          {i18n.t('reader.seen')}
         </span>
       )}
 

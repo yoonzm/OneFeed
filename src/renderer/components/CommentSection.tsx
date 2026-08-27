@@ -13,10 +13,18 @@ import type {
   CommentThreadDescriptor,
 } from '../../types/comments';
 import type { FeedImage } from '../../types/feed';
+import { formatDateTime, formatNumber, i18n } from '../../i18n';
 import { BlockRenderer } from './BlockRenderer';
 
 type CommentRequest = (command: CommentCommand) => Promise<CommentRequestResult>;
 type CommentStatus = 'idle' | 'loading' | 'ready' | 'failed';
+const metricLabels = {
+  reactions: i18n.t('metric.reactions'),
+  replies: i18n.t('metric.replies'),
+  reposts: i18n.t('metric.reposts'),
+  views: i18n.t('metric.views'),
+  score: i18n.t('metric.score'),
+};
 
 export interface CommentSectionHandle {
   openDialog: () => void;
@@ -25,19 +33,6 @@ export interface CommentSectionHandle {
 interface CommentSectionProps {
   descriptor: CommentThreadDescriptor;
   onRequest: CommentRequest;
-}
-
-function formatPublishedAt(value: string | number): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
-
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
 }
 
 function mergeSnapshots(
@@ -85,7 +80,7 @@ function CommentItemView({ item, onPreview, onOpenReplies }: {
           <strong>{item.author.name}</strong>
           {(item.publishedAt !== undefined || item.metadataLabels?.length) && (
             <small>
-              {item.publishedAt !== undefined && formatPublishedAt(item.publishedAt)}
+              {item.publishedAt !== undefined && formatDateTime(item.publishedAt)}
               {item.publishedAt !== undefined && item.metadataLabels?.length ? ' · ' : ''}
               {item.metadataLabels?.join(' · ')}
             </small>
@@ -107,7 +102,7 @@ function CommentItemView({ item, onPreview, onOpenReplies }: {
         <footer className="comment-meta">
           {item.metrics.map((metric) => (
             <span key={metric.kind}>
-              {metric.label || metric.kind} {metric.value.toLocaleString('zh-CN')}
+              {metric.label || metricLabels[metric.kind]} {formatNumber(metric.value)}
             </span>
           ))}
           {!!item.replyCount && (onOpenReplies ? (
@@ -119,10 +114,10 @@ function CommentItemView({ item, onPreview, onOpenReplies }: {
                 onOpenReplies(item);
               }}
             >
-              {item.replyCount.toLocaleString('zh-CN')} 条回复
+              {i18n.t('comment.replyCount', item.replyCount, [formatNumber(item.replyCount)])}
             </button>
           ) : (
-            <span>{item.replyCount.toLocaleString('zh-CN')} 条回复</span>
+            <span>{i18n.t('comment.replyCount', item.replyCount, [formatNumber(item.replyCount)])}</span>
           ))}
         </footer>
       )}
@@ -213,16 +208,20 @@ function CommentsDialog({
       >
         <header>
           <div>
-            <h2 id={titleId}>{isReplyView ? '回复' : '评论'}</h2>
-            <span>{(snapshot?.total ?? fallbackTotal).toLocaleString('zh-CN')}</span>
+            <h2 id={titleId}>{isReplyView
+              ? i18n.t('comment.replies')
+              : i18n.t('comment.comments')}</h2>
+            <span>{formatNumber(snapshot?.total ?? fallbackTotal)}</span>
           </div>
           <button
             ref={closeRef}
             type="button"
             onClick={onClose}
-            aria-label={`关闭${isReplyView ? '回复' : '评论'}`}
+            aria-label={isReplyView
+              ? i18n.t('comment.closeReplies')
+              : i18n.t('comment.closeComments')}
           >
-            关闭
+            {i18n.t('common.close')}
           </button>
         </header>
         <div
@@ -247,20 +246,28 @@ function CommentsDialog({
           />
           {status === 'loading' && (
             <p className="comment-status" role="status">
-              正在整理{isReplyView ? '回复' : '评论'}…
+              {isReplyView
+                ? i18n.t('comment.loadingReplies')
+                : i18n.t('comment.loadingComments')}
             </p>
           )}
           {!items.length && status === 'ready' && (
-            <p className="comment-status">暂无{isReplyView ? '回复' : '评论'}</p>
+            <p className="comment-status">{isReplyView
+              ? i18n.t('comment.emptyReplies')
+              : i18n.t('comment.emptyComments')}</p>
           )}
           {status === 'failed' && (
             <p className="comment-status" role="alert">
-              {isReplyView ? '回复' : '评论'}加载失败。
-              {retryable && <button type="button" onClick={onRetry}>重试</button>}
+              {isReplyView
+                ? i18n.t('comment.failedReplies')
+                : i18n.t('comment.failedComments')}
+              {retryable && <button type="button" onClick={onRetry}>{i18n.t('common.retry')}</button>}
             </p>
           )}
           {snapshot && !snapshot.hasMore && status !== 'loading' && (
-            <p className="comment-status">已加载当前全部{isReplyView ? '回复' : '评论'}</p>
+            <p className="comment-status">{isReplyView
+              ? i18n.t('comment.allReplies')
+              : i18n.t('comment.allComments')}</p>
           )}
         </div>
       </section>
@@ -478,10 +485,10 @@ export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionPro
             className="lightbox comment-lightbox"
             type="button"
             onClick={() => setImagePreview(undefined)}
-            aria-label="关闭评论图片预览"
+            aria-label={i18n.t('comment.closeImagePreview')}
           >
-            <img src={imagePreview.url} alt={imagePreview.alt || '评论图片'} />
-            <span>点击任意位置关闭</span>
+            <img src={imagePreview.url} alt={imagePreview.alt || i18n.t('comment.image')} />
+            <span>{i18n.t('common.clickAnywhereToClose')}</span>
           </button>
         )}
       </>

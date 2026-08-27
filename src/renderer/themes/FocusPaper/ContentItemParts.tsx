@@ -4,6 +4,7 @@ import type {
   FeedBlock,
   FeedImage,
 } from '../../../types/feed';
+import { formatShortDateTime, i18n } from '../../../i18n';
 import { BlockRenderer } from '../../components/BlockRenderer';
 
 interface ItemTitleProps {
@@ -27,18 +28,6 @@ interface ItemMetaProps {
 interface ItemLightboxProps {
   preview?: FeedImage;
   onClose: () => void;
-}
-
-function formatPublishedAt(value: string | number): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
-
-  return new Intl.DateTimeFormat('zh-CN', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
 }
 
 export function ItemTitle({ item, linked = false, onOpen }: ItemTitleProps) {
@@ -84,7 +73,9 @@ export function ItemMeta({ item, index, children }: ItemMetaProps) {
 
   return (
     <div className="card-meta-row">
-      <span className="card-index" aria-label={`第 ${item.sequence || index + 1} 条`}>
+      <span className="card-index" aria-label={i18n.t('reader.itemIndex', [
+        String(item.sequence || index + 1),
+      ])}>
         {String(item.sequence || index + 1).padStart(2, '0')}
       </span>
       {hasAuthor && (
@@ -102,7 +93,7 @@ export function ItemMeta({ item, index, children }: ItemMetaProps) {
       )}
       {item.publishedAt !== undefined && (
         <span className="card-time">
-          <time>{formatPublishedAt(item.publishedAt)}</time>
+          <time>{formatShortDateTime(item.publishedAt)}</time>
         </span>
       )}
 
@@ -125,11 +116,11 @@ export function ItemMeta({ item, index, children }: ItemMetaProps) {
       )}
 
       {item.flags && Object.values(item.flags).some(Boolean) && (
-        <span className="flag-row" aria-label="内容状态">
-          {item.flags.pinned && <span>置顶</span>}
-          {item.flags.sensitive && <span>敏感内容</span>}
-          {item.flags.spoiler && <span>含剧透</span>}
-          {item.flags.locked && <span>已锁定</span>}
+        <span className="flag-row" aria-label={i18n.t('common.contentStatus')}>
+          {item.flags.pinned && <span>{i18n.t('common.flagPinned')}</span>}
+          {item.flags.sensitive && <span>{i18n.t('common.flagSensitive')}</span>}
+          {item.flags.spoiler && <span>{i18n.t('common.flagSpoiler')}</span>}
+          {item.flags.locked && <span>{i18n.t('common.flagLocked')}</span>}
         </span>
       )}
 
@@ -142,9 +133,9 @@ export function ItemLightbox({ preview, onClose }: ItemLightboxProps) {
   if (!preview) return null;
 
   return (
-    <button className="lightbox" type="button" onClick={onClose} aria-label="关闭图片预览">
-      <img src={preview.url} alt={preview.alt || '预览图片'} />
-      <span>点击任意位置关闭</span>
+    <button className="lightbox" type="button" onClick={onClose} aria-label={i18n.t('common.closeImagePreview')}>
+      <img src={preview.url} alt={preview.alt || i18n.t('common.imagePreview')} />
+      <span>{i18n.t('common.clickAnywhereToClose')}</span>
     </button>
   );
 }

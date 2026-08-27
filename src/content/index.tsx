@@ -9,6 +9,7 @@ import {
   normalizeColorScheme,
   type ColorScheme,
 } from '../theme/useColorScheme';
+import { uiLocale } from '../i18n';
 import type { FeedChannel } from '../types/feed';
 import { createAdapter, isSupportedUrl } from './adapters/registry';
 import { FloatingToggle } from './FloatingToggle';
@@ -115,6 +116,7 @@ function mount(
 
   const host = document.createElement('div');
   host.id = READER_HOST_ID;
+  host.lang = uiLocale;
   host.dataset.onefeedTheme = initialColorScheme;
   // DetailApp 自带加载态；适配器等待原站正文时保持宿主可见，避免只显示空白遮罩。
   document.body.appendChild(host);
@@ -267,6 +269,7 @@ export function startContentScript(): ContentScriptController {
     domReady = true;
     toggleHost = document.createElement('div');
     toggleHost.id = TOGGLE_HOST_ID;
+    toggleHost.lang = uiLocale;
     document.body.appendChild(toggleHost);
     const toggleShadow = toggleHost.attachShadow({ mode: 'open' });
     const toggleStyle = document.createElement('style');

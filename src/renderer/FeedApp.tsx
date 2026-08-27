@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { filterFeedItems } from '../filters/feedFilters';
 import { useFeedFilters } from '../filters/useFeedFilters';
+import { i18n } from '../i18n';
 import type { ColorScheme } from '../theme/useColorScheme';
 import type {
   FeedActionDescriptor,
@@ -177,17 +178,17 @@ export default function FeedApp({
         </main>
         {hasVisibleItems && (
           <footer className="reader-footer" aria-live="polite">
-            {loadState.phase === 'loading' && '正在加载更多内容…'}
-            {loadState.phase === 'idle' && '已读到这里 · 继续滚动加载更多'}
-            {loadState.phase === 'exhausted' && '已加载全部内容'}
+            {loadState.phase === 'loading' && i18n.t('reader.loadingMore')}
+            {loadState.phase === 'idle' && i18n.t('reader.continue')}
+            {loadState.phase === 'exhausted' && i18n.t('reader.exhausted')}
             {loadState.phase === 'failed' && (
               loadState.retryable
                 ? (
                     <button type="button" onClick={() => void requestMore(true)}>
-                      加载失败 · 点击重试
+                      {i18n.t('reader.retryLoad')}
                     </button>
                   )
-                : '无法继续加载'
+                : i18n.t('reader.cannotLoad')
             )}
             <span ref={loadSentinelRef} className="feed-load-sentinel" aria-hidden="true" />
           </footer>

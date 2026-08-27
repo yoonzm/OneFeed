@@ -1,4 +1,5 @@
 import DOMPurify from 'dompurify';
+import { i18n } from '../../i18n';
 import type { ThreadDetail, ThreadHeader } from '../../types/detail';
 import type { FeedBlock, FeedImage, ThreadEntry } from '../../types/feed';
 import type { DetailAdapterDefinition, DetailListener } from './detail';
@@ -77,7 +78,7 @@ function parseAuthor(element: Element): ThreadEntry['author'] {
   return {
     name: authorLink?.textContent?.trim() ||
       authorLink?.getAttribute('data-user-card') ||
-      'Linux DO 用户',
+      i18n.t('adapter.linuxDoUser'),
     avatar: absoluteUrl(avatar?.getAttribute('src') || ''),
     link: authorLink
       ? absoluteUrl(authorLink.getAttribute('href') || '') || undefined
@@ -131,19 +132,19 @@ export function parseLinuxDoPost(
     publishedAt: Number.isFinite(publishedAt) ? publishedAt : undefined,
     body: parseBlocks(body),
     metrics: reactions
-      ? [{ kind: 'reactions', value: reactions, label: '赞' }]
+      ? [{ kind: 'reactions', value: reactions, label: i18n.t('adapter.reactions') }]
       : [],
     actions: [
       ...(canReact ? [{
         id: 'react',
         kind: 'react' as const,
         variant: 'like' as const,
-        label: '点赞',
+        label: i18n.t('adapter.like'),
         count: reactions,
         enabled: true,
         fallback: 'openOriginal' as const,
       }] : []),
-      { id: 'open', kind: 'open', label: '查看原帖', enabled: true },
+      { id: 'open', kind: 'open', label: i18n.t('adapter.openPost'), enabled: true },
     ],
   };
 }
@@ -210,13 +211,13 @@ export function parseLinuxDoThread(
       tags,
     } : undefined,
     metrics: [
-      ...(reactions ? [{ kind: 'reactions' as const, value: reactions, label: '赞' }] : []),
-      { kind: 'replies', value: replies, label: '回复' },
-      ...(views ? [{ kind: 'views' as const, value: views, label: '浏览' }] : []),
+      ...(reactions ? [{ kind: 'reactions' as const, value: reactions, label: i18n.t('adapter.reactions') }] : []),
+      { kind: 'replies', value: replies, label: i18n.t('adapter.reply') },
+      ...(views ? [{ kind: 'views' as const, value: views, label: i18n.t('adapter.views') }] : []),
     ],
     actions: [
       ...(firstPost?.item.actions.filter((action) => action.kind === 'react') || []),
-      { id: 'open', kind: 'open', label: '查看原主题', enabled: true },
+      { id: 'open', kind: 'open', label: i18n.t('adapter.openTopic'), enabled: true },
     ],
   };
 
@@ -228,7 +229,7 @@ export function parseLinuxDoThread(
     kind: 'thread',
     header,
     entries,
-    entryLabel: '回复',
+    entryKind: 'reply',
     loadingMode: 'infinite',
   };
 }

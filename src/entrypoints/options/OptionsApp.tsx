@@ -15,24 +15,29 @@ import {
 import { useMemo, useState, type CSSProperties, type FormEvent } from 'react';
 import { PlatformIcon } from '../../components/PlatformIcon';
 import { getPlatformPresentation } from '../../config/platformPresentation';
-import { getSupportedPlatforms, type PlatformId } from '../../config/platforms';
+import {
+  getPlatformDisplayName,
+  getSupportedPlatforms,
+  type PlatformId,
+} from '../../config/platforms';
 import {
   type FeedFilterCondition,
   type FeedFilterRule,
 } from '../../filters/feedFilters';
 import { useFeedFilters } from '../../filters/useFeedFilters';
+import { formatNumber, i18n } from '../../i18n';
 import { useColorScheme } from '../../theme/useColorScheme';
 
 const KIND_LABELS = {
-  post: '动态',
-  article: '文章',
-  discussion: '讨论',
+  post: i18n.t('filter.kind.post'),
+  article: i18n.t('filter.kind.article'),
+  discussion: i18n.t('filter.kind.discussion'),
 } as const;
 
 const TEXT_FIELD_LABELS = {
-  all: '标题或正文',
-  title: '标题',
-  content: '正文',
+  all: i18n.t('filter.field.all'),
+  title: i18n.t('filter.field.title'),
+  content: i18n.t('filter.field.content'),
 } as const;
 
 interface DeletedRule {
@@ -63,31 +68,44 @@ function createCondition(type: FeedFilterCondition['type']): FeedFilterCondition
 
 function conditionSummary(condition: FeedFilterCondition): string {
   if (condition.type === 'keyword') {
-    return `${TEXT_FIELD_LABELS[condition.field]}包含“${condition.values.filter(Boolean).join('、')}”`;
+    return i18n.t('filter.summaryKeyword', {
+      field: TEXT_FIELD_LABELS[condition.field],
+      value: condition.values.filter(Boolean).join(', '),
+    });
   }
   if (condition.type === 'author') {
-    return `作者${condition.operator === 'equals' ? '是' : '包含'}“${condition.value}”`;
+    return i18n.t(
+      condition.operator === 'equals'
+        ? 'filter.summaryAuthorEquals'
+        : 'filter.summaryAuthorContains',
+      { value: condition.value },
+    );
   }
-  return `内容类型是${KIND_LABELS[condition.value]}`;
+  return i18n.t('filter.summaryKind', { kind: KIND_LABELS[condition.value] });
 }
 
 function ruleSummary(rule: FeedFilterRule): string {
   const scope = rule.platformIds?.length
     ? rule.platformIds.map((id) => (
-        getSupportedPlatforms().find((platform) => platform.id === id)?.name || id
-      )).join('、')
-    : '所有平台';
-  return `${scope} · ${rule.conditions.map(conditionSummary).join('，并且')} · 隐藏`;
+        getSupportedPlatforms().find((platform) => platform.id === id)
+          ? getPlatformDisplayName(id as PlatformId)
+          : id
+      )).join(' · ')
+    : i18n.t('filter.allPlatforms');
+  return i18n.t('filter.ruleSummary', {
+    scope,
+    conditions: rule.conditions.map(conditionSummary).join(i18n.t('filter.conditionSeparator')),
+  });
 }
 
 function ruleValidationError(rule: FeedFilterRule): string | undefined {
-  if (!rule.conditions.length) return '至少添加一个过滤条件。';
+  if (!rule.conditions.length) return i18n.t('filter.validationCondition');
   const invalid = rule.conditions.some((condition) => {
     if (condition.type === 'keyword') return !condition.values.some((value) => value.trim());
     if (condition.type === 'author') return !condition.value.trim();
     return false;
   });
-  return invalid ? '请填写完整的关键词或作者条件。' : undefined;
+  return invalid ? i18n.t('filter.validationValue') : undefined;
 }
 
 interface ToggleProps {
@@ -158,26 +176,28 @@ function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
     <form className="rule-editor" onSubmit={handleSubmit}>
       <div className="editor-heading">
         <div>
-          <p>规则编辑器</p>
-          <h2>{initialRule.name ? '编辑过滤规则' : '创建过滤规则'}</h2>
+          <p>{i18n.t('filter.editorEyebrow')}</p>
+          <h2>{initialRule.name
+            ? i18n.t('filter.editorEdit')
+            : i18n.t('filter.editorCreate')}</h2>
         </div>
-        <button className="icon-button" type="button" aria-label="关闭规则编辑器" onClick={onCancel}>
+        <button className="icon-button" type="button" aria-label={i18n.t('filter.editorClose')} onClick={onCancel}>
           <X size={21} />
         </button>
       </div>
 
       <label className="field-label">
-        <span>规则名称 <small>可选</small></span>
+        <span>{i18n.t('filter.ruleName')} <small>{i18n.t('filter.optional')}</small></span>
         <input
           type="text"
           value={draft.name}
-          placeholder="例如：减少推广内容"
+          placeholder={i18n.t('filter.ruleNamePlaceholder')}
           onChange={(event) => setDraft({ ...draft, name: event.target.value })}
         />
       </label>
 
       <fieldset className="scope-fieldset">
-        <legend>适用平台</legend>
+        <legend>{i18n.t('filter.scope')}</legend>
         <div className="scope-choice">
           <label>
             <input
@@ -186,7 +206,7 @@ function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
               checked={allPlatforms}
               onChange={() => setDraft({ ...draft, platformIds: undefined })}
             />
-            所有平台
+            {i18n.t('filter.allPlatforms')}
           </label>
           <label>
             <input
@@ -198,7 +218,7 @@ function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
                 if (firstPlatform) setDraft({ ...draft, platformIds: [firstPlatform.id] });
               }}
             />
-            指定平台
+            {i18n.t('filter.specificPlatforms')}
           </label>
         </div>
         {!allPlatforms && (
@@ -223,7 +243,7 @@ function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
                     }}
                   />
                   <span aria-hidden="true"><PlatformIcon platformId={platform.id as PlatformId} /></span>
-                  {platform.name}
+                  {getPlatformDisplayName(platform.id as PlatformId)}
                 </label>
               );
             })}
@@ -232,43 +252,43 @@ function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
       </fieldset>
 
       <fieldset className="conditions-fieldset">
-        <legend>满足以下全部条件</legend>
+        <legend>{i18n.t('filter.allConditions')}</legend>
         <div className="condition-list">
           {draft.conditions.map((condition, index) => (
             <div className="condition-row" key={`${condition.type}-${index}`}>
               <span className="condition-number">{index + 1}</span>
               <select
-                aria-label={`条件 ${index + 1} 类型`}
+                aria-label={i18n.t('filter.conditionType', [String(index + 1)])}
                 value={condition.type}
                 onChange={(event) => updateCondition(
                   index,
                   createCondition(event.target.value as FeedFilterCondition['type']),
                 )}
               >
-                <option value="keyword">关键词</option>
-                <option value="author">作者</option>
-                <option value="kind">内容类型</option>
+                <option value="keyword">{i18n.t('filter.keyword')}</option>
+                <option value="author">{i18n.t('filter.author')}</option>
+                <option value="kind">{i18n.t('filter.contentType')}</option>
               </select>
 
               {condition.type === 'keyword' && (
                 <>
                   <select
-                    aria-label={`条件 ${index + 1} 文本范围`}
+                    aria-label={i18n.t('filter.textRange', [String(index + 1)])}
                     value={condition.field}
                     onChange={(event) => updateCondition(index, {
                       ...condition,
                       field: event.target.value as typeof condition.field,
                     })}
                   >
-                    <option value="all">标题或正文</option>
-                    <option value="title">仅标题</option>
-                    <option value="content">仅正文</option>
+                    <option value="all">{i18n.t('filter.field.all')}</option>
+                    <option value="title">{i18n.t('filter.titleOnly')}</option>
+                    <option value="content">{i18n.t('filter.contentOnly')}</option>
                   </select>
                   <input
                     type="text"
-                    aria-label={`条件 ${index + 1} 关键词`}
+                    aria-label={i18n.t('filter.conditionKeyword', [String(index + 1)])}
                     value={condition.values.join(', ')}
-                    placeholder="多个词用逗号分隔"
+                    placeholder={i18n.t('filter.keywordsPlaceholder')}
                     onChange={(event) => updateCondition(index, {
                       ...condition,
                       values: event.target.value.split(/[,，]/),
@@ -280,21 +300,21 @@ function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
               {condition.type === 'author' && (
                 <>
                   <select
-                    aria-label={`条件 ${index + 1} 作者匹配方式`}
+                    aria-label={i18n.t('filter.authorMatch', [String(index + 1)])}
                     value={condition.operator}
                     onChange={(event) => updateCondition(index, {
                       ...condition,
                       operator: event.target.value as typeof condition.operator,
                     })}
                   >
-                    <option value="contains">名称包含</option>
-                    <option value="equals">名称等于</option>
+                    <option value="contains">{i18n.t('filter.nameContains')}</option>
+                    <option value="equals">{i18n.t('filter.nameEquals')}</option>
                   </select>
                   <input
                     type="text"
-                    aria-label={`条件 ${index + 1} 作者`}
+                    aria-label={i18n.t('filter.conditionAuthor', [String(index + 1)])}
                     value={condition.value}
-                    placeholder="作者名称"
+                    placeholder={i18n.t('filter.authorPlaceholder')}
                     onChange={(event) => updateCondition(index, {
                       ...condition,
                       value: event.target.value,
@@ -306,23 +326,23 @@ function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
               {condition.type === 'kind' && (
                 <select
                   className="condition-value"
-                  aria-label={`条件 ${index + 1} 内容类型`}
+                  aria-label={i18n.t('filter.conditionContentType', [String(index + 1)])}
                   value={condition.value}
                   onChange={(event) => updateCondition(index, {
                     ...condition,
                     value: event.target.value as typeof condition.value,
                   })}
                 >
-                  <option value="post">动态</option>
-                  <option value="article">文章</option>
-                  <option value="discussion">讨论</option>
+                  <option value="post">{i18n.t('filter.kind.post')}</option>
+                  <option value="article">{i18n.t('filter.kind.article')}</option>
+                  <option value="discussion">{i18n.t('filter.kind.discussion')}</option>
                 </select>
               )}
 
               <button
                 className="remove-condition"
                 type="button"
-                aria-label={`删除条件 ${index + 1}`}
+                aria-label={i18n.t('filter.deleteCondition', [String(index + 1)])}
                 disabled={draft.conditions.length === 1}
                 onClick={() => setDraft({
                   ...draft,
@@ -343,22 +363,22 @@ function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
           })}
         >
           <Plus size={17} />
-          添加条件
+          {i18n.t('filter.addCondition')}
         </button>
       </fieldset>
 
       <div className="rule-preview">
-        <span>规则句</span>
+        <span>{i18n.t('filter.ruleSentence')}</span>
         <p>{ruleSummary(draft)}</p>
       </div>
 
       <div className="editor-actions">
-        <p role="alert">{validationError || '规则只在当前设备本地执行。'}</p>
+        <p role="alert">{validationError || i18n.t('filter.localOnly')}</p>
         <div>
-          <button className="secondary-button" type="button" onClick={onCancel}>取消</button>
+          <button className="secondary-button" type="button" onClick={onCancel}>{i18n.t('filter.cancel')}</button>
           <button className="primary-button" type="submit" disabled={Boolean(validationError)}>
             <Check size={18} weight="bold" />
-            保存规则
+            {i18n.t('filter.saveRule')}
           </button>
         </div>
       </div>
@@ -413,7 +433,7 @@ export function OptionsApp() {
     const copy = {
       ...rule,
       id: createRuleId(),
-      name: `${rule.name}副本`,
+      name: `${rule.name}${i18n.t('filter.duplicateSuffix')}`,
       enabled: false,
       platformIds: rule.platformIds ? [...rule.platformIds] : undefined,
       conditions: rule.conditions.map((condition) => ({ ...condition })),
@@ -424,18 +444,20 @@ export function OptionsApp() {
 
   return (
     <div className="options-page" data-onefeed-theme={colorScheme}>
-      <a className="skip-link" href="#settings-main">跳到设置内容</a>
+      <a className="skip-link" href="#settings-main">{i18n.t('filter.skip')}</a>
       <header className="options-header">
-        <a className="options-brand" href="/board.html" aria-label="返回 OneFeed 启动中心">
+        <a className="options-brand" href="/board.html" aria-label={i18n.t('filter.backLabel')}>
           <img src="/icons/icon-128.png" alt="" />
           <span>OneFeed</span>
         </a>
         <div className="options-header-actions">
-          <a href="/board.html"><ArrowLeft size={18} />返回启动中心</a>
+          <a href="/board.html"><ArrowLeft size={18} />{i18n.t('filter.back')}</a>
           <button
             className="theme-button"
             type="button"
-            aria-label={`切换到${nextColorScheme === 'dark' ? '深色' : '浅色'}主题`}
+            aria-label={nextColorScheme === 'dark'
+              ? i18n.t('common.themeSwitchDark')
+              : i18n.t('common.themeSwitchLight')}
             disabled={!colorReady}
             onClick={() => setColorScheme(nextColorScheme)}
           >
@@ -447,18 +469,18 @@ export function OptionsApp() {
       <main id="settings-main" className="options-main">
         <section className="settings-intro" aria-labelledby="settings-title">
           <p>DISPLAY FILTER</p>
-          <h1 id="settings-title">决定哪些内容<br />不再出现。</h1>
-          <p>规则只改变 OneFeed 的展示，不会修改、删除或上传原网站内容。</p>
+          <h1 id="settings-title">{i18n.t('filter.introTitle')}</h1>
+          <p>{i18n.t('filter.introDescription')}</p>
         </section>
 
         <div className="settings-workspace">
-          <aside className="settings-index" aria-label="设置分类">
-            <div className="index-title"><Funnel size={19} weight="fill" /><span>展示过滤</span></div>
-            <p>同一规则内需满足全部条件；命中任意一条规则即隐藏。</p>
+          <aside className="settings-index" aria-label={i18n.t('filter.categories')}>
+            <div className="index-title"><Funnel size={19} weight="fill" /><span>{i18n.t('filter.displayFilter')}</span></div>
+            <p>{i18n.t('filter.indexDescription')}</p>
             <dl>
-              <div><dt>状态</dt><dd>{settings.enabled ? '正在执行' : '已暂停'}</dd></div>
-              <div><dt>生效规则</dt><dd>{activeRuleCount}</dd></div>
-              <div><dt>数据位置</dt><dd>仅此设备</dd></div>
+              <div><dt>{i18n.t('filter.status')}</dt><dd>{settings.enabled ? i18n.t('filter.running') : i18n.t('common.paused')}</dd></div>
+              <div><dt>{i18n.t('filter.activeRules')}</dt><dd>{formatNumber(activeRuleCount)}</dd></div>
+              <div><dt>{i18n.t('filter.dataLocation')}</dt><dd>{i18n.t('filter.thisDevice')}</dd></div>
             </dl>
           </aside>
 
@@ -466,15 +488,15 @@ export function OptionsApp() {
             <section className="master-card" aria-labelledby="master-title">
               <div className="master-icon"><EyeSlash size={28} /></div>
               <div>
-                <p>全局控制</p>
-                <h2 id="master-title">展示过滤</h2>
+                <p>{i18n.t('filter.globalControl')}</p>
+                <h2 id="master-title">{i18n.t('filter.displayFilter')}</h2>
                 <span>{settings.enabled
-                  ? `${activeRuleCount} 条规则正在参与列表筛选`
-                  : '规则已保留，但暂时不会过滤内容'}</span>
+                  ? i18n.t('filter.activeSummary', activeRuleCount, [formatNumber(activeRuleCount)])
+                  : i18n.t('filter.pausedSummary')}</span>
               </div>
               <Toggle
                 checked={settings.enabled}
-                label="展示过滤总开关"
+                label={i18n.t('filter.masterToggle')}
                 disabled={!ready}
                 onChange={(enabled) => saveSettings({ ...settings, enabled })}
               />
@@ -482,25 +504,25 @@ export function OptionsApp() {
 
             <section className="quick-section" aria-labelledby="quick-title">
               <div className="section-title">
-                <div><p>快捷规则</p><h2 id="quick-title">先处理最常见的噪音</h2></div>
+                <div><p>{i18n.t('filter.quickRules')}</p><h2 id="quick-title">{i18n.t('filter.quickTitle')}</h2></div>
               </div>
               <div className="quick-grid">
                 <article>
                   <div className="quick-icon"><Check size={22} /></div>
-                  <div><h3>隐藏已读内容</h3><p>使用已打开条目的本地标记，避免重复出现。</p></div>
+                  <div><h3>{i18n.t('filter.hideSeen')}</h3><p>{i18n.t('filter.hideSeenDescription')}</p></div>
                   <Toggle
                     checked={settings.hideSeen}
-                    label="隐藏已读内容"
+                    label={i18n.t('filter.hideSeen')}
                     disabled={!ready}
                     onChange={(hideSeen) => saveSettings({ ...settings, hideSeen })}
                   />
                 </article>
                 <article>
                   <div className="quick-icon"><Sparkle size={22} /></div>
-                  <div><h3>隐藏平台推荐</h3><p>仅在平台提供推荐原因时生效，缺失字段不会误判。</p></div>
+                  <div><h3>{i18n.t('filter.hideRecommended')}</h3><p>{i18n.t('filter.hideRecommendedDescription')}</p></div>
                   <Toggle
                     checked={settings.hideRecommended}
-                    label="隐藏平台推荐内容"
+                    label={i18n.t('filter.hideRecommendedToggle')}
                     disabled={!ready}
                     onChange={(hideRecommended) => saveSettings({ ...settings, hideRecommended })}
                   />
@@ -510,10 +532,10 @@ export function OptionsApp() {
 
             <section className="rules-section" aria-labelledby="rules-title">
               <div className="section-title rules-heading">
-                <div><p>自定义规则</p><h2 id="rules-title">用你自己的条件过滤</h2></div>
+                <div><p>{i18n.t('filter.customRules')}</p><h2 id="rules-title">{i18n.t('filter.customTitle')}</h2></div>
                 <button className="primary-button" type="button" onClick={() => setEditingRule(createRule())}>
                   <Plus size={18} weight="bold" />
-                  新建规则
+                  {i18n.t('filter.newRule')}
                 </button>
               </div>
 
@@ -529,9 +551,9 @@ export function OptionsApp() {
               {!settings.rules.length && !editingRule ? (
                 <div className="rules-empty">
                   <Funnel size={26} />
-                  <h3>还没有自定义规则</h3>
-                  <p>从关键词、作者或内容类型开始，创建第一条过滤规则。</p>
-                  <button type="button" onClick={() => setEditingRule(createRule())}>创建规则</button>
+                  <h3>{i18n.t('filter.emptyTitle')}</h3>
+                  <p>{i18n.t('filter.emptyDescription')}</p>
+                  <button type="button" onClick={() => setEditingRule(createRule())}>{i18n.t('filter.createRule')}</button>
                 </div>
               ) : (
                 <div className="rule-list">
@@ -540,7 +562,10 @@ export function OptionsApp() {
                       <div className="rule-card-main">
                         <Toggle
                           checked={rule.enabled}
-                          label={`${rule.enabled ? '停用' : '启用'}规则 ${rule.name}`}
+                          label={i18n.t(
+                            rule.enabled ? 'filter.disableRule' : 'filter.enableRule',
+                            [rule.name],
+                          )}
                           onChange={(enabled) => saveSettings({
                             ...settings,
                             rules: settings.rules.map((entry) => (
@@ -554,13 +579,13 @@ export function OptionsApp() {
                         </div>
                       </div>
                       <div className="rule-actions">
-                        <button type="button" aria-label={`编辑规则 ${rule.name}`} onClick={() => setEditingRule(rule)}>
+                        <button type="button" aria-label={i18n.t('filter.editRule', [rule.name])} onClick={() => setEditingRule(rule)}>
                           <PencilSimple size={18} />
                         </button>
-                        <button type="button" aria-label={`复制规则 ${rule.name}`} onClick={() => duplicateRule(rule)}>
+                        <button type="button" aria-label={i18n.t('filter.copyRule', [rule.name])} onClick={() => duplicateRule(rule)}>
                           <Copy size={18} />
                         </button>
-                        <button type="button" aria-label={`删除规则 ${rule.name}`} onClick={() => deleteRule(rule)}>
+                        <button type="button" aria-label={i18n.t('filter.deleteRule', [rule.name])} onClick={() => deleteRule(rule)}>
                           <Trash size={18} />
                         </button>
                       </div>
@@ -575,8 +600,8 @@ export function OptionsApp() {
 
       {deletedRule && (
         <div className="undo-toast" role="status">
-          <span>已删除“{deletedRule.rule.name}”</span>
-          <button type="button" onClick={undoDelete}>撤销</button>
+          <span>{i18n.t('filter.deleted', [deletedRule.rule.name])}</span>
+          <button type="button" onClick={undoDelete}>{i18n.t('filter.undo')}</button>
         </div>
       )}
     </div>

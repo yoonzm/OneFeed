@@ -69,7 +69,7 @@ describe('V2EX topic thread', () => {
     expect(thread).toMatchObject({
       id: 'v2ex_topic_123',
       kind: 'thread',
-      entryLabel: '回复',
+      entryKind: 'reply',
       loadingMode: 'paged',
       header: {
         role: 'topic',

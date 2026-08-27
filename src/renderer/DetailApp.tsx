@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { ColorScheme } from '../theme/useColorScheme';
+import { i18n } from '../i18n';
 import type { CommentCommand, CommentRequestResult } from '../types/comments';
 import type { FeedActionDescriptor } from '../types/feed';
 import { OneFeedShell } from './OneFeedShell';
@@ -89,7 +90,11 @@ export default function DetailApp({
         </main>
         {content && (
           <footer className="reader-footer">
-            {content.kind === 'thread' ? `已读完本页${content.entryLabel}` : '已读完本文'}
+            {content.kind === 'thread'
+              ? i18n.t(content.entryKind === 'answer'
+                ? 'reader.answersFinished'
+                : 'reader.repliesFinished')
+              : i18n.t('reader.articleFinished')}
           </footer>
         )}
       </div>

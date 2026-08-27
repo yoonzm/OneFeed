@@ -1,4 +1,5 @@
 import type { FeedSource } from '../types/feed';
+import { i18n } from '../i18n';
 
 export type PlatformStatus = 'supported' | 'adapting' | 'testing' | 'planned';
 
@@ -130,6 +131,24 @@ export const PLATFORM_CATALOG = [
 ] as const satisfies readonly PlatformDefinition[];
 
 export type PlatformId = (typeof PLATFORM_CATALOG)[number]['id'];
+
+const PLATFORM_NAME_KEYS = {
+  zhihu: 'platform.zhihu.name',
+  twitter: 'platform.twitter.name',
+  v2ex: 'platform.v2ex.name',
+  'linux-do': 'platform.linuxDo.name',
+  weibo: 'platform.weibo.name',
+  xiaohongshu: 'platform.xiaohongshu.name',
+  'hacker-news': 'platform.hackerNews.name',
+  '36kr': 'platform.thirtySixKr.name',
+  reddit: 'platform.reddit.name',
+  bilibili: 'platform.bilibili.name',
+  youtube: 'platform.youtube.name',
+} as const satisfies Record<PlatformId, string>;
+
+export function getPlatformDisplayName(id: PlatformId): string {
+  return i18n.t(PLATFORM_NAME_KEYS[id]);
+}
 
 export function getSupportedPlatforms(): PlatformDefinition[] {
   return PLATFORM_CATALOG.filter((platform) => platform.status === 'supported');

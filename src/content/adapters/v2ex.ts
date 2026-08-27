@@ -1,4 +1,5 @@
 import { V2EX_PLATFORM } from '../../config/platforms';
+import { i18n } from '../../i18n';
 import type { FeedItem } from '../../types/feed';
 import {
   BaseAdapter,
@@ -59,7 +60,7 @@ export function parseV2exCard(element: Element): FeedItem | null {
   const avatarElement = element.querySelector<HTMLImageElement>('img.avatar');
   const authorName = authorLink?.textContent?.trim() ||
     avatarElement?.getAttribute('alt')?.trim() ||
-    'V2EX 用户';
+    i18n.t('adapter.v2exUser');
   const originId = originalUrl.match(/\/t\/(\d+)/)?.[1] ||
     stableHash(`${originalUrl}|${title}|${authorName}`);
   const communityLink = element.querySelector<HTMLAnchorElement>('.topic_info .node, a.node');
@@ -91,17 +92,17 @@ export function parseV2exCard(element: Element): FeedItem | null {
     } : undefined,
     publishedAt: element.querySelector('.topic_info [title]')?.getAttribute('title') || undefined,
     previewBlocks: [],
-    metrics: isXnaEntry ? [] : [{ kind: 'replies', value: replies, label: '回复' }],
+    metrics: isXnaEntry ? [] : [{ kind: 'replies', value: replies, label: i18n.t('adapter.reply') }],
     actions: [
       ...(!isXnaEntry ? [{
         id: 'reply',
         kind: 'reply' as const,
-        label: '回复',
+        label: i18n.t('adapter.reply'),
         count: replies,
         enabled: true,
         fallback: 'openOriginal' as const,
       }] : []),
-      { id: 'open', kind: 'open', label: '查看原文', enabled: true },
+      { id: 'open', kind: 'open', label: i18n.t('adapter.openOriginal'), enabled: true },
     ],
   };
 }

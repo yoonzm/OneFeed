@@ -1,4 +1,5 @@
 import { LINUX_DO_PLATFORM } from '../../config/platforms';
+import { i18n } from '../../i18n';
 import type { FeedItem } from '../../types/feed';
 import {
   BaseAdapter,
@@ -50,7 +51,7 @@ function getAuthor(element: Element): FeedItem['author'] {
   const displayName = avatarElement?.getAttribute('title')?.split(' - ')[0]?.trim();
 
   return {
-    name: displayName || authorLink?.getAttribute('data-user-card') || 'Linux DO 用户',
+    name: displayName || authorLink?.getAttribute('data-user-card') || i18n.t('adapter.linuxDoUser'),
     avatar: absoluteUrl(avatarElement?.getAttribute('src') || ''),
     link: authorLink
       ? absoluteUrl(authorLink.getAttribute('href') || '') || undefined
@@ -104,27 +105,27 @@ export function parseLinuxDoCard(element: Element): FeedItem | null {
     publishedAt: Number.isFinite(createdAt) ? createdAt : undefined,
     previewBlocks: [],
     metrics: [
-      { kind: 'replies', value: replies, label: '回复' },
-      { kind: 'views', value: views, label: '浏览' },
+      { kind: 'replies', value: replies, label: i18n.t('adapter.reply') },
+      { kind: 'views', value: views, label: i18n.t('adapter.views') },
     ],
     actions: [
       {
         id: 'react',
         kind: 'react',
         variant: 'like',
-        label: '点赞',
+        label: i18n.t('adapter.like'),
         enabled: true,
         fallback: 'openOriginal',
       },
       {
         id: 'reply',
         kind: 'reply',
-        label: '回复',
+        label: i18n.t('adapter.reply'),
         count: replies,
         enabled: true,
         fallback: 'openOriginal',
       },
-      { id: 'open', kind: 'open', label: '查看原文', enabled: true },
+      { id: 'open', kind: 'open', label: i18n.t('adapter.openOriginal'), enabled: true },
     ],
   };
 }

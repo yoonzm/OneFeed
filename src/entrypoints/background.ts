@@ -1,10 +1,12 @@
-const ENABLED_ACTION_TITLE = '打开 OneFeed 启动中心（已开启）';
-const DISABLED_ACTION_TITLE = '打开 OneFeed 启动中心（已暂停）';
+import { i18n } from '../i18n';
+
 const DISABLED_BADGE_COLOR = '#5f6b7e';
 
 function updateActionState(enabled: boolean): void {
   void chrome.action.setTitle({
-    title: enabled ? ENABLED_ACTION_TITLE : DISABLED_ACTION_TITLE,
+    title: enabled
+      ? i18n.t('manifest.actionEnabled')
+      : i18n.t('manifest.actionDisabled'),
   });
   void chrome.action.setBadgeText({ text: enabled ? '' : 'OFF' });
   if (!enabled) {

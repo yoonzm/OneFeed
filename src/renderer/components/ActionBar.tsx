@@ -3,6 +3,7 @@ import type {
   FeedMetric,
   FeedMetricKind,
 } from '../../types/feed';
+import { formatNumber, i18n } from '../../i18n';
 
 interface ActionBarProps {
   originalUrl: string;
@@ -19,6 +20,13 @@ const actionMetricKinds: Partial<Record<FeedActionDescriptor['kind'], FeedMetric
   react: 'reactions',
   reply: 'replies',
   repost: 'reposts',
+};
+const metricLabels: Record<FeedMetricKind, string> = {
+  reactions: i18n.t('metric.reactions'),
+  replies: i18n.t('metric.replies'),
+  reposts: i18n.t('metric.reposts'),
+  views: i18n.t('metric.views'),
+  score: i18n.t('metric.score'),
 };
 
 /** 渲染跨平台统计与操作，同时避免同一数字以 metric 和 action 重复出现。 */
@@ -50,7 +58,7 @@ export function ActionBar({
     <footer className="card-actions">
       {passiveMetrics.map((metric) => (
         <span className="passive-metric" key={metric.kind}>
-          {metric.label || metric.kind} {metric.value.toLocaleString('zh-CN')}
+          {metric.label || metricLabels[metric.kind]} {formatNumber(metric.value)}
         </span>
       ))}
       {/* open 是普通链接；其余动作必须交回 Adapter 代理用户在原站的操作。 */}
@@ -72,7 +80,7 @@ export function ActionBar({
           aria-pressed={action.active}
           onClick={() => onAction(action)}
         >
-          {action.label}{action.count !== undefined ? ` ${action.count.toLocaleString('zh-CN')}` : ''}
+          {action.label}{action.count !== undefined ? ` ${formatNumber(action.count)}` : ''}
         </button>
       ))}
     </footer>

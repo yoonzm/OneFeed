@@ -1,4 +1,5 @@
 import type { ComponentType } from 'react';
+import { formatNumber, i18n } from '../../i18n';
 import type { FeedBlock, FeedImage } from '../../types/feed';
 
 interface BlockComponentProps {
@@ -39,8 +40,11 @@ function GalleryBlock({ block, onPreview, compactGallery = false }: BlockCompone
           key={`${image.url}-${index}`}
           onClick={() => onPreview(image)}
           aria-label={remainingCount > 0 && index === visibleItems.length - 1
-            ? `预览图片 ${index + 1}，共 ${block.items.length} 张`
-            : `预览图片 ${index + 1}`}
+            ? i18n.t('block.previewImageInGallery', [
+              String(index + 1),
+              formatNumber(block.items.length),
+            ])
+            : i18n.t('block.previewImage', [String(index + 1)])}
         >
           <img
             src={image.url}
@@ -66,7 +70,7 @@ function VideoBlock({ block }: BlockComponentProps) {
       <img
         className="video-poster"
         src={block.media.poster}
-        alt={block.media.alt || '视频封面'}
+        alt={block.media.alt || i18n.t('block.videoPoster')}
         loading="lazy"
       />
     ) : null;
@@ -80,7 +84,7 @@ function VideoBlock({ block }: BlockComponentProps) {
       poster={block.media.poster || undefined}
       src={block.media.url}
     >
-      当前浏览器无法播放此视频。
+      {i18n.t('block.videoUnsupported')}
     </video>
   );
 }
@@ -116,18 +120,28 @@ function PollBlock({ block }: BlockComponentProps) {
   if (block.type !== 'poll') return null;
 
   return (
-    <section className="poll-block" aria-label={block.poll.question || '投票'}>
+    <section className="poll-block" aria-label={block.poll.question || i18n.t('block.poll')}>
       {block.poll.question && <strong>{block.poll.question}</strong>}
       <ul>
         {block.poll.options.map((option) => (
           <li key={option.id}>
             <span>{option.label}</span>
-            {option.votes !== undefined && <small>{option.votes.toLocaleString('zh-CN')} 票</small>}
+            {option.votes !== undefined && (
+              <small>{i18n.t(
+                'block.voteCount',
+                option.votes,
+                [formatNumber(option.votes)],
+              )}</small>
+            )}
           </li>
         ))}
       </ul>
       {block.poll.totalVotes !== undefined && (
-        <small>共 {block.poll.totalVotes.toLocaleString('zh-CN')} 票</small>
+        <small>{i18n.t(
+          'block.totalVotes',
+          block.poll.totalVotes,
+          [formatNumber(block.poll.totalVotes)],
+        )}</small>
       )}
     </section>
   );

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { ArticleDetail } from '../../../types/detail';
 import type { CommentCommand, CommentRequestResult } from '../../../types/comments';
 import type { FeedActionDescriptor, FeedImage } from '../../../types/feed';
+import { formatDateTime, i18n } from '../../../i18n';
 import { ActionBar } from '../../components/ActionBar';
 import { BlockRenderer } from '../../components/BlockRenderer';
 import {
@@ -13,19 +14,6 @@ interface DetailArticleProps {
   content: ArticleDetail;
   onAction: (action: FeedActionDescriptor) => void;
   onCommentRequest?: (command: CommentCommand) => Promise<CommentRequestResult>;
-}
-
-function formatPublishedAt(value: string | number): string {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
-
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  }).format(date);
 }
 
 /** 单篇正文视图：保留作者元信息，并始终完整渲染所有标准 Block。 */
@@ -44,11 +32,11 @@ export function DetailArticle({ content, onAction, onCommentRequest }: DetailArt
   return (
     <article className="detail-article">
       {content.flags && Object.values(content.flags).some(Boolean) && (
-        <div className="flag-row" aria-label="内容状态">
-          {content.flags.pinned && <span>置顶</span>}
-          {content.flags.sensitive && <span>敏感内容</span>}
-          {content.flags.spoiler && <span>含剧透</span>}
-          {content.flags.locked && <span>已锁定</span>}
+        <div className="flag-row" aria-label={i18n.t('common.contentStatus')}>
+          {content.flags.pinned && <span>{i18n.t('common.flagPinned')}</span>}
+          {content.flags.sensitive && <span>{i18n.t('common.flagSensitive')}</span>}
+          {content.flags.spoiler && <span>{i18n.t('common.flagSpoiler')}</span>}
+          {content.flags.locked && <span>{i18n.t('common.flagLocked')}</span>}
         </div>
       )}
 
@@ -92,10 +80,10 @@ export function DetailArticle({ content, onAction, onCommentRequest }: DetailArt
           {(content.publishedAt !== undefined || content.updatedAt !== undefined) && (
             <span>
               {content.publishedAt !== undefined && (
-                <time>{formatPublishedAt(content.publishedAt)}</time>
+                <time>{formatDateTime(content.publishedAt)}</time>
               )}
               {content.publishedAt !== undefined && content.updatedAt !== undefined && ' · '}
-              {content.updatedAt !== undefined && '已编辑'}
+              {content.updatedAt !== undefined && i18n.t('reader.edited')}
             </span>
           )}
         </div>
@@ -144,10 +132,10 @@ export function DetailArticle({ content, onAction, onCommentRequest }: DetailArt
           className="lightbox"
           type="button"
           onClick={() => setPreview(undefined)}
-          aria-label="关闭图片预览"
+          aria-label={i18n.t('common.closeImagePreview')}
         >
-          <img src={preview.url} alt={preview.alt || '预览图片'} />
-          <span>点击任意位置关闭</span>
+          <img src={preview.url} alt={preview.alt || i18n.t('common.imagePreview')} />
+          <span>{i18n.t('common.clickAnywhereToClose')}</span>
         </button>
       )}
     </article>

@@ -1,3 +1,5 @@
+import { i18n } from '../../i18n';
+
 const GITHUB_URL = 'https://github.com/yoonzm/OneFeed';
 
 export function GitHubLink() {
@@ -7,7 +9,7 @@ export function GitHubLink() {
       href={GITHUB_URL}
       target="_blank"
       rel="noreferrer"
-      aria-label="在 GitHub 查看 OneFeed"
+      aria-label={i18n.t('github.label')}
       title="GitHub"
     >
       <svg className="size-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

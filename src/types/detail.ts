@@ -132,8 +132,8 @@ export interface ThreadDetail {
   header: ThreadHeader;
   /** 按原讨论顺序排列的回答或回复。 */
   entries: ThreadEntry[];
-  /** 面向用户的集合名称，同时用于标题和无内容状态。 */
-  entryLabel: '回答' | '回复';
+  /** 集合的跨平台语义；具体展示名称由 Renderer 按界面语言决定。 */
+  entryKind: 'answer' | 'reply';
   /** 决定触底同步原页面，还是渲染上一页/下一页链接。 */
   loadingMode: 'infinite' | 'paged';
   /** paged 模式下的原站分页导航；无限加载模式通常缺失。 */

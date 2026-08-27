@@ -1,4 +1,5 @@
 import { THIRTY_SIX_KR_PLATFORM } from '../../config/platforms';
+import { i18n } from '../../i18n';
 import type { FeedBlock, FeedItem } from '../../types/feed';
 import {
   BaseAdapter,
@@ -126,7 +127,7 @@ export function parseThirtySixKrCard(
       }] : []),
     ],
     metrics: [],
-    actions: [{ id: 'open', kind: 'open', label: '查看原文', enabled: true }],
+    actions: [{ id: 'open', kind: 'open', label: i18n.t('adapter.openOriginal'), enabled: true }],
   };
 }
 
