@@ -8,10 +8,20 @@ import {
   type FeedPageContext,
 } from './base';
 
-const CARD_SELECTOR = 'main article';
-const SUPPORTED_HOSTS = new Set(['weibo.com', 'www.weibo.com']);
+const CARD_SELECTOR = 'main article, .card-wrap[mid]';
+const MAIN_HOSTS = new Set(['weibo.com', 'www.weibo.com']);
+const SEARCH_HOST = 's.weibo.com';
 
 export const WEIBO_SOURCE = WEIBO_PLATFORM;
+
+export function createWeiboSearchUrl(query: string): URL | undefined {
+  const normalizedQuery = query.trim();
+  if (!normalizedQuery) return undefined;
+
+  const target = new URL('/weibo', `https://${SEARCH_HOST}`);
+  target.searchParams.set('q', normalizedQuery);
+  return target;
+}
 
 function absoluteUrl(value: string, pageUrl: URL): string {
   if (!value) return '';
@@ -39,7 +49,16 @@ export function parseWeiboCount(value: string): number {
 
 function createRichTextBlock(element: Element, pageUrl: URL): FeedBlock | null {
   const clone = element.cloneNode(true) as Element;
-  clone.querySelectorAll('.expand, script, style, noscript, button, svg, video')
+  clone.querySelectorAll([
+    '.expand',
+    '[action-type="fl_unfold"]',
+    'script',
+    'style',
+    'noscript',
+    'button',
+    'svg',
+    'video',
+  ].join(', '))
     .forEach((node) => node.remove());
   clone.querySelectorAll<HTMLImageElement>('img').forEach((image) => {
     const src = absoluteUrl(image.getAttribute('src') || '', pageUrl);
@@ -150,6 +169,15 @@ function findPermalink(element: Element, pageUrl: URL): HTMLAnchorElement | unde
   });
 }
 
+function findSearchPermalink(element: Element, pageUrl: URL): HTMLAnchorElement | undefined {
+  return Array.from(element.querySelectorAll<HTMLAnchorElement>('.from a[href]')).find((anchor) => {
+    const href = absoluteUrl(anchor.getAttribute('href') || '', pageUrl);
+    if (!href) return false;
+    const url = new URL(href);
+    return MAIN_HOSTS.has(url.hostname) && /^\/\d+\/[A-Za-z0-9]+\/?$/.test(url.pathname);
+  });
+}
+
 function createMetrics(element: Element): FeedMetric[] {
   const values = (element.querySelector('footer[aria-label]')?.getAttribute('aria-label') || '')
     .split(',')
@@ -235,9 +263,114 @@ export function parseWeiboCard(
   };
 }
 
+function searchMetric(element: Element, label: string): number {
+  const text = Array.from(element.querySelectorAll('.card-act li'))
+    .map((item) => normalizedText(item))
+    .find((value) => value.includes(label));
+  if (!text) return 0;
+  return parseWeiboCount(text.slice(text.indexOf(label) + label.length));
+}
+
+function extractSearchImages(element: Element, pageUrl: URL): FeedImage[] {
+  const seen = new Set<string>();
+  return Array.from(element.querySelectorAll<HTMLImageElement>([
+    '.media-piclist img[src]',
+    '.media-piclist img[data-src]',
+    '.media-pic img[src]',
+    '.media-pic img[data-src]',
+  ].join(', '))).map((image) => ({
+    url: absoluteUrl(
+      image.getAttribute('data-src') || image.getAttribute('src') || '',
+      pageUrl,
+    ),
+    alt: image.getAttribute('alt') || '',
+  })).filter((image) => {
+    if (!image.url || seen.has(image.url)) return false;
+    seen.add(image.url);
+    return true;
+  });
+}
+
+export function parseWeiboSearchCard(
+  element: Element,
+  pageUrl = new URL(window.location.href),
+): FeedItem | null {
+  // 搜索站没有语义 article/header，依赖 card-wrap 的 node-type、action-type 与永久链接。
+  const permalink = findSearchPermalink(element, pageUrl);
+  const originalUrl = absoluteUrl(permalink?.getAttribute('href') || '', pageUrl);
+  const originId = originalUrl ? new URL(originalUrl).pathname.split('/').filter(Boolean).at(-1) : '';
+  if (!originId || !originalUrl) return null;
+
+  const authorLink = element.querySelector<HTMLAnchorElement>(
+    '.info a.name[href], .info a[nick-name][href]',
+  );
+  const body = element.querySelector([
+    'p[node-type="feed_list_content_full"]',
+    'p[node-type="feed_list_content"]',
+    'p.txt',
+  ].join(', '));
+  const richText = body ? createRichTextBlock(body, pageUrl) : null;
+  const images = extractSearchImages(element, pageUrl);
+  const previewBlocks: FeedBlock[] = [
+    ...(richText ? [richText] : []),
+    ...(images.length ? [{ type: 'gallery' as const, items: images }] : []),
+  ];
+  if (!previewBlocks.length) return null;
+
+  const metrics: FeedMetric[] = [
+    { kind: 'reposts', value: searchMetric(element, '转发'), label: i18n.t('adapter.repost') },
+    { kind: 'replies', value: searchMetric(element, '评论'), label: i18n.t('adapter.comments') },
+    { kind: 'reactions', value: searchMetric(element, '赞'), label: i18n.t('adapter.reactions') },
+  ];
+  const reactions = metrics.find((metric) => metric.kind === 'reactions')?.value || 0;
+  const likeControl = element.querySelector<HTMLElement>('[action-type="feed_list_like"]');
+  const likeLabel = [
+    likeControl?.getAttribute('title'),
+    likeControl?.getAttribute('aria-label'),
+  ].filter(Boolean).join(' ');
+
+  return {
+    id: `weibo_${originId}`,
+    platform: 'weibo',
+    source: WEIBO_SOURCE,
+    originalUrl,
+    kind: 'post',
+    role: 'post',
+    author: {
+      name: normalizedText(authorLink) || authorLink?.getAttribute('nick-name') || '',
+      avatar: absoluteUrl(
+        element.querySelector<HTMLImageElement>('.avator img[src]')?.getAttribute('src') || '',
+        pageUrl,
+      ),
+      link: authorLink
+        ? absoluteUrl(authorLink.getAttribute('href') || '', pageUrl) || undefined
+        : undefined,
+    },
+    publishedAt: permalink?.getAttribute('title') || normalizedText(permalink) || undefined,
+    previewBlocks,
+    metrics,
+    actions: [
+      {
+        id: 'react',
+        kind: 'react',
+        variant: 'like',
+        label: i18n.t('adapter.reactions'),
+        count: reactions,
+        active: likeLabel.includes('取消') ||
+          Boolean(likeControl?.matches('.cur, .praised, [aria-pressed="true"]')),
+        enabled: Boolean(likeControl),
+        fallback: 'openOriginal',
+      },
+      { id: 'open', kind: 'open', label: i18n.t('adapter.openPost'), enabled: true },
+    ],
+  };
+}
+
 export function triggerWeiboAction(element: Element | undefined, actionId: string): boolean {
   if (actionId !== 'react') return false;
-  const control = element?.querySelector<HTMLButtonElement>('button.woo-like-main');
+  const control = element?.querySelector<HTMLElement>(
+    'button.woo-like-main, [action-type="feed_list_like"]',
+  );
   if (!control) return false;
   control.click();
   return true;
@@ -247,15 +380,29 @@ export class WeiboAdapter extends BaseAdapter {
   protected readonly cardSelector = CARD_SELECTOR;
 
   parseCard(element: Element, context: FeedPageContext): FeedItem | null {
-    return parseWeiboCard(element, context.url);
+    return context.url.hostname === SEARCH_HOST
+      ? parseWeiboSearchCard(element, context.url)
+      : parseWeiboCard(element, context.url);
   }
 
   triggerAction(itemId: string, actionId: string): boolean {
     return triggerWeiboAction(this.getRuntimeElement(itemId), actionId);
   }
+
+  override getInitialSearchQuery(): string {
+    const url = new URL(window.location.href);
+    return url.hostname === SEARCH_HOST ? url.searchParams.get('q')?.trim() || '' : '';
+  }
+
+  override triggerSearch(query: string): boolean {
+    const target = createWeiboSearchUrl(query);
+    if (!target) return false;
+    window.location.assign(target.href);
+    return true;
+  }
 }
 
-function isSupportedPath(url: URL): boolean {
+function isSupportedMainPath(url: URL): boolean {
   const path = url.pathname.replace(/\/+$/, '') || '/';
   if (path === '/') return true;
   if (path !== '/newlogin') return false;
@@ -265,6 +412,10 @@ function isSupportedPath(url: URL): boolean {
 
 export const weiboAdapterDefinition: AdapterDefinition = {
   source: WEIBO_SOURCE,
-  matches: (url) => SUPPORTED_HOSTS.has(url.hostname) && isSupportedPath(url),
+  matches: (url) => (
+    (MAIN_HOSTS.has(url.hostname) && isSupportedMainPath(url)) ||
+    (url.hostname === SEARCH_HOST && url.pathname.replace(/\/+$/, '') === '/weibo' &&
+      Boolean(url.searchParams.get('q')?.trim()))
+  ),
   create: (onItems) => new WeiboAdapter(onItems),
 };

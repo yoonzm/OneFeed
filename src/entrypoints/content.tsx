@@ -15,6 +15,7 @@ export default defineContentScript({
     'https://*.linux.do/*',
     'https://weibo.com/*',
     'https://www.weibo.com/*',
+    'https://s.weibo.com/*',
     'https://xiaohongshu.com/*',
     'https://www.xiaohongshu.com/*',
     'https://news.ycombinator.com/*',

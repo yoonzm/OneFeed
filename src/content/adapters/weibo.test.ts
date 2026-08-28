@@ -1,9 +1,108 @@
 import { describe, expect, it, vi } from 'vitest';
 import {
+  createWeiboSearchUrl,
   parseWeiboCard,
   parseWeiboCount,
+  parseWeiboSearchCard,
   triggerWeiboAction,
 } from './weibo';
+
+describe('Weibo original-site search', () => {
+  it('builds the native content-search route with a normalized query', () => {
+    const target = createWeiboSearchUrl('  人工 智能  ');
+
+    expect(target?.origin).toBe('https://s.weibo.com');
+    expect(target?.pathname).toBe('/weibo');
+    expect(target?.searchParams.get('q')).toBe('人工 智能');
+    expect(createWeiboSearchUrl('   ')).toBeUndefined();
+  });
+
+  it('normalizes content results and ignores cards without a permanent post link', () => {
+    document.body.innerHTML = `
+      <div class="card-wrap" mid="5336257887404082" id="post-result">
+        <div class="card-feed">
+          <div class="avator">
+            <a href="//weibo.com/u/1623886424">
+              <img src="https://tvax.sinaimg.cn/avatar.jpg" />
+            </a>
+          </div>
+          <div class="content">
+            <div class="info">
+              <a class="name" nick-name="新浪电影" href="//weibo.com/u/1623886424">
+                新浪电影
+              </a>
+            </div>
+            <p class="from">
+              <a title="2026-08-27 09:58" href="//weibo.com/1623886424/RfiCC64Mb">
+                7小时前
+              </a>
+            </p>
+            <p class="txt" node-type="feed_list_content_full">
+              <a href="//s.weibo.com/weibo?q=OneFeed">#OneFeed#</a> 搜索结果
+              <img alt="[doge]" src="https://face.t.sinajs.cn/doge.png" />
+              <a action-type="fl_unfold">展开全文</a><script>alert(1)</script>
+            </p>
+            <div class="media-piclist">
+              <img
+                src="data:image/gif;base64,placeholder"
+                data-src="//wx1.sinaimg.cn/search.jpg"
+                alt="搜索配图"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="card-act">
+          <ul>
+            <li>转发 1.1万</li>
+            <li>评论 406</li>
+            <li><a class="praised" action-type="feed_list_like" title="取消赞">赞 3228</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="card-wrap" mid="advertisement" id="auxiliary-result">
+        <p class="txt" node-type="feed_list_content">推广内容</p>
+      </div>`;
+    const pageUrl = new URL('https://s.weibo.com/weibo?q=OneFeed');
+    const item = parseWeiboSearchCard(document.querySelector('#post-result')!, pageUrl);
+
+    expect(item).toMatchObject({
+      id: 'weibo_RfiCC64Mb',
+      originalUrl: 'https://weibo.com/1623886424/RfiCC64Mb',
+      author: {
+        name: '新浪电影',
+        avatar: 'https://tvax.sinaimg.cn/avatar.jpg',
+        link: 'https://weibo.com/u/1623886424',
+      },
+      publishedAt: '2026-08-27 09:58',
+      metrics: [
+        { kind: 'reposts', value: 11000 },
+        { kind: 'replies', value: 406 },
+        { kind: 'reactions', value: 3228 },
+      ],
+    });
+    expect(item?.actions[0]).toMatchObject({
+      id: 'react',
+      count: 3228,
+      active: true,
+      enabled: true,
+    });
+    expect(item?.previewBlocks).toEqual([
+      {
+        type: 'richText',
+        html: expect.stringContaining('href="https://s.weibo.com/weibo?q=OneFeed"'),
+        plainText: '#OneFeed# 搜索结果 [doge]',
+      },
+      {
+        type: 'gallery',
+        items: [{ url: 'https://wx1.sinaimg.cn/search.jpg', alt: '搜索配图' }],
+      },
+    ]);
+    expect(parseWeiboSearchCard(
+      document.querySelector('#auxiliary-result')!,
+      pageUrl,
+    )).toBeNull();
+  });
+});
 
 describe('parseWeiboCount', () => {
   it('parses exact and Chinese compact counts', () => {
@@ -101,10 +200,13 @@ describe('parseWeiboCard', () => {
 });
 
 describe('triggerWeiboAction', () => {
-  it('proxies the native like button and ignores unknown actions', () => {
-    document.body.innerHTML = '<article><button class="woo-like-main">赞</button></article>';
-    const button = document.querySelector<HTMLButtonElement>('button')!;
-    const click = vi.spyOn(button, 'click').mockImplementation(() => undefined);
+  it.each([
+    '<button class="woo-like-main">赞</button>',
+    '<a action-type="feed_list_like">赞</a>',
+  ])('proxies a native like control and ignores unknown actions', (control) => {
+    document.body.innerHTML = `<article>${control}</article>`;
+    const element = document.querySelector<HTMLElement>('button, a')!;
+    const click = vi.spyOn(element, 'click').mockImplementation(() => undefined);
 
     expect(triggerWeiboAction(document.querySelector('article')!, 'react')).toBe(true);
     expect(click).toHaveBeenCalledOnce();

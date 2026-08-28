@@ -60,8 +60,8 @@
     },
     "weibo": {
       "name": "Weibo",
-      "scope": "Home trending feed and post pages",
-      "access": "Trending posts are available without signing in"
+      "scope": "Home trending feed, post pages, and content search",
+      "access": "Trending posts are public; search requires sign-in"
     },
     "xiaohongshu": {
       "name": "Xiaohongshu",

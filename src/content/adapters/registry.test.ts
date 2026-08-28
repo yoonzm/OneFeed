@@ -97,6 +97,14 @@ describe('createAdapter', () => {
       adapter: expect.any(WeiboAdapter),
       source: { id: 'weibo', name: '微博' },
     });
+    expect(createAdapter(
+      new URL('https://s.weibo.com/weibo?q=OneFeed'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(WeiboAdapter),
+      source: { id: 'weibo', name: '微博' },
+    });
   });
 
   it('selects supported article detail adapters', () => {
@@ -163,6 +171,8 @@ describe('createAdapter', () => {
     expect(createAdapter(new URL('https://linux.do/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://weibo.com/hot/search'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://weibo.com/detail/123456'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://s.weibo.com/user?q=OneFeed'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://s.weibo.com/weibo?q='), listeners())).toBeNull();
     expect(createAdapter(new URL('https://www.xiaohongshu.com/explore/note-id'), listeners()))
       .toBeNull();
     expect(createAdapter(new URL('https://www.zhihu.com/settings/account'), listeners())).toBeNull();
@@ -195,6 +205,7 @@ describe('createAdapter', () => {
     expect(isSupportedUrl(
       new URL('https://weibo.com/1623886424/RfiCC64Mb'),
     )).toBe(true);
+    expect(isSupportedUrl(new URL('https://s.weibo.com/weibo?q=OneFeed'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore'))).toBe(true);
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/news'))).toBe(true);
     expect(isSupportedUrl(new URL('https://36kr.com/information/technology/'))).toBe(true);

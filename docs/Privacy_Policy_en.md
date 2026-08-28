@@ -34,7 +34,7 @@ OneFeed does not maintain a cloud user database. The enabled state, theme prefer
 ## Permissions
 
 - **storage:** Saves the enabled state, theme preferences, recently used platforms, display-filter rules, and opened-item identifiers locally.
-- **Weibo site access:** Reads and rearranges supported Weibo trending feeds and individual post pages opened by the user.
+- **Weibo site access:** Reads and rearranges supported Weibo trending feeds, individual post pages, and content-search results opened by the user.
 - **X site access:** Reads and rearranges the supported X home timeline and its feed channels opened by the user.
 - **Xiaohongshu site access:** Reads and rearranges supported Xiaohongshu Explore feeds and content channels opened by the user.
 - **Reddit site access:** Reads and rearranges supported Reddit home, sorted, and community feeds opened by the user.
