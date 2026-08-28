@@ -6,17 +6,17 @@
 - **简短说明**：将受支持网站的信息流重新排版为专注、统一、可随时关闭的阅读界面。
 - **推荐分类**：效率工具
 - **语言**：简体中文
-- **版本**：0.1.13
+- **版本**：0.1.14
 
 ## 详细说明
 
-OneFeed 面向多平台信息流，将受支持网站的内容转换为简洁、一致的 Focus Paper 阅读界面，帮助你减少页面噪音，把注意力留给内容本身。当前版本支持微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX 与 36氪信息流。
+OneFeed 面向多平台信息流，将受支持网站的内容转换为简洁、一致的 Focus Paper 阅读界面，帮助你减少页面噪音，把注意力留给内容本身。当前版本支持微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX 与 36氪信息流及受支持的详情页面。
 
 当前版本提供：
 
 - 首次安装后展示欢迎页，可直接打开无需登录的 Hacker News 体验 OneFeed；
 - 点击浏览器工具栏图标打开 Launch Center，可查看最近使用的平台、打开受支持网站并统一控制启用状态与外观；
-- 重新排版微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX 与 36氪信息流，以及知乎问题/回答/专栏、Linux DO 话题、V2EX 主题和 36氪文章详情；
+- 重新排版微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX 与 36氪信息流，以及微博单条动态、小红书笔记、知乎问题/回答/专栏、Linux DO 话题、V2EX 主题和 36氪文章详情；
 - 在知乎回答详情中通过 OneFeed 弹窗统一阅读评论与回复，并支持继续加载；
 - 统一展示标题、作者、两行正文摘要、紧凑图片预览和互动数量；
 - 在本地标记用户已经打开过的信息流条目，返回列表时更容易识别阅读进度；
@@ -57,7 +57,7 @@ OneFeed 是独立开发的第三方扩展，与微博、X、小红书、Reddit�
 ## 测试说明
 
 1. 首次安装后会自动打开 OneFeed 欢迎页，点击“打开 Hacker News 立即体验”可进入无需测试账号的公开信息流。
-2. 扩展会将 Hacker News、`https://www.v2ex.com/` 或 `https://36kr.com/information/web_news/` 的公开信息流显示为 Focus Paper 阅读界面。
+2. 扩展会将 Hacker News、`https://www.v2ex.com/` 或 `https://36kr.com/information/web_news/` 的公开信息流显示为 Focus Paper 阅读界面；也可打开 `https://www.xiaohongshu.com/explore` 中的任意笔记，检查标题、正文、完整画廊或视频、互动统计以及喜欢和收藏代理。
 3. 在 36氪信息流中打开任意文章，可检查文章标题、作者、发布时间、正文与图片的详情阅读界面，无需测试账号。
 4. 使用审核人员自己的知乎账号打开 `https://www.zhihu.com/hot`，可检查两行正文摘要、右侧圆角图片预览、热榜频道导航和问题详情页；在回答详情点击评论数，可检查 OneFeed 评论弹窗与评论继续加载，点击评论中的回复数可检查上层回复弹窗。
 5. 点击 Chrome 工具栏中的 OneFeed 图标，可打开 Launch Center、切换平台并暂停或重新开启统一信息流。
