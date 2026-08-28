@@ -1,11 +1,9 @@
-import type { ColorScheme } from '../theme/useColorScheme';
 import { i18n } from '../i18n';
 
 interface FloatingToggleProps {
   enabled: boolean;
   ready: boolean;
   iconUrl: string;
-  colorScheme?: ColorScheme;
   onToggle: () => void;
 }
 
@@ -13,7 +11,6 @@ export function FloatingToggle({
   enabled,
   ready,
   iconUrl,
-  colorScheme = 'light',
   onToggle,
 }: FloatingToggleProps) {
   const label = enabled
@@ -21,13 +18,13 @@ export function FloatingToggle({
     : i18n.t('toggle.enableLabel');
 
   return (
-    <div className="floating-toggle" data-onefeed-theme={colorScheme}>
+    <div className="floating-toggle">
       <span className="toggle-tip" role="status">
         <strong>{enabled ? i18n.t('toggle.enabledTitle') : i18n.t('toggle.pausedTitle')}</strong>
         <small>{enabled ? i18n.t('toggle.showOriginal') : i18n.t('toggle.enableFocused')}</small>
       </span>
       <button
-        className={`toggle-button ${enabled ? 'toggle-enabled' : 'toggle-disabled'}`}
+        className={`toggle-button${enabled ? '' : ' toggle-disabled'}`}
         type="button"
         role="switch"
         aria-checked={enabled}

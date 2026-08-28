@@ -36,9 +36,21 @@ describe('FloatingToggle', () => {
   });
 
   it('keeps the switch half-hidden until hover or keyboard focus', () => {
-    expect(toggleStyles).toContain('transform: translateX(50%);');
+    expect(toggleStyles).toContain('transform: translateX(calc(50% + 6px));');
     expect(toggleStyles).toMatch(
       /\.floating-toggle:hover,\s*\.floating-toggle:focus-within\s*{[^}]*transform: translateX\(0\);/,
     );
+  });
+
+  it('uses a fixed brand surface instead of following the page theme', () => {
+    const markup = renderToStaticMarkup(
+      <FloatingToggle enabled ready iconUrl={iconUrl} onToggle={vi.fn()} />,
+    );
+
+    expect(markup).not.toContain('data-onefeed-theme');
+    expect(toggleStyles).toContain('--floating-toggle-background: #171717;');
+    expect(toggleStyles).toContain('background: var(--floating-toggle-background);');
+    expect(toggleStyles).not.toContain('background: var(--color-onefeed-ink);');
+    expect(toggleStyles).not.toContain('.toggle-enabled');
   });
 });

@@ -358,7 +358,6 @@ export function startContentScript(): ContentScriptController {
         enabled={enabled}
         ready={ready}
         iconUrl={chrome.runtime.getURL('icons/icon-32.png')}
-        colorScheme={colorScheme}
         onToggle={() => chrome.storage.local.set({ enabled: !enabled })}
       />,
     );
@@ -427,7 +426,6 @@ export function startContentScript(): ContentScriptController {
       if (readerHost instanceof HTMLDivElement) {
         readerHost.dataset.onefeedTheme = colorScheme;
       }
-      renderToggle(storageReady);
     }
     if (changes.enabled) {
       storageReady = true;
