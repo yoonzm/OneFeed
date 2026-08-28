@@ -47,7 +47,8 @@ describe('filter settings page', () => {
     const container = await renderOptions();
 
     expect(container.querySelector('a[href="/board.html"]')).toBeNull();
-    expect(container.querySelector('h1')?.textContent).toContain('适合你的样子');
+    expect(container.querySelector('.settings-intro')).toBeNull();
+    expect(container.querySelector('.index-title h1')).not.toBeNull();
     expect(container.textContent).toContain('顶部常用网站');
     expect(container.querySelectorAll('.header-platform-row')).toHaveLength(
       getSupportedPlatforms().length,

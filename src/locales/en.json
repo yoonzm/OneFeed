@@ -171,9 +171,6 @@
     "enableFocused": "Click to start focused reading"
   },
   "display": {
-    "eyebrow": "READING CONTROL",
-    "introTitle": "Make the reading interface yours.",
-    "introDescription": "Choose the websites in the header, arrange their order, and control content images separately for feeds and detail pages. Every preference stays on this device.",
     "settings": "Reading settings",
     "indexDescription": "Interface preferences and content filters remain independent and can be changed at any time.",
     "visiblePlatforms": "Header websites",

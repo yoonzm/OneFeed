@@ -171,9 +171,6 @@
     "enableFocused": "点击开启专注阅读"
   },
   "display": {
-    "eyebrow": "阅读控制",
-    "introTitle": "把阅读界面调成适合你的样子。",
-    "introDescription": "选择顶部常用网站、安排访问顺序，并分别决定信息流与详情页是否显示内容图片。所有偏好只保存在当前设备。",
     "settings": "阅读设置",
     "indexDescription": "界面偏好与内容过滤彼此独立，可随时调整。",
     "visiblePlatforms": "顶部网站",

@@ -520,15 +520,9 @@ export function OptionsApp() {
       </header>
 
       <main id="settings-main" className="options-main">
-        <section className="settings-intro" aria-labelledby="settings-title">
-          <p>{i18n.t('display.eyebrow')}</p>
-          <h1 id="settings-title">{i18n.t('display.introTitle')}</h1>
-          <p>{i18n.t('display.introDescription')}</p>
-        </section>
-
         <div className="settings-workspace">
           <aside className="settings-index" aria-label={i18n.t('filter.categories')}>
-            <div className="index-title"><Funnel size={19} weight="fill" /><span>{i18n.t('display.settings')}</span></div>
+            <div className="index-title"><Funnel size={19} weight="fill" /><h1>{i18n.t('display.settings')}</h1></div>
             <p>{i18n.t('display.indexDescription')}</p>
             <dl>
               <div><dt>{i18n.t('display.visiblePlatforms')}</dt><dd>{formatNumber(visiblePlatformCount)}</dd></div>

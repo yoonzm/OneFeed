@@ -63,27 +63,18 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .theme-button { display: grid; width: 42px; height: 42px; padding: 0; place-items: center; border-radius: 8px; background: transparent; }
 
 .options-main { width: min(calc(100% - 64px), 1240px); margin: 0 auto; padding: 64px 0 100px; }
-.settings-intro { max-width: 680px; margin-bottom: 50px; }
-.settings-intro > p:first-child, .section-title p, .editor-heading p, .master-card > div:nth-child(2) > p {
+.section-title p, .editor-heading p, .master-card > div:nth-child(2) > p {
   margin: 0 0 10px;
   color: var(--color-onefeed-blue);
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .16em;
 }
-.settings-intro h1 {
-  margin: 0;
-  font-family: var(--font-onefeed-reading);
-  font-size: clamp(44px, 6vw, 72px);
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -.055em;
-}
-.settings-intro > p:last-child { max-width: 560px; margin: 22px 0 0; color: var(--color-onefeed-muted); font-size: 16px; line-height: 1.8; }
 
 .settings-workspace { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 42px; align-items: start; }
 .settings-index { position: sticky; top: 24px; padding: 22px; border: 1px solid var(--color-onefeed-line); border-radius: 12px; background: color-mix(in srgb, var(--color-onefeed-surface) 78%, transparent); }
 .index-title { display: flex; align-items: center; gap: 10px; font-family: var(--font-onefeed-reading); font-size: 17px; font-weight: 650; }
+.index-title h1 { margin: 0; font: inherit; }
 .index-title svg { color: var(--color-onefeed-blue); }
 .settings-index > p { margin: 15px 0 21px; color: var(--color-onefeed-muted); font-size: 13px; line-height: 1.7; }
 .settings-index dl { margin: 0; border-top: 1px solid var(--color-onefeed-line); }
@@ -270,7 +261,6 @@ fieldset legend { margin-bottom: 11px; }
 @media (max-width: 620px) {
   .options-header, .options-main { width: min(calc(100% - 32px), 1240px); }
   .options-main { padding-top: 44px; }
-  .settings-intro { margin-bottom: 34px; }
   .master-card { grid-template-columns: 48px 1fr; padding: 21px; }
   .platform-order-card > header { padding: 19px 17px 16px; }
   .header-platform-row { padding-right: 12px; padding-left: 12px; grid-template-columns: 32px minmax(0, 1fr) auto auto; gap: 7px; }
