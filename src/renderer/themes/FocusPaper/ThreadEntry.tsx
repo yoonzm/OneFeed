@@ -17,11 +17,12 @@ import { getDensityClassName, hasExpandableText } from './contentItemUtils';
 interface ThreadEntryProps {
   item: ThreadEntryItem;
   index: number;
+  hideImages?: boolean;
   onAction: (item: ThreadEntryItem, action: FeedActionDescriptor) => void;
 }
 
 /** Answer 是详情预览，Reply 是线程内正文；二者共享骨架但不共享展开和导航语义。 */
-export function ThreadEntry({ item, index, onAction }: ThreadEntryProps) {
+export function ThreadEntry({ item, index, hideImages = false, onAction }: ThreadEntryProps) {
   const [expanded, setExpanded] = useState(false);
   const [preview, setPreview] = useState<FeedImage>();
   const isAnswer = item.role === 'answer';
@@ -40,7 +41,12 @@ export function ThreadEntry({ item, index, onAction }: ThreadEntryProps) {
     >
       <div className="card-main">
         <ItemTitle item={item} />
-        <ItemBody blocks={contentBlocks} expanded={contentExpanded} onPreview={setPreview} />
+        <ItemBody
+          blocks={contentBlocks}
+          expanded={contentExpanded}
+          hideImages={hideImages}
+          onPreview={setPreview}
+        />
 
         <ItemMeta
           item={item}
@@ -76,7 +82,10 @@ export function ThreadEntry({ item, index, onAction }: ThreadEntryProps) {
         </ItemMeta>
       </div>
 
-      <ItemLightbox preview={preview} onClose={() => setPreview(undefined)} />
+      <ItemLightbox
+        preview={hideImages ? undefined : preview}
+        onClose={() => setPreview(undefined)}
+      />
     </article>
   );
 }

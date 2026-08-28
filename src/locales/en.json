@@ -35,7 +35,7 @@
     "onboardingTitle": "Welcome to OneFeed",
     "onboardingDescription": "OneFeed is installed. Learn about supported websites, core features, and how to get started.",
     "optionsTitle": "OneFeed settings",
-    "optionsDescription": "Configure local display filters for OneFeed."
+    "optionsDescription": "Configure OneFeed header websites, image visibility, and local filters."
   },
   "platform": {
     "zhihu": {
@@ -170,6 +170,36 @@
     "showOriginal": "Click to show the original page",
     "enableFocused": "Click to start focused reading"
   },
+  "display": {
+    "eyebrow": "READING CONTROL",
+    "introTitle": "Make the reading interface yours.",
+    "introDescription": "Choose the websites in the header, arrange their order, and control content images separately for feeds and detail pages. Every preference stays on this device.",
+    "settings": "Reading settings",
+    "indexDescription": "Interface preferences and content filters remain independent and can be changed at any time.",
+    "visiblePlatforms": "Header websites",
+    "contentImages": "Content images",
+    "headerEyebrow": "HEADER NAVIGATION",
+    "headerTitle": "Choose your header websites and their order",
+    "headerPlatforms": "Header websites",
+    "headerDescription": "Turn off websites you do not use and move the rest into your preferred reading order.",
+    "resetOrder": "Reset order",
+    "moveUp": "Move $1 up",
+    "moveDown": "Move $1 down",
+    "showPlatform": "Show $1 in the header",
+    "activePlatformNote": "The website you are currently viewing remains temporarily visible even when hidden, so its source and channels stay clear.",
+    "imageTitle": "Content images",
+    "imageDescription": "Author avatars, website marks, and video playback are not affected.",
+    "feedImages": "Feed list",
+    "feedImagesDescription": "Controls card images, link covers, and video posters.",
+    "feedImagesToggle": "Show images in the feed list",
+    "detailImages": "Detail pages",
+    "detailImagesDescription": "Controls content images in articles, discussions, and comments.",
+    "detailImagesToggle": "Show images on detail pages",
+    "allImagesShown": "All shown",
+    "feedImagesHidden": "Feed hidden",
+    "detailImagesHidden": "Details hidden",
+    "allImagesHidden": "All hidden"
+  },
   "filter": {
     "kind": {
       "post": "Post",
@@ -223,8 +253,6 @@
     "saveRule": "Save rule",
     "duplicateSuffix": " copy",
     "skip": "Skip to settings",
-    "backLabel": "Return to the OneFeed launch center",
-    "back": "Back to launch center",
     "introTitle": "Decide what no longer appears.",
     "introDescription": "Rules only change what OneFeed displays. They never modify, delete, or upload content from the original website.",
     "categories": "Settings categories",
@@ -315,7 +343,8 @@
     "searchForm": "$1 content search",
     "searchScope": "$1 · Search",
     "searchPlaceholder": "Search content on $1",
-    "searchSubmit": "Search"
+    "searchSubmit": "Search",
+    "openSettings": "Open OneFeed settings"
   },
   "comment": {
     "comments": "Comments",

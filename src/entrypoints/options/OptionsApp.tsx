@@ -1,10 +1,12 @@
 import {
-  ArrowLeft,
+  ArrowDown,
+  ArrowUp,
   Check,
   Copy,
   EyeSlash,
   Funnel,
   MoonStars,
+  Image,
   PencilSimple,
   Plus,
   Sparkle,
@@ -26,6 +28,10 @@ import {
 } from '../../filters/feedFilters';
 import { useFeedFilters } from '../../filters/useFeedFilters';
 import { formatNumber, i18n } from '../../i18n';
+import {
+  DEFAULT_DISPLAY_PREFERENCES,
+} from '../../preferences/displayPreferences';
+import { useDisplayPreferences } from '../../preferences/useDisplayPreferences';
 import { useColorScheme } from '../../theme/useColorScheme';
 
 const KIND_LABELS = {
@@ -389,11 +395,59 @@ function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
 export function OptionsApp() {
   const { colorScheme, ready: colorReady, setColorScheme } = useColorScheme();
   const { settings, ready, saveSettings } = useFeedFilters();
+  const {
+    preferences,
+    ready: displayReady,
+    savePreferences,
+  } = useDisplayPreferences();
   const [editingRule, setEditingRule] = useState<FeedFilterRule>();
   const [deletedRule, setDeletedRule] = useState<DeletedRule>();
   const activeRuleCount = settings.rules.filter((rule) => rule.enabled).length +
     Number(settings.hideSeen) + Number(settings.hideRecommended);
   const nextColorScheme = colorScheme === 'light' ? 'dark' : 'light';
+  const orderedPlatforms = useMemo(() => {
+    const supportedPlatforms = getSupportedPlatforms();
+    const platformById = new Map(supportedPlatforms.map((platform) => [platform.id, platform]));
+    return preferences.headerPlatformOrder
+      .map((id) => platformById.get(id))
+      .filter((platform) => platform !== undefined);
+  }, [preferences.headerPlatformOrder]);
+  const visiblePlatformCount = orderedPlatforms.length -
+    preferences.hiddenHeaderPlatformIds.length;
+
+  const movePlatform = (platformId: PlatformId, offset: -1 | 1) => {
+    savePreferences((current) => {
+      const index = current.headerPlatformOrder.indexOf(platformId);
+      const targetIndex = index + offset;
+      if (index < 0 || targetIndex < 0 || targetIndex >= current.headerPlatformOrder.length) {
+        return current;
+      }
+      const headerPlatformOrder = [...current.headerPlatformOrder];
+      [headerPlatformOrder[index], headerPlatformOrder[targetIndex]] = [
+        headerPlatformOrder[targetIndex]!,
+        headerPlatformOrder[index]!,
+      ];
+      return { ...current, headerPlatformOrder };
+    });
+  };
+
+  const setPlatformVisible = (platformId: PlatformId, visible: boolean) => {
+    savePreferences((current) => ({
+      ...current,
+      hiddenHeaderPlatformIds: visible
+        ? current.hiddenHeaderPlatformIds.filter((id) => id !== platformId)
+        : [...current.hiddenHeaderPlatformIds, platformId],
+    }));
+  };
+
+  const imageModeSummary = (() => {
+    if (preferences.hideFeedImages && preferences.hideDetailImages) {
+      return i18n.t('display.allImagesHidden');
+    }
+    if (preferences.hideFeedImages) return i18n.t('display.feedImagesHidden');
+    if (preferences.hideDetailImages) return i18n.t('display.detailImagesHidden');
+    return i18n.t('display.allImagesShown');
+  })();
 
   const saveRule = (rule: FeedFilterRule) => {
     saveSettings((current) => {
@@ -446,12 +500,11 @@ export function OptionsApp() {
     <div className="options-page" data-onefeed-theme={colorScheme}>
       <a className="skip-link" href="#settings-main">{i18n.t('filter.skip')}</a>
       <header className="options-header">
-        <a className="options-brand" href="/board.html" aria-label={i18n.t('filter.backLabel')}>
+        <div className="options-brand">
           <img src="/icons/icon-128.png" alt="" />
           <span>OneFeed</span>
-        </a>
+        </div>
         <div className="options-header-actions">
-          <a href="/board.html"><ArrowLeft size={18} />{i18n.t('filter.back')}</a>
           <button
             className="theme-button"
             type="button"
@@ -468,23 +521,150 @@ export function OptionsApp() {
 
       <main id="settings-main" className="options-main">
         <section className="settings-intro" aria-labelledby="settings-title">
-          <p>DISPLAY FILTER</p>
-          <h1 id="settings-title">{i18n.t('filter.introTitle')}</h1>
-          <p>{i18n.t('filter.introDescription')}</p>
+          <p>{i18n.t('display.eyebrow')}</p>
+          <h1 id="settings-title">{i18n.t('display.introTitle')}</h1>
+          <p>{i18n.t('display.introDescription')}</p>
         </section>
 
         <div className="settings-workspace">
           <aside className="settings-index" aria-label={i18n.t('filter.categories')}>
-            <div className="index-title"><Funnel size={19} weight="fill" /><span>{i18n.t('filter.displayFilter')}</span></div>
-            <p>{i18n.t('filter.indexDescription')}</p>
+            <div className="index-title"><Funnel size={19} weight="fill" /><span>{i18n.t('display.settings')}</span></div>
+            <p>{i18n.t('display.indexDescription')}</p>
             <dl>
-              <div><dt>{i18n.t('filter.status')}</dt><dd>{settings.enabled ? i18n.t('filter.running') : i18n.t('common.paused')}</dd></div>
-              <div><dt>{i18n.t('filter.activeRules')}</dt><dd>{formatNumber(activeRuleCount)}</dd></div>
+              <div><dt>{i18n.t('display.visiblePlatforms')}</dt><dd>{formatNumber(visiblePlatformCount)}</dd></div>
+              <div><dt>{i18n.t('display.contentImages')}</dt><dd>{imageModeSummary}</dd></div>
               <div><dt>{i18n.t('filter.dataLocation')}</dt><dd>{i18n.t('filter.thisDevice')}</dd></div>
             </dl>
           </aside>
 
           <div className="settings-content">
+            <section className="display-section" aria-labelledby="display-title">
+              <div className="section-title">
+                <div>
+                  <p>{i18n.t('display.headerEyebrow')}</p>
+                  <h2 id="display-title">{i18n.t('display.headerTitle')}</h2>
+                </div>
+              </div>
+              <div className="display-grid">
+                <article className="platform-order-card">
+                  <header>
+                    <div>
+                      <h3>{i18n.t('display.headerPlatforms')}</h3>
+                      <p>{i18n.t('display.headerDescription')}</p>
+                    </div>
+                    <button
+                      className="reset-order-button"
+                      type="button"
+                      disabled={!displayReady}
+                      onClick={() => savePreferences((current) => ({
+                        ...current,
+                        headerPlatformOrder: [
+                          ...DEFAULT_DISPLAY_PREFERENCES.headerPlatformOrder,
+                        ],
+                      }))}
+                    >
+                      {i18n.t('display.resetOrder')}
+                    </button>
+                  </header>
+                  <ol className="header-platform-list">
+                    {orderedPlatforms.map((platform, index) => {
+                      const platformId = platform.id as PlatformId;
+                      const displayName = getPlatformDisplayName(platformId);
+                      const presentation = getPlatformPresentation(platformId);
+                      const visible = !preferences.hiddenHeaderPlatformIds.includes(platformId);
+                      return (
+                        <li
+                          className={`header-platform-row ${visible ? '' : 'is-hidden'}`}
+                          data-platform-id={platform.id}
+                          key={platform.id}
+                          style={{ '--platform-accent': presentation.accent } as CSSProperties}
+                        >
+                          <span className="platform-order-number" aria-hidden="true">
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
+                          <span className="header-platform-icon" aria-hidden="true">
+                            <PlatformIcon platformId={platformId} />
+                          </span>
+                          <span className="header-platform-name">{displayName}</span>
+                          <span className="platform-order-actions">
+                            <button
+                              className="move-up"
+                              type="button"
+                              aria-label={i18n.t('display.moveUp', [displayName])}
+                              disabled={!displayReady || index === 0}
+                              onClick={() => movePlatform(platformId, -1)}
+                            >
+                              <ArrowUp size={15} weight="bold" aria-hidden="true" />
+                            </button>
+                            <button
+                              className="move-down"
+                              type="button"
+                              aria-label={i18n.t('display.moveDown', [displayName])}
+                              disabled={!displayReady || index === orderedPlatforms.length - 1}
+                              onClick={() => movePlatform(platformId, 1)}
+                            >
+                              <ArrowDown size={15} weight="bold" aria-hidden="true" />
+                            </button>
+                          </span>
+                          <Toggle
+                            checked={visible}
+                            label={i18n.t('display.showPlatform', [displayName])}
+                            disabled={!displayReady}
+                            onChange={(checked) => setPlatformVisible(platformId, checked)}
+                          />
+                        </li>
+                      );
+                    })}
+                  </ol>
+                  <p className="active-platform-note">{i18n.t('display.activePlatformNote')}</p>
+                </article>
+
+                <article className="image-settings-card">
+                  <header>
+                    <span className="image-settings-icon" aria-hidden="true">
+                      <Image size={23} />
+                    </span>
+                    <div>
+                      <h3>{i18n.t('display.imageTitle')}</h3>
+                      <p>{i18n.t('display.imageDescription')}</p>
+                    </div>
+                  </header>
+                  <div className="image-setting-list">
+                    <div className="image-setting-row">
+                      <div>
+                        <strong>{i18n.t('display.feedImages')}</strong>
+                        <span>{i18n.t('display.feedImagesDescription')}</span>
+                      </div>
+                      <Toggle
+                        checked={!preferences.hideFeedImages}
+                        label={i18n.t('display.feedImagesToggle')}
+                        disabled={!displayReady}
+                        onChange={(showImages) => savePreferences({
+                          ...preferences,
+                          hideFeedImages: !showImages,
+                        })}
+                      />
+                    </div>
+                    <div className="image-setting-row">
+                      <div>
+                        <strong>{i18n.t('display.detailImages')}</strong>
+                        <span>{i18n.t('display.detailImagesDescription')}</span>
+                      </div>
+                      <Toggle
+                        checked={!preferences.hideDetailImages}
+                        label={i18n.t('display.detailImagesToggle')}
+                        disabled={!displayReady}
+                        onChange={(showImages) => savePreferences({
+                          ...preferences,
+                          hideDetailImages: !showImages,
+                        })}
+                      />
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </section>
+
             <section className="master-card" aria-labelledby="master-title">
               <div className="master-icon"><EyeSlash size={28} /></div>
               <div>

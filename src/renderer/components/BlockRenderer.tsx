@@ -7,22 +7,25 @@ interface BlockComponentProps {
   expanded: boolean;
   onPreview: (image: FeedImage) => void;
   compactGallery?: boolean;
+  hideImages?: boolean;
 }
 
-function RichTextBlock({ block, expanded }: BlockComponentProps) {
+function RichTextBlock({ block, expanded, hideImages }: BlockComponentProps) {
   if (block.type !== 'richText') return null;
 
   // FeedBlock 契约要求 Adapter 先清洗 html；Renderer 只负责保持富文本结构。
   return (
     <div
-      className={expanded ? 'content content-expanded' : 'content'}
+      className={`${expanded ? 'content content-expanded' : 'content'}${
+        hideImages ? ' content-images-hidden' : ''
+      }`}
       dangerouslySetInnerHTML={{ __html: block.html }}
     />
   );
 }
 
-function GalleryBlock({ block, onPreview, compactGallery = false }: BlockComponentProps) {
-  if (block.type !== 'gallery') return null;
+function GalleryBlock({ block, onPreview, compactGallery = false, hideImages }: BlockComponentProps) {
+  if (block.type !== 'gallery' || hideImages) return null;
 
   const visibleItems = compactGallery ? block.items.slice(0, 4) : block.items;
   const remainingCount = compactGallery ? block.items.length - visibleItems.length : 0;
@@ -62,11 +65,11 @@ function GalleryBlock({ block, onPreview, compactGallery = false }: BlockCompone
   );
 }
 
-function VideoBlock({ block }: BlockComponentProps) {
+function VideoBlock({ block, hideImages }: BlockComponentProps) {
   if (block.type !== 'video') return null;
 
   if (!block.media.url) {
-    return block.media.poster ? (
+    return block.media.poster && !hideImages ? (
       <img
         className="video-poster"
         src={block.media.poster}
@@ -81,7 +84,7 @@ function VideoBlock({ block }: BlockComponentProps) {
       className="video-player"
       controls
       preload="metadata"
-      poster={block.media.poster || undefined}
+      poster={!hideImages && block.media.poster ? block.media.poster : undefined}
       src={block.media.url}
     >
       {i18n.t('block.videoUnsupported')}
@@ -89,12 +92,14 @@ function VideoBlock({ block }: BlockComponentProps) {
   );
 }
 
-function LinkPreviewBlock({ block }: BlockComponentProps) {
+function LinkPreviewBlock({ block, hideImages }: BlockComponentProps) {
   if (block.type !== 'linkPreview') return null;
 
   return (
     <a className="link-preview" href={block.preview.url} target="_blank" rel="noreferrer">
-      {block.preview.image && <img src={block.preview.image} alt="" loading="lazy" />}
+      {block.preview.image && !hideImages && (
+        <img src={block.preview.image} alt="" loading="lazy" />
+      )}
       <span>
         {block.preview.siteName && <small>{block.preview.siteName}</small>}
         <strong>{block.preview.title || block.preview.url}</strong>
@@ -165,6 +170,7 @@ export function BlockRenderer({
   expanded,
   onPreview,
   compactGallery,
+  hideImages,
 }: BlockRendererProps) {
   // 注册表让新增标准 Block 保持集中且穷尽，避免在主题组件中加入平台判断。
   const Renderer = blockRegistry[block.type];
@@ -174,6 +180,7 @@ export function BlockRenderer({
       expanded={expanded}
       onPreview={onPreview}
       compactGallery={compactGallery}
+      hideImages={hideImages}
     />
   );
 }

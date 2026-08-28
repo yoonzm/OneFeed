@@ -2,6 +2,7 @@ import {
   CaretDown,
   Check,
   EyeSlash,
+  GearSix,
   MagnifyingGlass,
   X,
 } from '@phosphor-icons/react';
@@ -21,6 +22,7 @@ import {
 } from '../../config/platforms';
 import { DiaTextReveal } from '../../components/DiaTextReveal';
 import { formatNumber, i18n } from '../../i18n';
+import { OPEN_OPTIONS_MESSAGE_TYPE } from '../../runtimeMessages';
 import type { ColorScheme } from '../../theme/useColorScheme';
 import type { FeedChannel } from '../../types/feed';
 import { GitHubLink } from './GitHubLink';
@@ -34,6 +36,7 @@ const mobileItemClass = 'flex min-h-12 w-full items-center justify-between borde
 interface PlatformBarProps {
   activePlatformId: string;
   channels: readonly FeedChannel[];
+  platforms?: readonly PlatformDefinition[];
   onFeedChannelSelect?: (channelId: string) => boolean;
   surface: ReaderSurface;
   scrollElement: HTMLElement;
@@ -48,6 +51,7 @@ interface PlatformBarProps {
 export function PlatformBar({
   activePlatformId,
   channels,
+  platforms = getSupportedPlatforms(),
   onFeedChannelSelect,
   surface,
   scrollElement,
@@ -58,7 +62,6 @@ export function PlatformBar({
   onColorSchemeChange,
   onSearch,
 }: PlatformBarProps) {
-  const supportedPlatforms = getSupportedPlatforms();
   const activePlatform = getPlatformById(activePlatformId);
   const activeChannel = channels.find((channel) => channel.active);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -159,7 +162,13 @@ export function PlatformBar({
     if (mobile) setMenuOpen(false);
   };
 
-  const renderSupportedLinks = (mobile = false) => supportedPlatforms.map((platform) => {
+  const openSettings = () => {
+    if (typeof chrome === 'undefined' || !chrome.runtime?.sendMessage) return;
+    void chrome.runtime.sendMessage({ type: OPEN_OPTIONS_MESSAGE_TYPE })
+      .catch(() => undefined);
+  };
+
+  const renderSupportedLinks = (mobile = false) => platforms.map((platform) => {
     const active = platform.id === activePlatformId;
     const displayName = getPlatformDisplayName(platform.id as PlatformId);
     const showDesktopChannelControl = active && !mobile && channels.length > 1;
@@ -394,6 +403,14 @@ export function PlatformBar({
               {i18n.t('platformBar.switchPlatform')}
             </strong>
           </button>}
+          <button
+            className="grid size-8 shrink-0 cursor-pointer place-items-center rounded-md border-0 bg-transparent p-0 text-onefeed-ink transition-colors duration-150 hover:bg-onefeed-blue-soft hover:text-onefeed-blue focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-onefeed-focus"
+            type="button"
+            aria-label={i18n.t('platformBar.openSettings')}
+            onClick={openSettings}
+          >
+            <GearSix size={17} aria-hidden="true" />
+          </button>
         </div>
       </div>
 

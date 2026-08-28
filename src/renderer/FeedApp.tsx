@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { filterFeedItems } from '../filters/feedFilters';
 import { useFeedFilters } from '../filters/useFeedFilters';
 import { i18n } from '../i18n';
+import { getHeaderPlatforms } from '../preferences/displayPreferences';
+import { useDisplayPreferences } from '../preferences/useDisplayPreferences';
 import type { ColorScheme } from '../theme/useColorScheme';
 import type {
   FeedActionDescriptor,
@@ -53,11 +55,15 @@ export default function FeedApp({
   const mountedRef = useRef(true);
   const { markSeen, seenItemKeys } = useSeenFeedItems();
   const { settings: filterSettings, ready: filtersReady } = useFeedFilters();
+  const { preferences, ready: displayReady } = useDisplayPreferences();
+  const headerPlatforms = useMemo(() => (
+    getHeaderPlatforms(preferences, activePlatformId)
+  ), [activePlatformId, preferences]);
   const filterResult = useMemo(() => filterFeedItems(items, filterSettings, {
     isSeen: (item) => seenItemKeys.has(getSeenFeedItemKey(item)),
   }), [filterSettings, items, seenItemKeys]);
   const visibleItems = filterResult.visibleItems;
-  const hasVisibleItems = filtersReady && visibleItems.length > 0;
+  const hasVisibleItems = filtersReady && displayReady && visibleItems.length > 0;
 
   useEffect(() => {
     mountedRef.current = true;
@@ -146,6 +152,7 @@ export default function FeedApp({
     <OneFeedShell
       activePlatformId={activePlatformId}
       channels={channels}
+      platforms={headerPlatforms}
       onFeedChannelSelect={onFeedChannelSelect}
       surface="feed"
       scrollElement={scrollElement}
@@ -162,7 +169,7 @@ export default function FeedApp({
         </div>
 
         <main>
-          {!hasItems || !filtersReady ? (
+          {!hasItems || !filtersReady || !displayReady ? (
             <section className="empty-state" aria-live="polite">
               <span className="scan-mark" aria-hidden="true" />
             </section>
@@ -175,6 +182,7 @@ export default function FeedApp({
                   item={item}
                   index={index}
                   isSeen={seenItemKeys.has(seenItemKey)}
+                  hideImages={preferences.hideFeedImages}
                   onSeen={() => markSeen(seenItemKey)}
                   onAction={handleAction}
                 />

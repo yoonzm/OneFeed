@@ -35,7 +35,7 @@
     "onboardingTitle": "欢迎使用 OneFeed",
     "onboardingDescription": "OneFeed 安装成功。了解支持的平台、核心功能和使用方法。",
     "optionsTitle": "OneFeed 设置",
-    "optionsDescription": "配置只在本地运行的 OneFeed 展示过滤规则。"
+    "optionsDescription": "配置 OneFeed 的顶部网站、图片显示与本地过滤规则。"
   },
   "platform": {
     "zhihu": {
@@ -170,6 +170,36 @@
     "showOriginal": "点击显示原页面",
     "enableFocused": "点击开启专注阅读"
   },
+  "display": {
+    "eyebrow": "阅读控制",
+    "introTitle": "把阅读界面调成适合你的样子。",
+    "introDescription": "选择顶部常用网站、安排访问顺序，并分别决定信息流与详情页是否显示内容图片。所有偏好只保存在当前设备。",
+    "settings": "阅读设置",
+    "indexDescription": "界面偏好与内容过滤彼此独立，可随时调整。",
+    "visiblePlatforms": "顶部网站",
+    "contentImages": "内容图片",
+    "headerEyebrow": "顶部导航",
+    "headerTitle": "选择顶部常用网站，并安排顺序",
+    "headerPlatforms": "顶部常用网站",
+    "headerDescription": "关闭不常用的网站，并用箭头调整它们在阅读器顶部的顺序。",
+    "resetOrder": "恢复默认顺序",
+    "moveUp": "上移$1",
+    "moveDown": "下移$1",
+    "showPlatform": "顶部显示$1",
+    "activePlatformNote": "当前正在浏览的网站即使被隐藏，也会临时显示在顶部，方便确认来源与切换频道。",
+    "imageTitle": "内容图片",
+    "imageDescription": "头像、网站标识与视频播放不受影响。",
+    "feedImages": "信息流列表",
+    "feedImagesDescription": "控制卡片配图、链接封面与视频封面。",
+    "feedImagesToggle": "信息流列表显示图片",
+    "detailImages": "详情页",
+    "detailImagesDescription": "控制正文、讨论与评论中的内容图片。",
+    "detailImagesToggle": "详情页显示图片",
+    "allImagesShown": "全部显示",
+    "feedImagesHidden": "列表隐藏",
+    "detailImagesHidden": "详情隐藏",
+    "allImagesHidden": "全部隐藏"
+  },
   "filter": {
     "kind": {
       "post": "动态",
@@ -223,8 +253,6 @@
     "saveRule": "保存规则",
     "duplicateSuffix": "副本",
     "skip": "跳到设置内容",
-    "backLabel": "返回 OneFeed 启动中心",
-    "back": "返回启动中心",
     "introTitle": "决定哪些内容不再出现。",
     "introDescription": "规则只改变 OneFeed 的展示，不会修改、删除或上传原网站内容。",
     "categories": "设置分类",
@@ -315,7 +343,8 @@
     "searchForm": "$1内容检索",
     "searchScope": "$1 · 检索",
     "searchPlaceholder": "在$1检索内容",
-    "searchSubmit": "检索"
+    "searchSubmit": "检索",
+    "openSettings": "打开 OneFeed 设置"
   },
   "comment": {
     "comments": "评论",

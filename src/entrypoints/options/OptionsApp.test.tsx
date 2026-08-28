@@ -3,6 +3,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getSupportedPlatforms } from '../../config/platforms';
 import { FEED_FILTER_SETTINGS_KEY } from '../../filters/feedFilters';
+import { DISPLAY_PREFERENCES_KEY } from '../../preferences/displayPreferences';
 import { OptionsApp } from './OptionsApp';
 
 describe('filter settings page', () => {
@@ -45,7 +46,12 @@ describe('filter settings page', () => {
   it('presents local filtering controls and every supported platform', async () => {
     const container = await renderOptions();
 
-    expect(container.querySelector('h1')?.textContent).toContain('决定哪些内容');
+    expect(container.querySelector('a[href="/board.html"]')).toBeNull();
+    expect(container.querySelector('h1')?.textContent).toContain('适合你的样子');
+    expect(container.textContent).toContain('顶部常用网站');
+    expect(container.querySelectorAll('.header-platform-row')).toHaveLength(
+      getSupportedPlatforms().length,
+    );
     expect(container.textContent).toContain('隐藏已读内容');
     expect(container.textContent).toContain('隐藏平台推荐');
 
@@ -70,5 +76,52 @@ describe('filter settings page', () => {
 
     expect(storedValues[FEED_FILTER_SETTINGS_KEY]).toMatchObject({ hideSeen: true });
     expect(toggle?.getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('persists header visibility and custom platform order', async () => {
+    const container = await renderOptions();
+    const firstPlatform = getSupportedPlatforms()[0]!;
+    const displayName = container.querySelector(
+      `.header-platform-row[data-platform-id="${firstPlatform.id}"] .header-platform-name`,
+    )?.textContent;
+    const visibility = container.querySelector<HTMLButtonElement>(
+      `.header-platform-row[data-platform-id="${firstPlatform.id}"] [role="switch"]`,
+    );
+    const moveDown = container.querySelector<HTMLButtonElement>(
+      `.header-platform-row[data-platform-id="${firstPlatform.id}"] .move-down`,
+    );
+
+    expect(visibility?.getAttribute('aria-checked')).toBe('true');
+    await act(async () => visibility?.click());
+    expect(storedValues[DISPLAY_PREFERENCES_KEY]).toMatchObject({
+      hiddenHeaderPlatformIds: [firstPlatform.id],
+    });
+
+    await act(async () => moveDown?.click());
+    expect(
+      (storedValues[DISPLAY_PREFERENCES_KEY] as { headerPlatformOrder: string[] })
+        .headerPlatformOrder[1],
+    ).toBe(firstPlatform.id);
+    expect(displayName).toBeTruthy();
+  });
+
+  it('persists independent image visibility for feed and detail surfaces', async () => {
+    const container = await renderOptions();
+    const feedImages = container.querySelector<HTMLButtonElement>(
+      '[aria-label="信息流列表显示图片"]',
+    );
+    const detailImages = container.querySelector<HTMLButtonElement>(
+      '[aria-label="详情页显示图片"]',
+    );
+
+    expect(feedImages?.getAttribute('aria-checked')).toBe('true');
+    expect(detailImages?.getAttribute('aria-checked')).toBe('true');
+    await act(async () => feedImages?.click());
+    await act(async () => detailImages?.click());
+
+    expect(storedValues[DISPLAY_PREFERENCES_KEY]).toMatchObject({
+      hideFeedImages: true,
+      hideDetailImages: true,
+    });
   });
 });

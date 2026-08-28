@@ -1,6 +1,7 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { getSupportedPlatforms } from '../../config/platforms';
 import { PlatformBar } from './PlatformBar';
 
 describe('PlatformBar feed channels', () => {
@@ -9,6 +10,7 @@ describe('PlatformBar feed channels', () => {
   afterEach(async () => {
     if (root) await act(async () => root?.unmount());
     root = undefined;
+    vi.unstubAllGlobals();
   });
 
   it('opens the channel menu beside the active platform and delegates selection', async () => {
@@ -130,5 +132,58 @@ describe('PlatformBar feed channels', () => {
     expect(container.querySelector<HTMLInputElement>('#onefeed-site-search')?.value)
       .toBe('阅读体验');
     expect(container.querySelector('button[aria-label="关闭检索"]')).not.toBeNull();
+  });
+
+  it('renders only the configured platforms in their chosen order', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+    const platforms = getSupportedPlatforms();
+    const zhihu = platforms.find((platform) => platform.id === 'zhihu')!;
+    const twitter = platforms.find((platform) => platform.id === 'twitter')!;
+
+    await act(async () => root?.render(
+      <PlatformBar
+        activePlatformId="zhihu"
+        channels={[]}
+        platforms={[zhihu, twitter]}
+        surface="feed"
+        scrollElement={document.createElement('div')}
+        colorScheme="light"
+        themeReady
+        onColorSchemeChange={vi.fn()}
+      />,
+    ));
+
+    const desktopLinks = Array.from(container.querySelectorAll('header > div nav a'));
+    expect(desktopLinks.map((link) => link.textContent)).toEqual(['知乎', 'X']);
+    expect(container.textContent).not.toContain('小红书');
+  });
+
+  it('requests the full settings page from the header utility button', async () => {
+    const sendMessage = vi.fn(() => Promise.resolve());
+    vi.stubGlobal('chrome', { runtime: { sendMessage } });
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+
+    await act(async () => root?.render(
+      <PlatformBar
+        activePlatformId="zhihu"
+        channels={[]}
+        surface="feed"
+        scrollElement={document.createElement('div')}
+        colorScheme="light"
+        themeReady
+        onColorSchemeChange={vi.fn()}
+      />,
+    ));
+
+    const settings = container.querySelector<HTMLButtonElement>(
+      '[aria-label="打开 OneFeed 设置"]',
+    );
+    await act(async () => settings?.click());
+
+    expect(sendMessage).toHaveBeenCalledWith({ type: 'onefeed:open-options' });
   });
 });

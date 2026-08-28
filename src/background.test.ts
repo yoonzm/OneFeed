@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 type ActionClickListener = () => void;
 type InstalledListener = (details: { reason: string }) => void;
+type RuntimeMessageListener = (message: unknown) => void;
 type StorageChangeListener = (
   changes: Record<string, { newValue?: unknown }>,
   areaName: string,
@@ -15,6 +16,7 @@ function createChromeMock(initialEnabled: boolean) {
   };
   let actionClickListener: ActionClickListener | undefined;
   let installedListener: InstalledListener | undefined;
+  let runtimeMessageListener: RuntimeMessageListener | undefined;
   let storageChangeListener: StorageChangeListener | undefined;
 
   const setTitle = vi.fn();
@@ -43,6 +45,11 @@ function createChromeMock(initialEnabled: boolean) {
           installedListener = listener;
         }),
       },
+      onMessage: {
+        addListener: vi.fn((listener: RuntimeMessageListener) => {
+          runtimeMessageListener = listener;
+        }),
+      },
       onStartup: { addListener: vi.fn() },
     },
     tabs: {
@@ -69,6 +76,7 @@ function createChromeMock(initialEnabled: boolean) {
   return {
     actionClick: () => actionClickListener?.(),
     installed: (reason: string) => installedListener?.({ reason }),
+    runtimeMessage: (message: unknown) => runtimeMessageListener?.(message),
     createTab,
     storageChange: (enabled: boolean) => storageChangeListener?.(
       { enabled: { newValue: enabled } },
@@ -115,6 +123,17 @@ describe('toolbar action state', () => {
       url: 'chrome-extension://onefeed/board.html',
     });
     expect(chromeMock.set).not.toHaveBeenCalledWith({ enabled: false });
+  });
+
+  it('opens settings when the header sends the options message', async () => {
+    const chromeMock = createChromeMock(true);
+    await startBackground();
+
+    chromeMock.runtimeMessage({ type: 'onefeed:open-options' });
+
+    expect(chromeMock.createTab).toHaveBeenCalledWith({
+      url: 'chrome-extension://onefeed/options.html',
+    });
   });
 
   it('keeps toolbar feedback in sync with the page toggle', async () => {
