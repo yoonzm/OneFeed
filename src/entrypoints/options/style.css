@@ -237,9 +237,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .image-setting-list { border-top: 1px solid var(--color-onefeed-line); }
 .image-setting-row { display: flex; min-height: 88px; padding: 16px 18px; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--color-onefeed-line); }
 .image-setting-row:last-child { border-bottom: 0; }
-.image-setting-row strong, .image-setting-row span { display: block; }
-.image-setting-row strong { font-size: 13px; font-weight: 570; }
-.image-setting-row span { margin-top: 5px; color: var(--color-onefeed-muted); font-size: 11px; line-height: 1.5; }
+/* 文案选择器只命中直接内容容器，避免覆盖 Radix Switch 内部的 thumb span。 */
+.image-setting-row > div > strong, .image-setting-row > div > span { display: block; }
+.image-setting-row > div > strong { font-size: 13px; font-weight: 570; }
+.image-setting-row > div > span { margin-top: 5px; color: var(--color-onefeed-muted); font-size: 11px; line-height: 1.5; }
 
 .master-card {
   display: grid;
