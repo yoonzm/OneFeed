@@ -32,10 +32,13 @@
   "settings": {
     "title": "设置",
     "description": "按你的阅读习惯调整 OneFeed。",
-    "appearance": "界面与阅读",
-    "appearanceDescription": "顶部网站与内容图片",
-    "appearancePanelDescription": "调整信息流顶部的网站顺序，以及列表和详情中的图片显示。",
-    "filters": "内容过滤",
+    "header": "Header 设置",
+    "headerDescription": "网站入口与显示顺序",
+    "headerPanelDescription": "管理阅读器顶部的网站入口、显示状态和排列顺序。",
+    "contentDisplay": "内容展示设置",
+    "contentDisplayDescription": "图片与阅读信息",
+    "contentDisplayPanelDescription": "决定信息流列表和详情页中显示哪些内容元素。",
+    "filters": "内容过滤设置",
     "filtersDescription": "快捷规则与自定义规则",
     "filtersPanelDescription": "隐藏不想重复看到的内容，规则只影响 OneFeed 中的展示。",
     "localTitle": "保存在此设备",
@@ -47,7 +50,7 @@
     "onboardingTitle": "欢迎使用 OneFeed",
     "onboardingDescription": "OneFeed 安装成功。了解支持的平台、核心功能和使用方法。",
     "optionsTitle": "OneFeed 设置",
-    "optionsDescription": "配置 OneFeed 的顶部网站、图片显示与本地过滤规则。"
+    "optionsDescription": "配置 OneFeed 的 Header、内容展示与本地过滤规则。"
   },
   "platform": {
     "zhihu": {
@@ -196,6 +199,8 @@
     "moveDown": "下移$1",
     "showPlatform": "顶部显示$1",
     "activePlatformNote": "当前正在浏览的网站即使被隐藏，也会临时显示在顶部，方便确认来源与切换频道。",
+    "contentEyebrow": "内容元素",
+    "contentTitle": "选择列表和详情页要展示的内容",
     "imageTitle": "内容图片",
     "imageDescription": "头像、网站标识与视频播放不受影响。",
     "feedImages": "信息流列表",

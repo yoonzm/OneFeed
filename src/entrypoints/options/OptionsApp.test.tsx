@@ -55,13 +55,13 @@ describe('filter settings page', () => {
     return tab;
   }
 
-  it('presents local filtering controls and every supported platform', async () => {
+  it('presents three focused settings categories and every supported platform', async () => {
     const container = await renderOptions();
 
     expect(container.querySelector('a[href="/board.html"]')).toBeNull();
     expect(container.querySelector('.settings-intro')).toBeNull();
     expect(container.querySelector('.settings-sidebar-heading h1')?.textContent).toBe('设置');
-    expect(container.querySelectorAll('[role="tab"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[role="tab"]')).toHaveLength(3);
     expect(container.querySelectorAll('[data-slot="card"]').length).toBeGreaterThan(0);
     expect(container.querySelectorAll('.ui-switch').length).toBeGreaterThan(0);
     expect(container.querySelector(
@@ -74,10 +74,17 @@ describe('filter settings page', () => {
     expect(container.textContent).toContain('隐藏已读内容');
     expect(container.textContent).toContain('隐藏平台推荐');
 
-    const appearanceTab = Array.from(container.querySelectorAll<HTMLButtonElement>('[role="tab"]'))
-      .find((button) => button.textContent?.includes('界面与阅读'));
-    const filterTab = await selectCategory(container, '内容过滤');
-    expect(appearanceTab?.getAttribute('data-state')).toBe('inactive');
+    const headerTab = Array.from(container.querySelectorAll<HTMLButtonElement>('[role="tab"]'))
+      .find((button) => button.textContent?.includes('Header 设置'));
+    const contentDisplayTab = await selectCategory(container, '内容展示设置');
+    const contentDisplayPanel = container.querySelector('.settings-panel[data-state="active"]');
+    expect(headerTab?.getAttribute('data-state')).toBe('inactive');
+    expect(contentDisplayTab?.getAttribute('data-state')).toBe('active');
+    expect(contentDisplayPanel?.querySelector('.image-settings-card')).not.toBeNull();
+    expect(contentDisplayPanel?.querySelector('.platform-order-card')).toBeNull();
+
+    const filterTab = await selectCategory(container, '内容过滤设置');
+    expect(contentDisplayTab?.getAttribute('data-state')).toBe('inactive');
     expect(filterTab?.getAttribute('data-state')).toBe('active');
 
     const create = Array.from(container.querySelectorAll('button'))
@@ -107,7 +114,7 @@ describe('filter settings page', () => {
 
   it('persists the quick seen filter immediately', async () => {
     const container = await renderOptions();
-    await selectCategory(container, '内容过滤');
+    await selectCategory(container, '内容过滤设置');
     const toggle = container.querySelector<HTMLButtonElement>('[aria-label="隐藏已读内容"]');
 
     await act(async () => toggle?.click());
@@ -116,7 +123,7 @@ describe('filter settings page', () => {
     expect(toggle?.getAttribute('aria-checked')).toBe('true');
   });
 
-  it('persists header visibility and custom platform order', async () => {
+  it('preserves display preferences across header and content categories', async () => {
     const container = await renderOptions();
     const firstPlatform = getSupportedPlatforms()[0]!;
     const displayName = container.querySelector(
@@ -141,10 +148,21 @@ describe('filter settings page', () => {
         .headerPlatformOrder[1],
     ).toBe(firstPlatform.id);
     expect(displayName).toBeTruthy();
+
+    await selectCategory(container, '内容展示设置');
+    const feedImages = container.querySelector<HTMLButtonElement>(
+      '[aria-label="信息流列表显示图片"]',
+    );
+    await act(async () => feedImages?.click());
+    expect(storedValues[DISPLAY_PREFERENCES_KEY]).toMatchObject({
+      hiddenHeaderPlatformIds: [firstPlatform.id],
+      hideFeedImages: true,
+    });
   });
 
   it('persists independent image visibility for feed and detail surfaces', async () => {
     const container = await renderOptions();
+    await selectCategory(container, '内容展示设置');
     const feedImages = container.querySelector<HTMLButtonElement>(
       '[aria-label="信息流列表显示图片"]',
     );

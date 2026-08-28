@@ -32,9 +32,12 @@
   "settings": {
     "title": "Settings",
     "description": "Shape OneFeed around the way you read.",
-    "appearance": "Interface & reading",
-    "appearanceDescription": "Header websites and content images",
-    "appearancePanelDescription": "Adjust website order in the feed header and image visibility in lists and details.",
+    "header": "Header settings",
+    "headerDescription": "Website shortcuts and order",
+    "headerPanelDescription": "Manage which websites appear in the reader header and arrange their order.",
+    "contentDisplay": "Content display",
+    "contentDisplayDescription": "Images and reading details",
+    "contentDisplayPanelDescription": "Choose which content elements appear in feed lists and detail pages.",
     "filters": "Content filters",
     "filtersDescription": "Quick and custom rules",
     "filtersPanelDescription": "Hide content you do not want to see again. Rules only affect OneFeed's display.",
@@ -47,7 +50,7 @@
     "onboardingTitle": "Welcome to OneFeed",
     "onboardingDescription": "OneFeed is installed. Learn about supported websites, core features, and how to get started.",
     "optionsTitle": "OneFeed settings",
-    "optionsDescription": "Configure OneFeed header websites, image visibility, and local filters."
+    "optionsDescription": "Configure the OneFeed header, content display, and local filters."
   },
   "platform": {
     "zhihu": {
@@ -196,6 +199,8 @@
     "moveDown": "Move $1 down",
     "showPlatform": "Show $1 in the header",
     "activePlatformNote": "The website you are currently viewing remains temporarily visible even when hidden, so its source and channels stay clear.",
+    "contentEyebrow": "Content elements",
+    "contentTitle": "Choose what appears in lists and detail pages",
     "imageTitle": "Content images",
     "imageDescription": "Author avatars, website marks, and video playback are not affected.",
     "feedImages": "Feed list",

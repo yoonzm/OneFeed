@@ -1,21 +1,31 @@
-import { Funnel, MoonStars, SlidersHorizontal, Sun } from '@phosphor-icons/react';
+import { Article, Browser, Funnel, MoonStars, Sun } from '@phosphor-icons/react';
 import { i18n } from '../../i18n';
+import { useDisplayPreferences } from '../../preferences/useDisplayPreferences';
 import { useColorScheme } from '../../theme/useColorScheme';
 import { SettingsLayout, type SettingsCategory } from './components/SettingsLayout';
 import { Button } from './components/ui/Button';
-import { DisplaySettingsPanel } from './DisplaySettingsPanel';
+import { ContentDisplaySettingsPanel } from './ContentDisplaySettingsPanel';
 import { FilterSettingsPanel } from './FilterSettingsPanel';
+import { HeaderSettingsPanel } from './HeaderSettingsPanel';
 
 export function OptionsApp() {
   const { colorScheme, ready, setColorScheme } = useColorScheme();
+  const displayPreferences = useDisplayPreferences();
   const nextColorScheme = colorScheme === 'light' ? 'dark' : 'light';
   const categories: SettingsCategory[] = [
     {
-      id: 'appearance',
-      label: i18n.t('settings.appearance'),
-      description: i18n.t('settings.appearanceDescription'),
-      icon: <SlidersHorizontal size={19} />,
-      content: <DisplaySettingsPanel />,
+      id: 'header',
+      label: i18n.t('settings.header'),
+      description: i18n.t('settings.headerDescription'),
+      icon: <Browser size={19} />,
+      content: <HeaderSettingsPanel {...displayPreferences} />,
+    },
+    {
+      id: 'content-display',
+      label: i18n.t('settings.contentDisplay'),
+      description: i18n.t('settings.contentDisplayDescription'),
+      icon: <Article size={19} />,
+      content: <ContentDisplaySettingsPanel {...displayPreferences} />,
     },
     {
       id: 'filters',

@@ -6,7 +6,7 @@ import {
   type DisplayPreferences,
 } from './displayPreferences';
 
-type DisplayPreferencesUpdate = DisplayPreferences | (
+export type DisplayPreferencesUpdate = DisplayPreferences | (
   (current: DisplayPreferences) => DisplayPreferences
 );
 

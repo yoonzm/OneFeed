@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, Image } from '@phosphor-icons/react';
+import { ArrowDown, ArrowUp } from '@phosphor-icons/react';
 import { useMemo, type CSSProperties } from 'react';
 import { PlatformIcon } from '../../components/PlatformIcon';
 import { getPlatformPresentation } from '../../config/platformPresentation';
@@ -8,15 +8,27 @@ import {
   type PlatformId,
 } from '../../config/platforms';
 import { i18n } from '../../i18n';
-import { DEFAULT_DISPLAY_PREFERENCES } from '../../preferences/displayPreferences';
-import { useDisplayPreferences } from '../../preferences/useDisplayPreferences';
+import {
+  DEFAULT_DISPLAY_PREFERENCES,
+  type DisplayPreferences,
+} from '../../preferences/displayPreferences';
+import type { DisplayPreferencesUpdate } from '../../preferences/useDisplayPreferences';
 import { SettingsPanelHeader } from './components/SettingsLayout';
 import { Button } from './components/ui/Button';
 import { Card, CardContent, CardHeader } from './components/ui/Card';
 import { Switch } from './components/ui/Switch';
 
-export function DisplaySettingsPanel() {
-  const { preferences, ready, savePreferences } = useDisplayPreferences();
+interface HeaderSettingsPanelProps {
+  preferences: DisplayPreferences;
+  ready: boolean;
+  savePreferences: (update: DisplayPreferencesUpdate) => void;
+}
+
+export function HeaderSettingsPanel({
+  preferences,
+  ready,
+  savePreferences,
+}: HeaderSettingsPanelProps) {
   const orderedPlatforms = useMemo(() => {
     const supportedPlatforms = getSupportedPlatforms();
     const platformById = new Map(supportedPlatforms.map((platform) => [platform.id, platform]));
@@ -53,40 +65,39 @@ export function DisplaySettingsPanel() {
   return (
     <>
       <SettingsPanelHeader
-        title={i18n.t('settings.appearance')}
-        description={i18n.t('settings.appearancePanelDescription')}
+        title={i18n.t('settings.header')}
+        description={i18n.t('settings.headerPanelDescription')}
       />
 
-      <section className="display-section" aria-labelledby="display-title">
+      <section className="display-section" aria-labelledby="header-settings-title">
         <div className="section-title">
           <div>
             <p>{i18n.t('display.headerEyebrow')}</p>
-            <h2 id="display-title">{i18n.t('display.headerTitle')}</h2>
+            <h2 id="header-settings-title">{i18n.t('display.headerTitle')}</h2>
           </div>
         </div>
-        <div className="display-grid">
-          <Card as="article" className="platform-order-card">
-            <CardHeader>
-              <div>
-                <h3>{i18n.t('display.headerPlatforms')}</h3>
-                <p>{i18n.t('display.headerDescription')}</p>
-              </div>
-              <Button
-                className="reset-order-button"
-                type="button"
-                variant="ghost"
-                size="sm"
-                disabled={!ready}
-                onClick={() => savePreferences((current) => ({
-                  ...current,
-                  headerPlatformOrder: [...DEFAULT_DISPLAY_PREFERENCES.headerPlatformOrder],
-                }))}
-              >
-                {i18n.t('display.resetOrder')}
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <ol className="header-platform-list">
+        <Card as="article" className="platform-order-card">
+          <CardHeader>
+            <div>
+              <h3>{i18n.t('display.headerPlatforms')}</h3>
+              <p>{i18n.t('display.headerDescription')}</p>
+            </div>
+            <Button
+              className="reset-order-button"
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={!ready}
+              onClick={() => savePreferences((current) => ({
+                ...current,
+                headerPlatformOrder: [...DEFAULT_DISPLAY_PREFERENCES.headerPlatformOrder],
+              }))}
+            >
+              {i18n.t('display.resetOrder')}
+            </Button>
+          </CardHeader>
+          <CardContent>
+            <ol className="header-platform-list">
               {orderedPlatforms.map((platform, index) => {
                 const platformId = platform.id as PlatformId;
                 const displayName = getPlatformDisplayName(platformId);
@@ -139,55 +150,10 @@ export function DisplaySettingsPanel() {
                   </li>
                 );
               })}
-              </ol>
-              <p className="active-platform-note">{i18n.t('display.activePlatformNote')}</p>
-            </CardContent>
-          </Card>
-
-          <Card as="article" className="image-settings-card">
-            <CardHeader>
-              <span className="image-settings-icon" aria-hidden="true">
-                <Image size={23} />
-              </span>
-              <div>
-                <h3>{i18n.t('display.imageTitle')}</h3>
-                <p>{i18n.t('display.imageDescription')}</p>
-              </div>
-            </CardHeader>
-            <CardContent className="image-setting-list">
-              <div className="image-setting-row">
-                <div>
-                  <strong>{i18n.t('display.feedImages')}</strong>
-                  <span>{i18n.t('display.feedImagesDescription')}</span>
-                </div>
-                <Switch
-                  checked={!preferences.hideFeedImages}
-                  label={i18n.t('display.feedImagesToggle')}
-                  disabled={!ready}
-                  onCheckedChange={(showImages) => savePreferences({
-                    ...preferences,
-                    hideFeedImages: !showImages,
-                  })}
-                />
-              </div>
-              <div className="image-setting-row">
-                <div>
-                  <strong>{i18n.t('display.detailImages')}</strong>
-                  <span>{i18n.t('display.detailImagesDescription')}</span>
-                </div>
-                <Switch
-                  checked={!preferences.hideDetailImages}
-                  label={i18n.t('display.detailImagesToggle')}
-                  disabled={!ready}
-                  onCheckedChange={(showImages) => savePreferences({
-                    ...preferences,
-                    hideDetailImages: !showImages,
-                  })}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            </ol>
+            <p className="active-platform-note">{i18n.t('display.activePlatformNote')}</p>
+          </CardContent>
+        </Card>
       </section>
     </>
   );
