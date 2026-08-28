@@ -43,18 +43,37 @@ describe('filter settings page', () => {
     return container;
   }
 
+  async function selectCategory(container: HTMLElement, label: string) {
+    const tab = Array.from(container.querySelectorAll<HTMLButtonElement>('[role="tab"]'))
+      .find((button) => button.textContent?.includes(label));
+    await act(async () => {
+      tab?.dispatchEvent(new MouseEvent('mousedown', {
+        bubbles: true,
+        button: 0,
+      }));
+    });
+    return tab;
+  }
+
   it('presents local filtering controls and every supported platform', async () => {
     const container = await renderOptions();
 
     expect(container.querySelector('a[href="/board.html"]')).toBeNull();
     expect(container.querySelector('.settings-intro')).toBeNull();
-    expect(container.querySelector('.index-title h1')).not.toBeNull();
+    expect(container.querySelector('.settings-sidebar-heading h1')?.textContent).toBe('设置');
+    expect(container.querySelectorAll('[role="tab"]')).toHaveLength(2);
     expect(container.textContent).toContain('顶部常用网站');
     expect(container.querySelectorAll('.header-platform-row')).toHaveLength(
       getSupportedPlatforms().length,
     );
     expect(container.textContent).toContain('隐藏已读内容');
     expect(container.textContent).toContain('隐藏平台推荐');
+
+    const appearanceTab = Array.from(container.querySelectorAll<HTMLButtonElement>('[role="tab"]'))
+      .find((button) => button.textContent?.includes('界面与阅读'));
+    const filterTab = await selectCategory(container, '内容过滤');
+    expect(appearanceTab?.getAttribute('data-state')).toBe('inactive');
+    expect(filterTab?.getAttribute('data-state')).toBe('active');
 
     const create = Array.from(container.querySelectorAll('button'))
       .find((button) => button.textContent?.includes('新建规则'));
@@ -71,6 +90,7 @@ describe('filter settings page', () => {
 
   it('persists the quick seen filter immediately', async () => {
     const container = await renderOptions();
+    await selectCategory(container, '内容过滤');
     const toggle = container.querySelector<HTMLButtonElement>('[aria-label="隐藏已读内容"]');
 
     await act(async () => toggle?.click());

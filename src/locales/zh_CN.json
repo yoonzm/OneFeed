@@ -29,6 +29,18 @@
     "themeSwitchDark": "切换到深色主题",
     "themeSwitchLight": "切换到浅色主题"
   },
+  "settings": {
+    "title": "设置",
+    "description": "按你的阅读习惯调整 OneFeed。",
+    "appearance": "界面与阅读",
+    "appearanceDescription": "顶部网站与内容图片",
+    "appearancePanelDescription": "调整信息流顶部的网站顺序，以及列表和详情中的图片显示。",
+    "filters": "内容过滤",
+    "filtersDescription": "快捷规则与自定义规则",
+    "filtersPanelDescription": "隐藏不想重复看到的内容，规则只影响 OneFeed 中的展示。",
+    "localTitle": "保存在此设备",
+    "localDescription": "设置不会上传至 OneFeed。"
+  },
   "page": {
     "boardTitle": "OneFeed 启动中心",
     "boardDescription": "从 OneFeed 启动中心继续阅读、打开受支持的网站或暂停专注阅读。",

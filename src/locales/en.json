@@ -29,6 +29,18 @@
     "themeSwitchDark": "Switch to dark theme",
     "themeSwitchLight": "Switch to light theme"
   },
+  "settings": {
+    "title": "Settings",
+    "description": "Shape OneFeed around the way you read.",
+    "appearance": "Interface & reading",
+    "appearanceDescription": "Header websites and content images",
+    "appearancePanelDescription": "Adjust website order in the feed header and image visibility in lists and details.",
+    "filters": "Content filters",
+    "filtersDescription": "Quick and custom rules",
+    "filtersPanelDescription": "Hide content you do not want to see again. Rules only affect OneFeed's display.",
+    "localTitle": "Saved on this device",
+    "localDescription": "Settings are not uploaded to OneFeed."
+  },
   "page": {
     "boardTitle": "OneFeed launch center",
     "boardDescription": "Continue reading, open a supported website, or pause OneFeed from the launch center.",
