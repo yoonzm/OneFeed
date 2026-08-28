@@ -1,10 +1,28 @@
-import { ArrowDown, ArrowUp } from '@phosphor-icons/react';
+import {
+  closestCenter,
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { DotsSixVertical } from '@phosphor-icons/react';
 import { useMemo, type CSSProperties } from 'react';
 import { PlatformIcon } from '../../components/PlatformIcon';
-import { getPlatformPresentation } from '../../config/platformPresentation';
 import {
   getPlatformDisplayName,
   getSupportedPlatforms,
+  type PlatformDefinition,
   type PlatformId,
 } from '../../config/platforms';
 import { i18n } from '../../i18n';
@@ -24,11 +42,98 @@ interface HeaderSettingsPanelProps {
   savePreferences: (update: DisplayPreferencesUpdate) => void;
 }
 
+interface SortablePlatformRowProps {
+  index: number;
+  platform: PlatformDefinition;
+  ready: boolean;
+  visible: boolean;
+  onVisibleChange: (platformId: PlatformId, visible: boolean) => void;
+}
+
+export function reorderPlatformIds(
+  platformIds: PlatformId[],
+  activeId: PlatformId,
+  overId: PlatformId,
+): PlatformId[] {
+  const activeIndex = platformIds.indexOf(activeId);
+  const overIndex = platformIds.indexOf(overId);
+  if (activeIndex < 0 || overIndex < 0 || activeIndex === overIndex) return platformIds;
+  return arrayMove(platformIds, activeIndex, overIndex);
+}
+
+function SortablePlatformRow({
+  index,
+  platform,
+  ready,
+  visible,
+  onVisibleChange,
+}: SortablePlatformRowProps) {
+  const platformId = platform.id as PlatformId;
+  const displayName = getPlatformDisplayName(platformId);
+  const {
+    attributes,
+    isDragging,
+    listeners,
+    setActivatorNodeRef,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: platformId, disabled: !ready });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  } satisfies CSSProperties;
+
+  return (
+    <li
+      ref={setNodeRef}
+      className={[
+        'header-platform-row',
+        visible ? '' : 'is-hidden',
+        isDragging ? 'is-dragging' : '',
+      ].filter(Boolean).join(' ')}
+      data-platform-id={platformId}
+      style={style}
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        ref={setActivatorNodeRef}
+        className="platform-drag-handle"
+        type="button"
+        disabled={!ready}
+        title={i18n.t('display.dragPlatform', [displayName])}
+        aria-label={i18n.t('display.dragPlatform', [displayName])}
+      >
+        <DotsSixVertical size={17} weight="bold" aria-hidden="true" />
+      </button>
+      <span className="platform-order-number" aria-hidden="true">
+        {String(index + 1).padStart(2, '0')}
+      </span>
+      <span className="header-platform-icon" aria-hidden="true">
+        <PlatformIcon platformId={platformId} />
+      </span>
+      <span className="header-platform-name">{displayName}</span>
+      <Switch
+        checked={visible}
+        label={i18n.t('display.showPlatform', [displayName])}
+        disabled={!ready}
+        onCheckedChange={(checked) => onVisibleChange(platformId, checked)}
+      />
+    </li>
+  );
+}
+
 export function HeaderSettingsPanel({
   preferences,
   ready,
   savePreferences,
 }: HeaderSettingsPanelProps) {
+  // A small distance threshold keeps ordinary row and switch clicks from starting a drag.
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
   const orderedPlatforms = useMemo(() => {
     const supportedPlatforms = getSupportedPlatforms();
     const platformById = new Map(supportedPlatforms.map((platform) => [platform.id, platform]));
@@ -37,22 +142,6 @@ export function HeaderSettingsPanel({
       .filter((platform) => platform !== undefined);
   }, [preferences.headerPlatformOrder]);
 
-  const movePlatform = (platformId: PlatformId, offset: -1 | 1) => {
-    savePreferences((current) => {
-      const index = current.headerPlatformOrder.indexOf(platformId);
-      const targetIndex = index + offset;
-      if (index < 0 || targetIndex < 0 || targetIndex >= current.headerPlatformOrder.length) {
-        return current;
-      }
-      const headerPlatformOrder = [...current.headerPlatformOrder];
-      [headerPlatformOrder[index], headerPlatformOrder[targetIndex]] = [
-        headerPlatformOrder[targetIndex]!,
-        headerPlatformOrder[index]!,
-      ];
-      return { ...current, headerPlatformOrder };
-    });
-  };
-
   const setPlatformVisible = (platformId: PlatformId, visible: boolean) => {
     savePreferences((current) => ({
       ...current,
@@ -60,6 +149,29 @@ export function HeaderSettingsPanel({
         ? current.hiddenHeaderPlatformIds.filter((id) => id !== platformId)
         : [...current.hiddenHeaderPlatformIds, platformId],
     }));
+  };
+
+  const handleDragEnd = ({ active, over }: DragEndEvent) => {
+    if (!over || active.id === over.id) return;
+    savePreferences((current) => {
+      const headerPlatformOrder = reorderPlatformIds(
+        current.headerPlatformOrder,
+        active.id as PlatformId,
+        over.id as PlatformId,
+      );
+      return headerPlatformOrder === current.headerPlatformOrder
+        ? current
+        : { ...current, headerPlatformOrder };
+    });
+  };
+
+  const getDragAnnouncement = (platformId: string, overId?: string) => {
+    const displayName = getPlatformDisplayName(platformId as PlatformId);
+    if (!overId) return i18n.t('display.dragCancelled', [displayName]);
+    const position = orderedPlatforms.findIndex((platform) => platform.id === overId);
+    return position < 0
+      ? i18n.t('display.dragCancelled', [displayName])
+      : i18n.t('display.dragMoved', [displayName, String(position + 1)]);
   };
 
   return (
@@ -97,60 +209,51 @@ export function HeaderSettingsPanel({
             </Button>
           </CardHeader>
           <CardContent>
-            <ol className="header-platform-list">
-              {orderedPlatforms.map((platform, index) => {
-                const platformId = platform.id as PlatformId;
-                const displayName = getPlatformDisplayName(platformId);
-                const presentation = getPlatformPresentation(platformId);
-                const visible = !preferences.hiddenHeaderPlatformIds.includes(platformId);
-                return (
-                  <li
-                    className={`header-platform-row ${visible ? '' : 'is-hidden'}`}
-                    data-platform-id={platform.id}
-                    key={platform.id}
-                    style={{ '--platform-accent': presentation.accent } as CSSProperties}
-                  >
-                    <span className="platform-order-number" aria-hidden="true">
-                      {String(index + 1).padStart(2, '0')}
-                    </span>
-                    <span className="header-platform-icon" aria-hidden="true">
-                      <PlatformIcon platformId={platformId} />
-                    </span>
-                    <span className="header-platform-name">{displayName}</span>
-                    <span className="platform-order-actions">
-                      <Button
-                        className="move-up"
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        aria-label={i18n.t('display.moveUp', [displayName])}
-                        disabled={!ready || index === 0}
-                        onClick={() => movePlatform(platformId, -1)}
-                      >
-                        <ArrowUp size={15} weight="bold" aria-hidden="true" />
-                      </Button>
-                      <Button
-                        className="move-down"
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        aria-label={i18n.t('display.moveDown', [displayName])}
-                        disabled={!ready || index === orderedPlatforms.length - 1}
-                        onClick={() => movePlatform(platformId, 1)}
-                      >
-                        <ArrowDown size={15} weight="bold" aria-hidden="true" />
-                      </Button>
-                    </span>
-                    <Switch
-                      checked={visible}
-                      label={i18n.t('display.showPlatform', [displayName])}
-                      disabled={!ready}
-                      onCheckedChange={(checked) => setPlatformVisible(platformId, checked)}
-                    />
-                  </li>
-                );
-              })}
-            </ol>
+            <DndContext
+              accessibility={{
+                announcements: {
+                  onDragStart: ({ active }) => i18n.t('display.dragStarted', [
+                    getPlatformDisplayName(active.id as PlatformId),
+                  ]),
+                  onDragOver: ({ active, over }) => (
+                    over ? getDragAnnouncement(String(active.id), String(over.id)) : undefined
+                  ),
+                  onDragEnd: ({ active, over }) => getDragAnnouncement(
+                    String(active.id),
+                    over ? String(over.id) : undefined,
+                  ),
+                  onDragCancel: ({ active }) => getDragAnnouncement(String(active.id)),
+                },
+                screenReaderInstructions: {
+                  draggable: i18n.t('display.dragInstructions'),
+                },
+              }}
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              modifiers={[restrictToVerticalAxis]}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={orderedPlatforms.map((platform) => platform.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <ol className="header-platform-list">
+                  {orderedPlatforms.map((platform, index) => {
+                    const platformId = platform.id as PlatformId;
+                    return (
+                      <SortablePlatformRow
+                        index={index}
+                        key={platformId}
+                        platform={platform}
+                        ready={ready}
+                        visible={!preferences.hiddenHeaderPlatformIds.includes(platformId)}
+                        onVisibleChange={setPlatformVisible}
+                      />
+                    );
+                  })}
+                </ol>
+              </SortableContext>
+            </DndContext>
             <p className="active-platform-note">{i18n.t('display.activePlatformNote')}</p>
           </CardContent>
         </Card>

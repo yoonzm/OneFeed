@@ -9,4 +9,12 @@ describe('settings page styles', () => {
     expect(styles).not.toContain('.image-setting-row span');
     expect(styles).toContain('.image-setting-row > div > span');
   });
+
+  it('keeps transparent brand marks visible on a neutral icon surface', () => {
+    const styles = readFileSync(resolve(process.cwd(), 'src/entrypoints/options/style.css'), 'utf8');
+    const iconRule = styles.match(/\.header-platform-icon \{[^}]+\}/)?.[0];
+
+    expect(iconRule).not.toContain('background: var(--platform-accent)');
+    expect(iconRule).toContain('background: #fff');
+  });
 });

@@ -1,9 +1,10 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getSupportedPlatforms } from '../../config/platforms';
+import { getSupportedPlatforms, type PlatformId } from '../../config/platforms';
 import { FEED_FILTER_SETTINGS_KEY } from '../../filters/feedFilters';
 import { DISPLAY_PREFERENCES_KEY } from '../../preferences/displayPreferences';
+import { reorderPlatformIds } from './HeaderSettingsPanel';
 import { OptionsApp } from './OptionsApp';
 
 describe('filter settings page', () => {
@@ -65,12 +66,20 @@ describe('filter settings page', () => {
     expect(container.querySelectorAll('[data-slot="card"]').length).toBeGreaterThan(0);
     expect(container.querySelectorAll('.ui-switch').length).toBeGreaterThan(0);
     expect(container.querySelector(
-      'button:not(.ui-button):not(.ui-switch):not(.settings-menu-item)',
+      'button:not(.ui-button):not(.ui-switch):not(.settings-menu-item):not(.platform-drag-handle)',
     )).toBeNull();
     expect(container.textContent).toContain('顶部常用网站');
     expect(container.querySelectorAll('.header-platform-row')).toHaveLength(
       getSupportedPlatforms().length,
     );
+    expect(container.querySelector('.header-platform-row')?.getAttribute('style') ?? '')
+      .not.toContain('--platform-accent');
+    expect(container.querySelectorAll('.platform-drag-handle')).toHaveLength(
+      getSupportedPlatforms().length,
+    );
+    expect(container.querySelector('.platform-drag-handle')?.tagName).toBe('BUTTON');
+    expect(container.querySelector('.platform-drag-handle')?.getAttribute('aria-label')).toBeTruthy();
+    expect(container.querySelector('.move-up, .move-down')).toBeNull();
     expect(container.textContent).toContain('隐藏已读内容');
     expect(container.textContent).toContain('隐藏平台推荐');
 
@@ -132,21 +141,12 @@ describe('filter settings page', () => {
     const visibility = container.querySelector<HTMLButtonElement>(
       `.header-platform-row[data-platform-id="${firstPlatform.id}"] [role="switch"]`,
     );
-    const moveDown = container.querySelector<HTMLButtonElement>(
-      `.header-platform-row[data-platform-id="${firstPlatform.id}"] .move-down`,
-    );
-
     expect(visibility?.getAttribute('aria-checked')).toBe('true');
     await act(async () => visibility?.click());
     expect(storedValues[DISPLAY_PREFERENCES_KEY]).toMatchObject({
       hiddenHeaderPlatformIds: [firstPlatform.id],
     });
 
-    await act(async () => moveDown?.click());
-    expect(
-      (storedValues[DISPLAY_PREFERENCES_KEY] as { headerPlatformOrder: string[] })
-        .headerPlatformOrder[1],
-    ).toBe(firstPlatform.id);
     expect(displayName).toBeTruthy();
 
     await selectCategory(container, '内容展示设置');
@@ -158,6 +158,18 @@ describe('filter settings page', () => {
       hiddenHeaderPlatformIds: [firstPlatform.id],
       hideFeedImages: true,
     });
+  });
+
+  it('reorders platform ids using the active and destination rows', () => {
+    const platformIds = getSupportedPlatforms().map((platform) => platform.id as PlatformId);
+
+    expect(reorderPlatformIds(platformIds, platformIds[0]!, platformIds[2]!)).toEqual([
+      platformIds[1],
+      platformIds[2],
+      platformIds[0],
+      ...platformIds.slice(3),
+    ]);
+    expect(reorderPlatformIds(platformIds, platformIds[0]!, platformIds[0]!)).toBe(platformIds);
   });
 
   it('persists independent image visibility for feed and detail surfaces', async () => {

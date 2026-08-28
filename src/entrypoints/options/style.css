@@ -210,10 +210,11 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 .reset-order-button.ui-button { color: var(--color-onefeed-muted); }
 .header-platform-list { margin: 0; padding: 0; border-top: 1px solid var(--color-onefeed-line); list-style: none; }
 .header-platform-row {
+  position: relative;
   display: grid;
   min-height: 52px;
   padding: 6px 14px;
-  grid-template-columns: 28px 32px minmax(0, 1fr) auto auto;
+  grid-template-columns: 20px 28px 32px minmax(0, 1fr) auto;
   align-items: center;
   gap: 8px;
   border-bottom: 1px solid var(--color-onefeed-line);
@@ -221,13 +222,19 @@ button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible
 }
 .header-platform-row:hover { background: color-mix(in srgb, var(--ui-secondary) 70%, transparent); }
 .header-platform-row.is-hidden { opacity: .5; }
+.header-platform-row.is-dragging {
+  z-index: 2;
+  background: var(--color-onefeed-surface);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 14%);
+  opacity: .72;
+}
+.platform-drag-handle { display: grid; width: 20px; height: 28px; padding: 0; place-items: center; border: 0; background: transparent; color: var(--color-onefeed-faint); cursor: grab; touch-action: none; }
+.platform-drag-handle:active { cursor: grabbing; }
+.platform-drag-handle:disabled { cursor: default; opacity: .5; }
 .platform-order-number { color: var(--color-onefeed-faint); font-size: 10px; font-variant-numeric: tabular-nums; }
-.header-platform-icon { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 7px; background: var(--platform-accent); color: #fff; }
-.header-platform-icon .platform-icon { width: 17px; height: 17px; }
+.header-platform-icon { display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid rgb(0 0 0 / 8%); border-radius: 7px; background: #fff; box-shadow: 0 1px 2px rgb(0 0 0 / 6%); }
+.header-platform-icon .platform-icon { width: 22px; height: 22px; object-fit: contain; }
 .header-platform-name { overflow: hidden; font-size: 13px; font-weight: 550; text-overflow: ellipsis; white-space: nowrap; }
-.platform-order-actions { display: inline-flex; gap: 1px; }
-.platform-order-actions .ui-button { width: 28px; min-height: 28px; }
-.platform-order-actions .ui-button:disabled { opacity: .25; }
 .header-platform-row .ui-switch { margin-left: 4px; }
 .active-platform-note { margin: 0; padding: 11px 16px 12px; background: var(--ui-secondary); color: var(--color-onefeed-muted); font-size: 11px; line-height: 1.55; }
 
@@ -337,7 +344,7 @@ fieldset legend { margin-bottom: 10px; }
   .options-main { padding-top: 32px; }
   .master-card { grid-template-columns: 42px 1fr; padding: 19px; }
   .master-card > .ui-switch { grid-column: 2; }
-  .header-platform-row { padding-right: 11px; padding-left: 11px; grid-template-columns: 30px minmax(0, 1fr) auto auto; gap: 7px; }
+  .header-platform-row { padding-right: 11px; padding-left: 11px; grid-template-columns: 20px 30px minmax(0, 1fr) auto; gap: 7px; }
   .platform-order-number { display: none; }
   .rules-heading { align-items: start; }
   .rule-card { align-items: start; }
