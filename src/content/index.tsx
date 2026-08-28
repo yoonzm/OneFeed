@@ -18,6 +18,8 @@ import toggleStyles from './floatingToggle.css?inline';
 const READER_HOST_ID = '__universal_feed_root__';
 const TOGGLE_HOST_ID = '__universal_feed_toggle__';
 const HIDE_STYLE_ID = '__universal_feed_hide_original__';
+const TAB_ICON_ID = '__onefeed_tab_icon__';
+const TAB_TITLE = 'OneFeed';
 const PAGE_BACKGROUND_BY_COLOR_SCHEME: Record<ColorScheme, string> = {
   light: '#f7f8fa',
   dark: '#101722',
@@ -30,6 +32,95 @@ function routeKey(url: URL): string {
 function clearSurfaceStores(): void {
   useFeedStore.getState().clear();
   useDetailStore.getState().clear();
+}
+
+/** 保留原站元数据，并在 SPA 异步更新 head 后继续维持 OneFeed 标签品牌。 */
+function takeOverTabBranding(): () => void {
+  let originalTitle = document.title;
+  const iconUrl = chrome.runtime.getURL('icons/icon-32.png');
+  const originalIcons = new Map<HTMLLinkElement, {
+    href: string | null;
+    sizes: string | null;
+    type: string | null;
+  }>();
+
+  const brandIcon = (icon: HTMLLinkElement) => {
+    const stored = originalIcons.get(icon);
+    if (stored) {
+      // 原站可能在接管期间复用同一节点；先记住它的新值，再重新应用品牌。
+      if (icon.href !== iconUrl) stored.href = icon.getAttribute('href');
+      if (icon.type !== 'image/png') stored.type = icon.getAttribute('type');
+      if (icon.getAttribute('sizes') !== '32x32') {
+        stored.sizes = icon.getAttribute('sizes');
+      }
+    } else {
+      originalIcons.set(icon, {
+        href: icon.getAttribute('href'),
+        sizes: icon.getAttribute('sizes'),
+        type: icon.getAttribute('type'),
+      });
+    }
+
+    if (icon.href !== iconUrl) icon.href = iconUrl;
+    if (icon.type !== 'image/png') icon.type = 'image/png';
+    if (icon.getAttribute('sizes') !== '32x32') icon.setAttribute('sizes', '32x32');
+  };
+
+  const observer = new MutationObserver(() => applyBranding());
+  const applyBranding = () => {
+    if (document.title !== TAB_TITLE) {
+      originalTitle = document.title;
+      document.title = TAB_TITLE;
+    }
+
+    const head = document.head;
+    if (!head) return;
+    const existing = document.getElementById(TAB_ICON_ID);
+    const icon = existing instanceof HTMLLinkElement
+      ? existing
+      : document.createElement('link');
+    if (!(existing instanceof HTMLLinkElement)) {
+      existing?.remove();
+      icon.id = TAB_ICON_ID;
+    }
+    if (icon.rel !== 'icon') icon.rel = 'icon';
+    if (icon.type !== 'image/png') icon.type = 'image/png';
+    if (icon.getAttribute('sizes') !== '32x32') icon.setAttribute('sizes', '32x32');
+    if (icon.href !== iconUrl) icon.href = iconUrl;
+
+    const faviconLinks = Array.from(
+      head.querySelectorAll<HTMLLinkElement>('link[rel~="icon"]'),
+    );
+    faviconLinks.forEach((candidate) => {
+      if (candidate !== icon) brandIcon(candidate);
+    });
+    if (faviconLinks.at(-1) !== icon) head.appendChild(icon);
+    // 丢弃本轮自身写入产生的记录，避免观察器反复触发。
+    observer.takeRecords();
+  };
+
+  applyBranding();
+  observer.observe(document.head || document.documentElement, {
+    attributes: true,
+    attributeFilter: ['href', 'rel', 'sizes', 'type'],
+    characterData: true,
+    childList: true,
+    subtree: true,
+  });
+
+  return () => {
+    observer.disconnect();
+    document.getElementById(TAB_ICON_ID)?.remove();
+    originalIcons.forEach((attributes, icon) => {
+      if (!icon.isConnected) return;
+      (['href', 'sizes', 'type'] as const).forEach((name) => {
+        const value = attributes[name];
+        if (value === null) icon.removeAttribute(name);
+        else icon.setAttribute(name, value);
+      });
+    });
+    document.title = originalTitle;
+  };
 }
 
 /** 在原站首屏绘制前建立纸张色遮罩；详情解析期间同步主题，避免等待画面闪烁。 */
@@ -123,10 +214,13 @@ function mount(
 
   let root: ReturnType<typeof createRoot> | undefined;
   let hideOriginal = initialHideStyle;
+  let restoreTabBranding: (() => void) | undefined;
 
   const cleanup = () => {
     activeAdapter.adapter.disconnect();
     root?.unmount();
+    restoreTabBranding?.();
+    restoreTabBranding = undefined;
     hideOriginal?.remove();
     host.remove();
     clearSurfaceStores();
@@ -143,6 +237,7 @@ function mount(
     shadow.appendChild(viewport);
 
     root = createRoot(viewport);
+    restoreTabBranding = takeOverTabBranding();
     const sharedProps = {
       scrollElement: viewport,
       initialColorScheme,

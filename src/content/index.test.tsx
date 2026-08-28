@@ -4,7 +4,9 @@ const mocks = vi.hoisted(() => ({
   createAdapter: vi.fn(),
   isSupportedUrl: vi.fn(),
   render: vi.fn(),
+  storageAddListener: vi.fn(),
   storageGet: vi.fn(),
+  storageRemoveListener: vi.fn(),
   unmountRoot: vi.fn(),
 }));
 
@@ -45,19 +47,26 @@ describe('content surface lifecycle', () => {
     mocks.createAdapter.mockReset();
     mocks.isSupportedUrl.mockReset().mockReturnValue(true);
     mocks.render.mockReset();
+    mocks.storageAddListener.mockReset();
     mocks.storageGet.mockReset().mockImplementation((_defaults, callback) => (
       callback({ enabled: true })
     ));
+    mocks.storageRemoveListener.mockReset();
     mocks.unmountRoot.mockReset();
+    document.title = '原站标题';
+    document.head.querySelectorAll('link[rel~="icon"]').forEach((icon) => icon.remove());
     vi.stubGlobal('chrome', {
+      runtime: {
+        getURL: vi.fn((path: string) => `chrome-extension://onefeed/${path}`),
+      },
       storage: {
         local: {
           get: mocks.storageGet,
           set: vi.fn(),
         },
         onChanged: {
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
+          addListener: mocks.storageAddListener,
+          removeListener: mocks.storageRemoveListener,
         },
       },
     });
@@ -68,6 +77,8 @@ describe('content surface lifecycle', () => {
     document.getElementById('__universal_feed_hide_original__')?.remove();
     document.getElementById('__universal_feed_root__')?.remove();
     document.getElementById('__universal_feed_toggle__')?.remove();
+    document.head.querySelectorAll('link[rel~="icon"]').forEach((icon) => icon.remove());
+    document.title = '';
     window.history.replaceState({}, '', '/');
   });
 
@@ -142,6 +153,54 @@ describe('content surface lifecycle', () => {
     controller.cleanup();
   });
 
+  it('brands the active tab and restores the latest original metadata when paused', async () => {
+    const originalIcon = document.createElement('link');
+    originalIcon.rel = 'icon';
+    originalIcon.type = 'image/svg+xml';
+    originalIcon.setAttribute('sizes', 'any');
+    originalIcon.href = 'https://example.com/original.ico';
+    document.head.appendChild(originalIcon);
+    mocks.createAdapter.mockReturnValue(activeSurface('feed'));
+
+    const controller = startContentScript();
+
+    expect(document.title).toBe('OneFeed');
+    expect(document.querySelector<HTMLLinkElement>('#__onefeed_tab_icon__')?.href)
+      .toBe('chrome-extension://onefeed/icons/icon-32.png');
+    expect(originalIcon.href).toBe('chrome-extension://onefeed/icons/icon-32.png');
+    expect(originalIcon.type).toBe('image/png');
+    expect(originalIcon.getAttribute('sizes')).toBe('32x32');
+
+    document.title = '原站新标题';
+    const routeIcon = document.createElement('link');
+    routeIcon.rel = 'icon';
+    routeIcon.type = 'image/svg+xml';
+    routeIcon.setAttribute('sizes', 'any');
+    routeIcon.href = 'https://example.com/new.ico';
+    document.head.appendChild(routeIcon);
+
+    await vi.waitFor(() => {
+      expect(document.title).toBe('OneFeed');
+      expect(Array.from(document.head.querySelectorAll('link[rel~="icon"]')).at(-1)?.id)
+        .toBe('__onefeed_tab_icon__');
+      expect(routeIcon.href).toBe('chrome-extension://onefeed/icons/icon-32.png');
+    });
+
+    const storageListener = mocks.storageAddListener.mock.calls[0]?.[0];
+    storageListener?.({ enabled: { newValue: false } }, 'local');
+
+    expect(document.title).toBe('原站新标题');
+    expect(document.getElementById('__onefeed_tab_icon__')).toBeNull();
+    expect(originalIcon.href).toBe('https://example.com/original.ico');
+    expect(originalIcon.type).toBe('image/svg+xml');
+    expect(originalIcon.getAttribute('sizes')).toBe('any');
+    expect(routeIcon.href).toBe('https://example.com/new.ico');
+    expect(routeIcon.type).toBe('image/svg+xml');
+    expect(routeIcon.getAttribute('sizes')).toBe('any');
+    expect(routeIcon.isConnected).toBe(true);
+    controller.cleanup();
+  });
+
   it('disconnects and replaces surfaces on SPA route changes', () => {
     const feed = activeSurface('feed');
     const detail = activeSurface('article');
@@ -153,12 +212,14 @@ describe('content surface lifecycle', () => {
 
     const controller = startContentScript();
     expect(feed.adapter.init).toHaveBeenCalledOnce();
+    expect(document.title).toBe('OneFeed');
     expect(document.getElementById('__universal_feed_hide_original__')).not.toBeNull();
 
     window.history.pushState({}, '', '/detail');
     controller.refresh();
     expect(feed.adapter.disconnect).toHaveBeenCalledOnce();
     expect(detail.adapter.init).toHaveBeenCalledOnce();
+    expect(document.title).toBe('OneFeed');
     expect(document.getElementById('__universal_feed_root__')?.style.display).toBe('');
     expect(document.getElementById('__universal_feed_hide_original__')).not.toBeNull();
 
@@ -167,6 +228,7 @@ describe('content surface lifecycle', () => {
     expect(detail.adapter.disconnect).toHaveBeenCalledOnce();
     expect(document.getElementById('__universal_feed_root__')).toBeNull();
     expect(document.getElementById('__universal_feed_hide_original__')).toBeNull();
+    expect(document.title).toBe('原站标题');
     expect(chrome.storage.local.set).not.toHaveBeenCalledWith({ enabled: false });
 
     controller.cleanup();
