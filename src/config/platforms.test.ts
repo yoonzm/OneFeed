@@ -36,6 +36,7 @@ describe('platform catalog', () => {
     expect(getPlatformForUrl('https://www.v2ex.com/')?.id).toBe('v2ex');
     expect(getPlatformForUrl('https://linux.do/latest')?.id).toBe('linux-do');
     expect(getPlatformForUrl('https://www.weibo.com/hot/weibo/102803')?.id).toBe('weibo');
+    expect(getPlatformForUrl('https://s.weibo.com/weibo?q=OneFeed')?.id).toBe('weibo');
     expect(getPlatformForUrl('https://www.xiaohongshu.com/explore')?.id).toBe('xiaohongshu');
     expect(getPlatformForUrl('https://news.ycombinator.com/newest')?.id).toBe('hacker-news');
     expect(getPlatformForUrl('https://36kr.com/information/web_news/')?.id).toBe('36kr');

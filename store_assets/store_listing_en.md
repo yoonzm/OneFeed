@@ -6,19 +6,19 @@
 - **Short description:** Rearrange supported website feeds into one focused, consistent reading interface that you can pause at any time.
 - **Recommended category:** Productivity
 - **Language:** English
-- **Version:** 0.1.13
+- **Version:** 0.1.14
 
 ## Detailed description
 
 OneFeed turns feeds from supported websites into a clean and consistent Focus Paper reading interface. It reduces page noise while keeping the original content, scrolling behavior, and essential interactions available.
 
-The current version supports feeds from Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, and 36Kr.
+The current version supports feeds and selected detail pages from Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, and 36Kr.
 
 Current features include:
 
 - a first-install welcome page with a public Hacker News page for immediate testing;
 - a launch center for recently used platforms, supported websites, global state, settings, and appearance;
-- unified feed, article, question, answer, topic, comment, and reply reading where supported;
+- unified feed, article, question, answer, topic, comment, and reply reading where supported, including individual Weibo posts and Xiaohongshu notes;
 - local read markers and display filters for read state, keywords, authors, platforms, and content types;
 - compact image previews, light and dark appearances, and continued feed loading;
 - delegated original-site interactions with an explicit return-to-source fallback;

@@ -11,7 +11,9 @@ import { TwitterAdapter } from './twitter';
 import { V2exAdapter } from './v2ex';
 import { V2exThreadAdapter } from './v2exThread';
 import { WeiboAdapter } from './weibo';
+import { WeiboDetailAdapter } from './weiboDetail';
 import { XiaohongshuAdapter } from './xiaohongshu';
+import { XiaohongshuDetailAdapter } from './xiaohongshuDetail';
 import { ZhihuAdapter } from './zhihu';
 import { ZhihuDetailAdapter } from './zhihuDetail';
 import { ZhihuThreadAdapter } from './zhihuThread';
@@ -96,9 +98,25 @@ describe('createAdapter', () => {
       adapter: expect.any(WeiboAdapter),
       source: { id: 'weibo', name: '微博' },
     });
+    expect(createAdapter(
+      new URL('https://s.weibo.com/weibo?q=OneFeed'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(WeiboAdapter),
+      source: { id: 'weibo', name: '微博' },
+    });
   });
 
   it('selects supported article detail adapters', () => {
+    expect(createAdapter(
+      new URL('https://weibo.com/1623886424/RfiCC64Mb?from=page_100206#comment'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'article',
+      adapter: expect.any(WeiboDetailAdapter),
+      source: { id: 'weibo', name: '微博' },
+    });
     expect(createAdapter(
       new URL('https://www.zhihu.com/question/1/answer/42?utm_source=test#comment-1'),
       listeners(),
@@ -121,6 +139,14 @@ describe('createAdapter', () => {
       surface: 'article',
       adapter: expect.any(ThirtySixKrDetailAdapter),
       source: { id: '36kr', name: '36Kr' },
+    });
+    expect(createAdapter(
+      new URL('https://www.xiaohongshu.com/explore/65b0cafe000000001a02beef?xsec_token=test'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'article',
+      adapter: expect.any(XiaohongshuDetailAdapter),
+      source: { id: 'xiaohongshu', name: '小红书' },
     });
   });
 
@@ -153,6 +179,9 @@ describe('createAdapter', () => {
     expect(createAdapter(new URL('https://x.com/explore'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://linux.do/settings/account'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://weibo.com/hot/search'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://weibo.com/detail/123456'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://s.weibo.com/user?q=OneFeed'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://s.weibo.com/weibo?q='), listeners())).toBeNull();
     expect(createAdapter(new URL('https://www.xiaohongshu.com/explore/note-id'), listeners()))
       .toBeNull();
     expect(createAdapter(new URL('https://www.zhihu.com/settings/account'), listeners())).toBeNull();
@@ -182,7 +211,14 @@ describe('createAdapter', () => {
     expect(isSupportedUrl(new URL('https://x.com/home'))).toBe(true);
     expect(isSupportedUrl(new URL('https://x.com/explore'))).toBe(false);
     expect(isSupportedUrl(new URL('https://weibo.com/'))).toBe(true);
+    expect(isSupportedUrl(
+      new URL('https://weibo.com/1623886424/RfiCC64Mb'),
+    )).toBe(true);
+    expect(isSupportedUrl(new URL('https://s.weibo.com/weibo?q=OneFeed'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore'))).toBe(true);
+    expect(isSupportedUrl(new URL(
+      'https://www.xiaohongshu.com/explore/65b0cafe000000001a02beef',
+    ))).toBe(true);
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/news'))).toBe(true);
     expect(isSupportedUrl(new URL('https://36kr.com/information/technology/'))).toBe(true);
     expect(isSupportedUrl(new URL('https://36kr.com/p/123456'))).toBe(true);

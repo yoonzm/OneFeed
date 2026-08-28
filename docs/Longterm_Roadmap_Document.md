@@ -46,7 +46,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 平台覆盖分为三个层级：
 
-* **Schema 可表达**：Feed 使用 `kind + role + previewBlocks + metrics + actions` 描述列表卡片；单篇详情使用 `ArticleDetail.body`，问题/主题详情使用 `ThreadDetail.header + entries`，仍需单独开发 Adapter、解析测试和原站操作代理。
+* **Schema 可表达**：Feed 使用 `kind + role + previewBlocks + metrics + actions` 描述列表卡片；动态、文章与回答的单篇详情使用 `ArticleDetail.body`，问题/主题详情使用 `ThreadDetail.header + entries`，仍需单独开发 Adapter、解析测试和原站操作代理。
 * **需要标准 Block 扩展**：仍属于通用 Feed，但必须先新增可复用 Block 或状态协议。
 * **需要专用 Surface**：核心交互不是卡片式 Feed，不应为了扩大平台数量而强行塞入通用 Card。
 
@@ -54,7 +54,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 | 产品类型 | 可覆盖产品 | 主要映射 |
 | :--- | :--- | :--- |
-| 短动态与开放社交 | X、微博 | `post` + `richText/gallery/video/linkPreview/quote/poll` |
+| 短动态与开放社交 | X、微博 | Feed 使用 `post` + `richText/gallery/video/linkPreview/quote/poll`；受支持的单条动态详情使用 `ArticleDetail.body` |
 | 论坛与社区 | Reddit、V2EX、Linux DO/Discourse、Hacker News、知乎问题 | Feed 使用 `discussion`；详情使用 `ThreadDetail` 的 `topic/question -> reply/answer` 角色关系 |
 | 长文内容 | 知乎专栏、36Kr 文章 | Feed 使用 `article + previewBlocks`；受支持详情使用 `ArticleDetail.body` |
 | 图片 Feed | 微博、小红书、Reddit | `post/article` + `gallery/video`；只覆盖 Feed 卡片，不承诺完整播放器体验 |
@@ -85,9 +85,9 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 | **基础能力（已完成）** | 完成 Schema、Surface 与 Renderer 解耦 | 知乎、V2EX、Linux DO、Hacker News | `FeedItem`/`ArticleDetail`/`ThreadDetail` 可序列化；URL 路由互斥；SPA 切换清理旧 Surface；Block Registry 与 Action Bar 跨 Surface 复用 |
 | **2.1 综合资讯扩展（已完成）** | 验证多频道资讯列表、同文档增量加载与完整文章阅读 | 36Kr | 资讯频道、标题、摘要、封面、作者、主题、“查看更多”加载与文章详情正文 |
 | **2.2 开放社交时间线（已完成）** | 验证动态 DOM、富媒体短动态与原站频道/互动代理 | X | 登录后的 `/home` 时间线、“为你推荐”与“正在关注”频道、文本、图片、视频封面、外链预览及互动统计；详情页和无可靠永久链接的推广卡片不接管 |
-| **2.3 社交与图片 Feed（已完成）** | 在不修改列表 Renderer 的前提下验证现有协议的跨类型复用 | 微博、小红书、Reddit | 微博热门首页、小红书发现页与频道、Reddit 首页/排序页/社区 Feed；文本、封面、作者、社区、推荐原因和互动统计；详情页与广告卡片不接管 |
+| **2.3 社交与图片 Feed（已完成）** | 验证现有列表协议的跨类型复用，并将单条动态与原站检索接入统一 Surface | 微博、小红书、Reddit | 微博热门首页、单条微博详情及内容检索，小红书发现页、频道与笔记详情，Reddit 首页/排序页/社区 Feed；文本、画廊、视频、作者和互动统计；微博详情代理主帖点赞，小红书详情代理喜欢与收藏，评论区及其余平台详情不接管 |
 
-Phase 2 前期不以 Adapter 数量为 KPI，而以阅读链路的稳定性为先。当前正式支持微博热门首页、X 首页时间线、小红书发现页、Reddit 首页/排序页/社区 Feed、知乎、Hacker News、Linux DO、V2EX，以及 36Kr 资讯频道及文章详情。Schema 理论上能够表达某类内容，不代表已经交付对应平台适配；平台支持状态以 README 为准。
+Phase 2 前期不以 Adapter 数量为 KPI，而以阅读链路的稳定性为先。当前正式支持微博热门首页、单条微博详情及内容检索，X 首页时间线，小红书发现页与笔记详情，Reddit 首页/排序页/社区 Feed，知乎、Hacker News、Linux DO、V2EX，以及 36Kr 资讯频道及文章详情。Schema 理论上能够表达某类内容，不代表已经交付对应平台适配；平台支持状态以 README 为准。
 
 建模依据包括 [ActivityStreams 2.0](https://www.w3.org/TR/activitystreams-core/)、[Reddit Post](https://developers.reddit.com/docs/api/redditapi/models/classes/Post)、[Hacker News API](https://github.com/HackerNews/API) 与 [Atom RFC 4287](https://www.rfc-editor.org/rfc/rfc4287)。
 
@@ -110,7 +110,7 @@ Thread Detail 按内容角色决定阅读层级，而不是强制所有平台采
 * **SPA Surface 生命周期**：使用 WXT 路由事件按完整 URL 识别页面，依次销毁旧 Adapter/Store/Renderer、恢复原 DOM，再挂载新 Surface；hash-only 跳转不重建页面。Article/Thread Detail 只有在 URL 对应的目标节点解析成功后才遮罩原页，避免 DOM 延迟或规则失效造成空白详情。
 * **原站频道代理**：Feed Adapter 从当前页面的原生导航容器动态发现频道名称、顺序与选中态，Renderer 只展示轻量描述；用户选择频道时回调原 DOM 控件，不复制站点 URL 清单或排序规则。站点在同一导航结构中增加频道后可自动进入 OneFeed，只有导航结构或 Feed 卡片结构变化时才需要更新 Adapter。
 * **文章评论代理**：Article Detail 的评论采用“静态能力描述 + 按需评论快照”，Adapter 负责驱动原站局部评论、全部评论/回复弹层与增量加载，Renderer 点击评论后统一打开 OneFeed 弹窗；点击评论回复数时在评论弹窗上方打开独立回复弹窗，关闭后保留底层评论数据和滚动位置。Renderer 不在文章底部插入评论，也不直接渲染平台 DOM。
-* **原站检索代理**：Renderer 只展示能力驱动的统一检索入口，查询、排序和持续加载仍由原站完成；知乎内容检索路由接管为 Feed Surface，只解析可归一化为 `FeedItem` 且具有有效原文链接的结果，不对本地 Store 做伪搜索。
+* **原站检索代理**：Renderer 只展示能力驱动的统一检索入口，查询、排序和持续加载仍由原站完成；微博与知乎内容检索路由接管为 Feed Surface，只解析可归一化为 `FeedItem` 且具有有效原文链接的结果，不对本地 Store 做伪搜索。微博仅接管 `s.weibo.com/weibo` 内容结果，用户、话题等其他检索路由保留原站。
 * **视频播放器节点搬运 (Portal)**：对于原站视频，通过 DOM `appendChild` 将播放器节点无缝“移驾”到新 UI 卡片中，保留原生播放状态与清晰度选项。
 * **统一触底加载 (Feed Loading)**：Feed Surface 接近底部时统一向 Adapter 请求下一批内容；Adapter 可驱动被隐藏的原页面滚动、点击同文档加载控件，或抓取并离线解析同源 HTML 下一页。文档分页使用单请求锁、稳定 ID 去重、失败重试和卸载终止，避免整页导航清空当前阅读进度。
 

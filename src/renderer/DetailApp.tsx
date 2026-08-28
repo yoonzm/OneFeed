@@ -94,7 +94,9 @@ export default function DetailApp({
               ? i18n.t(content.entryKind === 'answer'
                 ? 'reader.answersFinished'
                 : 'reader.repliesFinished')
-              : i18n.t('reader.articleFinished')}
+              : i18n.t(content.role === 'post'
+                ? 'reader.postFinished'
+                : 'reader.articleFinished')}
           </footer>
         )}
       </div>
