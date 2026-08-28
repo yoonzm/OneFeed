@@ -381,9 +381,6 @@
       "n": "$1 votes in total"
     }
   },
-  "github": {
-    "label": "View OneFeed on GitHub"
-  },
   "metric": {
     "reactions": "Reactions",
     "replies": "Replies",

@@ -381,9 +381,6 @@
       "n": "共 $1 票"
     }
   },
-  "github": {
-    "label": "在 GitHub 查看 OneFeed"
-  },
   "metric": {
     "reactions": "互动",
     "replies": "回复",
