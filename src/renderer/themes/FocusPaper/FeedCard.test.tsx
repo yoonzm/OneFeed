@@ -413,7 +413,7 @@ describe('FeedCard', () => {
     ].join('\n'));
   });
 
-  it('hides feed content images without hiding author avatars or video playback', () => {
+  it('removes the feed side-media region without hiding author avatars', () => {
     const item: FeedItem = {
       ...shortReply,
       author: { name: 'Alice', avatar: 'https://example.com/avatar.jpg' },
@@ -437,7 +437,9 @@ describe('FeedCard', () => {
 
     expect(markup).not.toContain('content.jpg');
     expect(markup).not.toContain('poster.jpg');
-    expect(markup).toContain('video.mp4');
+    expect(markup).not.toContain('video.mp4');
+    expect(markup).not.toContain('feed-card-side-media');
+    expect(markup).not.toContain('card-media-aside');
     expect(markup).toContain('avatar.jpg');
   });
 });

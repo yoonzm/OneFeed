@@ -28,18 +28,17 @@ interface FeedCardProps {
 
 type FeedMediaBlock = Extract<FeedBlock, { type: 'gallery' | 'video' }>;
 
-/** Feed 只保留首个有效内容媒体，并将图库收敛为单图右侧预览。 */
+/** 关闭列表图片后不创建右侧媒体区，避免卡片残留视频或空白网格轨道。 */
 function getSideMedia(item: FeedItem, hideImages: boolean): FeedMediaBlock | undefined {
+  if (hideImages) return undefined;
+
   for (const block of item.previewBlocks) {
-    if (block.type === 'gallery' && !hideImages) {
+    if (block.type === 'gallery') {
       const image = block.items[0];
       if (image) return { type: 'gallery', items: [image] };
     }
 
-    if (
-      block.type === 'video' &&
-      (block.media.url || (!hideImages && block.media.poster))
-    ) {
+    if (block.type === 'video' && (block.media.url || block.media.poster)) {
       return block;
     }
   }
