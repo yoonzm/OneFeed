@@ -16,7 +16,7 @@ interface DetailArticleProps {
   onCommentRequest?: (command: CommentCommand) => Promise<CommentRequestResult>;
 }
 
-/** 单篇正文视图：保留作者元信息，并始终完整渲染所有标准 Block。 */
+/** 单篇内容视图：保留作者元信息，并始终完整渲染所有标准 Block。 */
 export function DetailArticle({ content, onAction, onCommentRequest }: DetailArticleProps) {
   const [preview, setPreview] = useState<FeedImage>();
   const commentsRef = useRef<CommentSectionHandle>(null);

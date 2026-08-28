@@ -12,6 +12,7 @@ import { twitterAdapterDefinition } from './twitter';
 import { v2exAdapterDefinition } from './v2ex';
 import { v2exThreadAdapterDefinition } from './v2exThread';
 import { weiboAdapterDefinition } from './weibo';
+import { weiboDetailAdapterDefinition } from './weiboDetail';
 import { xiaohongshuAdapterDefinition } from './xiaohongshu';
 import { zhihuAdapterDefinition } from './zhihu';
 import { zhihuDetailAdapterDefinition } from './zhihuDetail';
@@ -30,6 +31,7 @@ const feedAdapterDefinitions: AdapterDefinition[] = [
 ];
 
 const detailAdapterDefinitions: DetailAdapterDefinition[] = [
+  weiboDetailAdapterDefinition,
   thirtySixKrDetailAdapterDefinition,
   zhihuThreadAdapterDefinition,
   v2exThreadAdapterDefinition,

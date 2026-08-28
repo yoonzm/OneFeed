@@ -32,7 +32,7 @@ export interface ArticleActionSlot {
 }
 
 /**
- * 单篇正文 Surface，例如知乎回答详情或专栏文章。
+ * 单篇正文 Surface，例如微博动态、知乎回答详情或专栏文章。
  * 它与 FeedItem 分开建模，确保详情正文不会被列表预览截断规则影响。
  */
 export interface ArticleDetail {
@@ -46,8 +46,8 @@ export interface ArticleDetail {
   originalUrl: string;
   /** DetailApp 用于判别单篇正文 Surface 的固定类型。 */
   kind: 'article';
-  /** 正文是独立文章还是隶属于问题的回答。 */
-  role: 'article' | 'answer';
+  /** 正文是短动态、独立文章还是隶属于问题的回答。 */
+  role: 'post' | 'article' | 'answer';
   /** 正文作者快照。 */
   author: FeedAuthor;
   /** 原文首次发布时间，保留 Adapter 可可靠解析的时间表示。 */

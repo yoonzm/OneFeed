@@ -60,7 +60,7 @@
     },
     "weibo": {
       "name": "Weibo",
-      "scope": "Home trending feed",
+      "scope": "Home trending feed and post pages",
       "access": "Trending posts are available without signing in"
     },
     "xiaohongshu": {
@@ -270,6 +270,7 @@
     "retryLoad": "Loading failed · Click to retry",
     "cannotLoad": "Cannot load more content",
     "articleFinished": "You've finished this article",
+    "postFinished": "You've finished this post",
     "answersFinished": "You've finished the answers on this page",
     "repliesFinished": "You've finished the replies on this page",
     "seen": "Read",

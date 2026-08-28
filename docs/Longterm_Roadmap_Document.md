@@ -46,7 +46,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 平台覆盖分为三个层级：
 
-* **Schema 可表达**：Feed 使用 `kind + role + previewBlocks + metrics + actions` 描述列表卡片；单篇详情使用 `ArticleDetail.body`，问题/主题详情使用 `ThreadDetail.header + entries`，仍需单独开发 Adapter、解析测试和原站操作代理。
+* **Schema 可表达**：Feed 使用 `kind + role + previewBlocks + metrics + actions` 描述列表卡片；动态、文章与回答的单篇详情使用 `ArticleDetail.body`，问题/主题详情使用 `ThreadDetail.header + entries`，仍需单独开发 Adapter、解析测试和原站操作代理。
 * **需要标准 Block 扩展**：仍属于通用 Feed，但必须先新增可复用 Block 或状态协议。
 * **需要专用 Surface**：核心交互不是卡片式 Feed，不应为了扩大平台数量而强行塞入通用 Card。
 
@@ -54,7 +54,7 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 
 | 产品类型 | 可覆盖产品 | 主要映射 |
 | :--- | :--- | :--- |
-| 短动态与开放社交 | X、微博 | `post` + `richText/gallery/video/linkPreview/quote/poll` |
+| 短动态与开放社交 | X、微博 | Feed 使用 `post` + `richText/gallery/video/linkPreview/quote/poll`；受支持的单条动态详情使用 `ArticleDetail.body` |
 | 论坛与社区 | Reddit、V2EX、Linux DO/Discourse、Hacker News、知乎问题 | Feed 使用 `discussion`；详情使用 `ThreadDetail` 的 `topic/question -> reply/answer` 角色关系 |
 | 长文内容 | 知乎专栏、36Kr 文章 | Feed 使用 `article + previewBlocks`；受支持详情使用 `ArticleDetail.body` |
 | 图片 Feed | 微博、小红书、Reddit | `post/article` + `gallery/video`；只覆盖 Feed 卡片，不承诺完整播放器体验 |
@@ -85,9 +85,9 @@ OneFeed 将成为 **Web 时代跨平台信息流的通用浏览器 Launcher 与 
 | **基础能力（已完成）** | 完成 Schema、Surface 与 Renderer 解耦 | 知乎、V2EX、Linux DO、Hacker News | `FeedItem`/`ArticleDetail`/`ThreadDetail` 可序列化；URL 路由互斥；SPA 切换清理旧 Surface；Block Registry 与 Action Bar 跨 Surface 复用 |
 | **2.1 综合资讯扩展（已完成）** | 验证多频道资讯列表、同文档增量加载与完整文章阅读 | 36Kr | 资讯频道、标题、摘要、封面、作者、主题、“查看更多”加载与文章详情正文 |
 | **2.2 开放社交时间线（已完成）** | 验证动态 DOM、富媒体短动态与原站频道/互动代理 | X | 登录后的 `/home` 时间线、“为你推荐”与“正在关注”频道、文本、图片、视频封面、外链预览及互动统计；详情页和无可靠永久链接的推广卡片不接管 |
-| **2.3 社交与图片 Feed（已完成）** | 在不修改列表 Renderer 的前提下验证现有协议的跨类型复用 | 微博、小红书、Reddit | 微博热门首页、小红书发现页与频道、Reddit 首页/排序页/社区 Feed；文本、封面、作者、社区、推荐原因和互动统计；详情页与广告卡片不接管 |
+| **2.3 社交与图片 Feed（已完成）** | 验证现有列表协议的跨类型复用，并将单条动态接入完整正文 Surface | 微博、小红书、Reddit | 微博热门首页及单条微博详情、小红书发现页与频道、Reddit 首页/排序页/社区 Feed；文本、封面、作者、社区、推荐原因和互动统计；微博详情保留完整正文与主帖点赞代理，评论区、完整播放器及其余平台详情不接管 |
 
-Phase 2 前期不以 Adapter 数量为 KPI，而以阅读链路的稳定性为先。当前正式支持微博热门首页、X 首页时间线、小红书发现页、Reddit 首页/排序页/社区 Feed、知乎、Hacker News、Linux DO、V2EX，以及 36Kr 资讯频道及文章详情。Schema 理论上能够表达某类内容，不代表已经交付对应平台适配；平台支持状态以 README 为准。
+Phase 2 前期不以 Adapter 数量为 KPI，而以阅读链路的稳定性为先。当前正式支持微博热门首页及单条微博详情、X 首页时间线、小红书发现页、Reddit 首页/排序页/社区 Feed、知乎、Hacker News、Linux DO、V2EX，以及 36Kr 资讯频道及文章详情。Schema 理论上能够表达某类内容，不代表已经交付对应平台适配；平台支持状态以 README 为准。
 
 建模依据包括 [ActivityStreams 2.0](https://www.w3.org/TR/activitystreams-core/)、[Reddit Post](https://developers.reddit.com/docs/api/redditapi/models/classes/Post)、[Hacker News API](https://github.com/HackerNews/API) 与 [Atom RFC 4287](https://www.rfc-editor.org/rfc/rfc4287)。
 

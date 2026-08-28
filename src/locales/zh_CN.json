@@ -60,7 +60,7 @@
     },
     "weibo": {
       "name": "微博",
-      "scope": "首页热门信息流",
+      "scope": "首页热门信息流与微博详情",
       "access": "无需登录可浏览热门内容"
     },
     "xiaohongshu": {
@@ -270,6 +270,7 @@
     "retryLoad": "加载失败 · 点击重试",
     "cannotLoad": "无法继续加载",
     "articleFinished": "已读完本文",
+    "postFinished": "已读完这条微博",
     "answersFinished": "已读完本页回答",
     "repliesFinished": "已读完本页回复",
     "seen": "已看过",
