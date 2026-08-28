@@ -14,6 +14,7 @@ import { v2exThreadAdapterDefinition } from './v2exThread';
 import { weiboAdapterDefinition } from './weibo';
 import { weiboDetailAdapterDefinition } from './weiboDetail';
 import { xiaohongshuAdapterDefinition } from './xiaohongshu';
+import { xiaohongshuDetailAdapterDefinition } from './xiaohongshuDetail';
 import { zhihuAdapterDefinition } from './zhihu';
 import { zhihuDetailAdapterDefinition } from './zhihuDetail';
 import { zhihuThreadAdapterDefinition } from './zhihuThread';
@@ -32,6 +33,7 @@ const feedAdapterDefinitions: AdapterDefinition[] = [
 
 const detailAdapterDefinitions: DetailAdapterDefinition[] = [
   weiboDetailAdapterDefinition,
+  xiaohongshuDetailAdapterDefinition,
   thirtySixKrDetailAdapterDefinition,
   zhihuThreadAdapterDefinition,
   v2exThreadAdapterDefinition,

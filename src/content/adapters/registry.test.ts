@@ -13,6 +13,7 @@ import { V2exThreadAdapter } from './v2exThread';
 import { WeiboAdapter } from './weibo';
 import { WeiboDetailAdapter } from './weiboDetail';
 import { XiaohongshuAdapter } from './xiaohongshu';
+import { XiaohongshuDetailAdapter } from './xiaohongshuDetail';
 import { ZhihuAdapter } from './zhihu';
 import { ZhihuDetailAdapter } from './zhihuDetail';
 import { ZhihuThreadAdapter } from './zhihuThread';
@@ -139,6 +140,14 @@ describe('createAdapter', () => {
       adapter: expect.any(ThirtySixKrDetailAdapter),
       source: { id: '36kr', name: '36Kr' },
     });
+    expect(createAdapter(
+      new URL('https://www.xiaohongshu.com/explore/65b0cafe000000001a02beef?xsec_token=test'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'article',
+      adapter: expect.any(XiaohongshuDetailAdapter),
+      source: { id: 'xiaohongshu', name: '小红书' },
+    });
   });
 
   it('selects thread adapters for question and topic detail routes', () => {
@@ -207,6 +216,9 @@ describe('createAdapter', () => {
     )).toBe(true);
     expect(isSupportedUrl(new URL('https://s.weibo.com/weibo?q=OneFeed'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.xiaohongshu.com/explore'))).toBe(true);
+    expect(isSupportedUrl(new URL(
+      'https://www.xiaohongshu.com/explore/65b0cafe000000001a02beef',
+    ))).toBe(true);
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/news'))).toBe(true);
     expect(isSupportedUrl(new URL('https://36kr.com/information/technology/'))).toBe(true);
     expect(isSupportedUrl(new URL('https://36kr.com/p/123456'))).toBe(true);
