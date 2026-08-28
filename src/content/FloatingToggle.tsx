@@ -4,6 +4,7 @@ import { i18n } from '../i18n';
 interface FloatingToggleProps {
   enabled: boolean;
   ready: boolean;
+  iconUrl: string;
   colorScheme?: ColorScheme;
   onToggle: () => void;
 }
@@ -11,6 +12,7 @@ interface FloatingToggleProps {
 export function FloatingToggle({
   enabled,
   ready,
+  iconUrl,
   colorScheme = 'light',
   onToggle,
 }: FloatingToggleProps) {
@@ -34,11 +36,7 @@ export function FloatingToggle({
         disabled={!ready}
         onClick={onToggle}
       >
-        <svg className="toggle-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <rect className="card-back" x="4.5" y="4.5" width="12" height="9" rx="2" />
-          <rect className="card-front" x="7.5" y="10.5" width="12" height="9" rx="2" />
-          <path d="M10.5 14h6M10.5 16.5h4" />
-        </svg>
+        <img className="toggle-logo" src={iconUrl} alt="" aria-hidden="true" />
         <span className="state-dot" aria-hidden="true" />
       </button>
     </div>

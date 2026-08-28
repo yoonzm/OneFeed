@@ -58,7 +58,7 @@
   overflow: hidden;
   border: 2px solid rgb(255 255 255 / 88%);
   border-radius: 50%;
-  background: #151922;
+  background: #010721;
   color: #ffffff;
   box-shadow: 0 5px 16px rgb(15 23 42 / 26%), 0 1px 3px rgb(15 23 42 / 30%);
   cursor: pointer;
@@ -88,42 +88,19 @@
 }
 
 .toggle-disabled {
-  background: #4b5361;
   color: #d5d9e0;
 }
 
-.toggle-icon {
-  width: 25px;
-  height: 25px;
-  overflow: visible;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.5;
+.toggle-logo {
+  display: block;
+  width: 32px;
+  height: 32px;
+  transition: filter 160ms ease, opacity 160ms ease;
 }
 
-.card-back,
-.card-front {
-  transition: transform 180ms ease, opacity 180ms ease;
-}
-
-.toggle-enabled .card-back {
-  transform: translate(1px, -1px);
-  opacity: .56;
-}
-
-.toggle-enabled .card-front {
-  transform: translate(-1px, 1px);
-}
-
-.toggle-disabled .card-back {
-  transform: translate(2px, 1px) rotate(5deg);
-  opacity: .42;
-}
-
-.toggle-disabled .card-front {
-  transform: translate(-1px, -1px) rotate(-4deg);
+.toggle-disabled .toggle-logo {
+  filter: grayscale(1);
+  opacity: .48;
 }
 
 .state-dot {
@@ -132,14 +109,13 @@
   bottom: 5px;
   width: 8px;
   height: 8px;
-  border: 2px solid #151922;
+  border: 2px solid #010721;
   border-radius: 50%;
   background: #62a1ff;
   transition: background 160ms ease;
 }
 
 .toggle-disabled .state-dot {
-  border-color: #4b5361;
   background: #a9b0bc;
 }
 

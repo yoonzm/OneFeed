@@ -10,20 +10,24 @@ const toggleStyles = readFileSync(
 );
 
 describe('FloatingToggle', () => {
+  const iconUrl = 'chrome-extension://onefeed/icons/icon-32.png';
+
   it('exposes the current enabled state as an accessible switch', () => {
     const markup = renderToStaticMarkup(
-      <FloatingToggle enabled ready onToggle={vi.fn()} />,
+      <FloatingToggle enabled ready iconUrl={iconUrl} onToggle={vi.fn()} />,
     );
 
     expect(markup).toContain('role="switch"');
     expect(markup).toContain('aria-checked="true"');
+    expect(markup).toContain(`src="${iconUrl}"`);
+    expect(markup).not.toContain('<svg');
     expect(markup).toContain('关闭 OneFeed，显示原页面');
     expect(markup).toContain('OneFeed 已开启');
   });
 
   it('labels the action to resume OneFeed when disabled', () => {
     const markup = renderToStaticMarkup(
-      <FloatingToggle enabled={false} ready onToggle={vi.fn()} />,
+      <FloatingToggle enabled={false} ready iconUrl={iconUrl} onToggle={vi.fn()} />,
     );
 
     expect(markup).toContain('aria-checked="false"');

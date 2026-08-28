@@ -357,6 +357,7 @@ export function startContentScript(): ContentScriptController {
       <FloatingToggle
         enabled={enabled}
         ready={ready}
+        iconUrl={chrome.runtime.getURL('icons/icon-32.png')}
         colorScheme={colorScheme}
         onToggle={() => chrome.storage.local.set({ enabled: !enabled })}
       />,
