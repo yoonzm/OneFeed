@@ -43,6 +43,7 @@ function takeOverTabBranding(): () => void {
     sizes: string | null;
     type: string | null;
   }>();
+  let observedTarget: Node | undefined;
 
   const brandIcon = (icon: HTMLLinkElement) => {
     const stored = originalIcons.get(icon);
@@ -67,6 +68,19 @@ function takeOverTabBranding(): () => void {
   };
 
   const observer = new MutationObserver(() => applyBranding());
+  const observeBrandingTarget = () => {
+    const target = document.head || document.documentElement;
+    if (!target || target === observedTarget) return;
+    observer.disconnect();
+    observer.observe(target, {
+      attributes: true,
+      attributeFilter: ['href', 'rel', 'sizes', 'type'],
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
+    observedTarget = target;
+  };
   const applyBranding = () => {
     if (document.title !== TAB_TITLE) {
       originalTitle = document.title;
@@ -74,7 +88,10 @@ function takeOverTabBranding(): () => void {
     }
 
     const head = document.head;
-    if (!head) return;
+    if (!head) {
+      observeBrandingTarget();
+      return;
+    }
     const existing = document.getElementById(TAB_ICON_ID);
     const icon = existing instanceof HTMLLinkElement
       ? existing
@@ -97,16 +114,11 @@ function takeOverTabBranding(): () => void {
     if (faviconLinks.at(-1) !== icon) head.appendChild(icon);
     // 丢弃本轮自身写入产生的记录，避免观察器反复触发。
     observer.takeRecords();
+    observeBrandingTarget();
   };
 
   applyBranding();
-  observer.observe(document.head || document.documentElement, {
-    attributes: true,
-    attributeFilter: ['href', 'rel', 'sizes', 'type'],
-    characterData: true,
-    childList: true,
-    subtree: true,
-  });
+  observeBrandingTarget();
 
   return () => {
     observer.disconnect();
@@ -214,13 +226,10 @@ function mount(
 
   let root: ReturnType<typeof createRoot> | undefined;
   let hideOriginal = initialHideStyle;
-  let restoreTabBranding: (() => void) | undefined;
 
   const cleanup = () => {
     activeAdapter.adapter.disconnect();
     root?.unmount();
-    restoreTabBranding?.();
-    restoreTabBranding = undefined;
     hideOriginal?.remove();
     host.remove();
     clearSurfaceStores();
@@ -237,7 +246,6 @@ function mount(
     shadow.appendChild(viewport);
 
     root = createRoot(viewport);
-    restoreTabBranding = takeOverTabBranding();
     const sharedProps = {
       scrollElement: viewport,
       initialColorScheme,
@@ -322,16 +330,26 @@ export interface ContentScriptController {
 }
 
 export function startContentScript(): ContentScriptController {
+  const initialUrl = new URL(window.location.href);
   let active = true;
   let enabled = false;
   let colorScheme = DEFAULT_COLOR_SCHEME;
   let storageReady = false;
   let domReady = false;
-  let currentRouteKey = routeKey(new URL(window.location.href));
+  let currentRouteKey = routeKey(initialUrl);
   let unmount: (() => void) | undefined;
-  let pendingHideStyle = hideOriginalPage(new URL(window.location.href));
+  // 存储读取前先乐观接管，避免原站 favicon 在首帧短暂显示；禁用状态返回后会恢复。
+  let restoreTabBranding = isSupportedUrl(initialUrl)
+    ? takeOverTabBranding()
+    : undefined;
+  let pendingHideStyle = hideOriginalPage(initialUrl);
   let toggleHost: HTMLDivElement | undefined;
   let toggleRoot: ReturnType<typeof createRoot> | undefined;
+
+  const restoreOriginalTab = () => {
+    restoreTabBranding?.();
+    restoreTabBranding = undefined;
+  };
 
   const renderToggle = (ready: boolean) => {
     if (!toggleRoot) return;
@@ -346,6 +364,13 @@ export function startContentScript(): ContentScriptController {
   };
 
   const applyEnabledState = () => {
+    const url = new URL(window.location.href);
+    const shouldTakeOver = isSupportedUrl(url) && (!storageReady || enabled);
+    if (shouldTakeOver) {
+      restoreTabBranding ??= takeOverTabBranding();
+    } else {
+      restoreOriginalTab();
+    }
     if (!storageReady) return;
     if (!enabled) {
       unmount?.();
@@ -355,15 +380,18 @@ export function startContentScript(): ContentScriptController {
       return;
     }
     if (!domReady) {
-      pendingHideStyle = hideOriginalPage(new URL(window.location.href), colorScheme);
+      pendingHideStyle = hideOriginalPage(url, colorScheme);
       return;
     }
     if (unmount) return;
 
-    const hideStyle = hideOriginalPage(new URL(window.location.href), colorScheme);
+    const hideStyle = hideOriginalPage(url, colorScheme);
     pendingHideStyle = undefined;
     unmount = mount(hideStyle, colorScheme);
-    if (!unmount) hideStyle?.remove();
+    if (!unmount) {
+      hideStyle?.remove();
+      restoreOriginalTab();
+    }
   };
 
   const initializeDom = () => {
@@ -445,6 +473,7 @@ export function startContentScript(): ContentScriptController {
       chrome.storage.onChanged.removeListener(handleStorageChange);
       unmount?.();
       pendingHideStyle?.remove();
+      restoreOriginalTab();
       clearSurfaceStores();
       toggleRoot?.unmount();
       toggleHost?.remove();

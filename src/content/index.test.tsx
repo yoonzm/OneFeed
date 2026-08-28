@@ -92,10 +92,14 @@ describe('content surface lifecycle', () => {
     const controller = startContentScript();
 
     expect(document.getElementById('__universal_feed_hide_original__')).not.toBeNull();
+    expect(document.title).toBe('OneFeed');
+    expect(document.getElementById('__onefeed_tab_icon__')).not.toBeNull();
     expect(mocks.createAdapter).not.toHaveBeenCalled();
 
     resolveStorage?.({ enabled: false });
     expect(document.getElementById('__universal_feed_hide_original__')).toBeNull();
+    expect(document.title).toBe('原站标题');
+    expect(document.getElementById('__onefeed_tab_icon__')).toBeNull();
     expect(mocks.createAdapter).not.toHaveBeenCalled();
     controller.cleanup();
   });
@@ -213,6 +217,7 @@ describe('content surface lifecycle', () => {
     const controller = startContentScript();
     expect(feed.adapter.init).toHaveBeenCalledOnce();
     expect(document.title).toBe('OneFeed');
+    const tabIcon = document.getElementById('__onefeed_tab_icon__');
     expect(document.getElementById('__universal_feed_hide_original__')).not.toBeNull();
 
     window.history.pushState({}, '', '/detail');
@@ -220,6 +225,7 @@ describe('content surface lifecycle', () => {
     expect(feed.adapter.disconnect).toHaveBeenCalledOnce();
     expect(detail.adapter.init).toHaveBeenCalledOnce();
     expect(document.title).toBe('OneFeed');
+    expect(document.getElementById('__onefeed_tab_icon__')).toBe(tabIcon);
     expect(document.getElementById('__universal_feed_root__')?.style.display).toBe('');
     expect(document.getElementById('__universal_feed_hide_original__')).not.toBeNull();
 
