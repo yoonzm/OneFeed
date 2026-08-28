@@ -10,8 +10,10 @@ import {
 import { i18n } from '../../i18n';
 import { DEFAULT_DISPLAY_PREFERENCES } from '../../preferences/displayPreferences';
 import { useDisplayPreferences } from '../../preferences/useDisplayPreferences';
-import { SettingSwitch } from './components/SettingSwitch';
 import { SettingsPanelHeader } from './components/SettingsLayout';
+import { Button } from './components/ui/Button';
+import { Card, CardContent, CardHeader } from './components/ui/Card';
+import { Switch } from './components/ui/Switch';
 
 export function DisplaySettingsPanel() {
   const { preferences, ready, savePreferences } = useDisplayPreferences();
@@ -63,15 +65,17 @@ export function DisplaySettingsPanel() {
           </div>
         </div>
         <div className="display-grid">
-          <article className="platform-order-card">
-            <header>
+          <Card as="article" className="platform-order-card">
+            <CardHeader>
               <div>
                 <h3>{i18n.t('display.headerPlatforms')}</h3>
                 <p>{i18n.t('display.headerDescription')}</p>
               </div>
-              <button
+              <Button
                 className="reset-order-button"
                 type="button"
+                variant="ghost"
+                size="sm"
                 disabled={!ready}
                 onClick={() => savePreferences((current) => ({
                   ...current,
@@ -79,9 +83,10 @@ export function DisplaySettingsPanel() {
                 }))}
               >
                 {i18n.t('display.resetOrder')}
-              </button>
-            </header>
-            <ol className="header-platform-list">
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <ol className="header-platform-list">
               {orderedPlatforms.map((platform, index) => {
                 const platformId = platform.id as PlatformId;
                 const displayName = getPlatformDisplayName(platformId);
@@ -102,26 +107,30 @@ export function DisplaySettingsPanel() {
                     </span>
                     <span className="header-platform-name">{displayName}</span>
                     <span className="platform-order-actions">
-                      <button
+                      <Button
                         className="move-up"
                         type="button"
+                        variant="ghost"
+                        size="icon"
                         aria-label={i18n.t('display.moveUp', [displayName])}
                         disabled={!ready || index === 0}
                         onClick={() => movePlatform(platformId, -1)}
                       >
                         <ArrowUp size={15} weight="bold" aria-hidden="true" />
-                      </button>
-                      <button
+                      </Button>
+                      <Button
                         className="move-down"
                         type="button"
+                        variant="ghost"
+                        size="icon"
                         aria-label={i18n.t('display.moveDown', [displayName])}
                         disabled={!ready || index === orderedPlatforms.length - 1}
                         onClick={() => movePlatform(platformId, 1)}
                       >
                         <ArrowDown size={15} weight="bold" aria-hidden="true" />
-                      </button>
+                      </Button>
                     </span>
-                    <SettingSwitch
+                    <Switch
                       checked={visible}
                       label={i18n.t('display.showPlatform', [displayName])}
                       disabled={!ready}
@@ -130,12 +139,13 @@ export function DisplaySettingsPanel() {
                   </li>
                 );
               })}
-            </ol>
-            <p className="active-platform-note">{i18n.t('display.activePlatformNote')}</p>
-          </article>
+              </ol>
+              <p className="active-platform-note">{i18n.t('display.activePlatformNote')}</p>
+            </CardContent>
+          </Card>
 
-          <article className="image-settings-card">
-            <header>
+          <Card as="article" className="image-settings-card">
+            <CardHeader>
               <span className="image-settings-icon" aria-hidden="true">
                 <Image size={23} />
               </span>
@@ -143,14 +153,14 @@ export function DisplaySettingsPanel() {
                 <h3>{i18n.t('display.imageTitle')}</h3>
                 <p>{i18n.t('display.imageDescription')}</p>
               </div>
-            </header>
-            <div className="image-setting-list">
+            </CardHeader>
+            <CardContent className="image-setting-list">
               <div className="image-setting-row">
                 <div>
                   <strong>{i18n.t('display.feedImages')}</strong>
                   <span>{i18n.t('display.feedImagesDescription')}</span>
                 </div>
-                <SettingSwitch
+                <Switch
                   checked={!preferences.hideFeedImages}
                   label={i18n.t('display.feedImagesToggle')}
                   disabled={!ready}
@@ -165,7 +175,7 @@ export function DisplaySettingsPanel() {
                   <strong>{i18n.t('display.detailImages')}</strong>
                   <span>{i18n.t('display.detailImagesDescription')}</span>
                 </div>
-                <SettingSwitch
+                <Switch
                   checked={!preferences.hideDetailImages}
                   label={i18n.t('display.detailImagesToggle')}
                   disabled={!ready}
@@ -175,8 +185,8 @@ export function DisplaySettingsPanel() {
                   })}
                 />
               </div>
-            </div>
-          </article>
+            </CardContent>
+          </Card>
         </div>
       </section>
     </>

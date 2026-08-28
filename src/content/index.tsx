@@ -21,8 +21,8 @@ const HIDE_STYLE_ID = '__universal_feed_hide_original__';
 const TAB_ICON_ID = '__onefeed_tab_icon__';
 const TAB_TITLE = 'OneFeed';
 const PAGE_BACKGROUND_BY_COLOR_SCHEME: Record<ColorScheme, string> = {
-  light: '#f7f8fa',
-  dark: '#101722',
+  light: '#fafafa',
+  dark: '#0a0a0a',
 };
 
 function routeKey(url: URL): string {

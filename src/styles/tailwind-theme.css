@@ -1,57 +1,28 @@
-/** OneFeed 设计 Token 的唯一来源，Tailwind 工具类与遗留样式共同消费这些变量。 */
-@theme static {
-  --color-onefeed-paper: #f7f8fa;
-  --color-onefeed-surface: #ffffff;
-  --color-onefeed-ink: #172033;
-  --color-onefeed-body: #374257;
-  --color-onefeed-muted: #5f6b7e;
-  --color-onefeed-subtle: #8793a5;
-  --color-onefeed-faint: #8c98aa;
-  --color-onefeed-line: #d8dee8;
-  --color-onefeed-line-strong: #b8c4d6;
-  --color-onefeed-blue: #1769e0;
-  --color-onefeed-blue-soft: #e6f0ff;
-  --color-onefeed-focus: #9fc6ff;
-  --color-onefeed-overlay: #0f1622;
-  --color-onefeed-code: #eaf0f8;
-  --color-onefeed-media: #e7ecf3;
+@import "./theme-tokens.css";
 
-  --font-onefeed-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif;
-  --font-onefeed-brand: Georgia, serif;
-  --font-onefeed-reading: "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif;
+/** 将共享原始令牌暴露给 Tailwind 工具类；具体颜色与字体只在 theme-tokens.css 定义。 */
+@theme static {
+  --color-onefeed-paper: var(--onefeed-paper);
+  --color-onefeed-surface: var(--onefeed-surface);
+  --color-onefeed-ink: var(--onefeed-ink);
+  --color-onefeed-body: var(--onefeed-body);
+  --color-onefeed-muted: var(--onefeed-muted);
+  --color-onefeed-subtle: var(--onefeed-subtle);
+  --color-onefeed-faint: var(--onefeed-faint);
+  --color-onefeed-line: var(--onefeed-line);
+  --color-onefeed-line-strong: var(--onefeed-line-strong);
+  --color-onefeed-blue: var(--onefeed-blue);
+  --color-onefeed-blue-soft: var(--onefeed-blue-soft);
+  --color-onefeed-focus: var(--onefeed-focus);
+  --color-onefeed-overlay: var(--onefeed-overlay);
+  --color-onefeed-code: var(--onefeed-code);
+  --color-onefeed-media: var(--onefeed-media);
+
+  --font-onefeed-sans: var(--onefeed-font-sans);
+  --font-onefeed-brand: var(--onefeed-font-sans);
+  --font-onefeed-reading: var(--onefeed-font-sans);
   --font-weight-onefeed-emphasis: 650;
 
   --radius-onefeed-sheet: 14px;
-  --shadow-onefeed-sheet: 0 -16px 48px rgb(15 22 34 / 20%);
-}
-
-/** Focus Paper 深色模式保持低对比纸张层次，避免纯黑背景带来的眩光。 */
-[data-onefeed-theme='dark'],
-:host([data-onefeed-theme='dark']) {
-  color-scheme: dark;
-  --color-onefeed-paper: #101722;
-  --color-onefeed-surface: #172130;
-  --color-onefeed-ink: #edf2f8;
-  --color-onefeed-body: #cbd5e1;
-  --color-onefeed-muted: #a8b4c5;
-  --color-onefeed-subtle: #8492a6;
-  --color-onefeed-faint: #758399;
-  --color-onefeed-line: #2b394b;
-  --color-onefeed-line-strong: #42536b;
-  --color-onefeed-blue: #69a8ff;
-  --color-onefeed-blue-soft: #1b3556;
-  --color-onefeed-focus: #8dbdff;
-  --color-onefeed-overlay: #05080d;
-  --color-onefeed-code: #182536;
-  --color-onefeed-media: #1b293a;
-  --shadow-onefeed-sheet: 0 -16px 48px rgb(0 0 0 / 46%);
-
-  /* 兼容阅读器中仍使用短 Token 的富文本样式。 */
-  --paper: var(--color-onefeed-paper);
-  --surface: var(--color-onefeed-surface);
-  --ink: var(--color-onefeed-ink);
-  --muted: var(--color-onefeed-muted);
-  --line: var(--color-onefeed-line);
-  --blue: var(--color-onefeed-blue);
-  --blue-soft: var(--color-onefeed-blue-soft);
+  --shadow-onefeed-sheet: var(--onefeed-shadow-sheet);
 }

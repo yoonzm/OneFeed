@@ -12,8 +12,10 @@ import { useState } from 'react';
 import type { FeedFilterRule } from '../../filters/feedFilters';
 import { useFeedFilters } from '../../filters/useFeedFilters';
 import { formatNumber, i18n } from '../../i18n';
-import { SettingSwitch } from './components/SettingSwitch';
 import { SettingsPanelHeader } from './components/SettingsLayout';
+import { Button } from './components/ui/Button';
+import { Card } from './components/ui/Card';
+import { Switch } from './components/ui/Switch';
 import { createRule, createRuleId, ruleSummary } from './filterRuleUtils';
 import { RuleEditor } from './RuleEditor';
 
@@ -83,7 +85,7 @@ export function FilterSettingsPanel() {
         description={i18n.t('settings.filtersPanelDescription')}
       />
 
-      <section className="master-card" aria-labelledby="master-title">
+      <Card as="section" className="master-card" aria-labelledby="master-title">
         <div className="master-icon"><EyeSlash size={28} /></div>
         <div>
           <p>{i18n.t('filter.globalControl')}</p>
@@ -92,13 +94,13 @@ export function FilterSettingsPanel() {
             ? i18n.t('filter.activeSummary', activeRuleCount, [formatNumber(activeRuleCount)])
             : i18n.t('filter.pausedSummary')}</span>
         </div>
-        <SettingSwitch
+        <Switch
           checked={settings.enabled}
           label={i18n.t('filter.masterToggle')}
           disabled={!ready}
           onCheckedChange={(enabled) => saveSettings({ ...settings, enabled })}
         />
-      </section>
+      </Card>
 
       <section className="quick-section" aria-labelledby="quick-title">
         <div className="section-title">
@@ -108,32 +110,32 @@ export function FilterSettingsPanel() {
           </div>
         </div>
         <div className="quick-grid">
-          <article>
+          <Card as="article">
             <div className="quick-icon"><Check size={22} /></div>
             <div>
               <h3>{i18n.t('filter.hideSeen')}</h3>
               <p>{i18n.t('filter.hideSeenDescription')}</p>
             </div>
-            <SettingSwitch
+            <Switch
               checked={settings.hideSeen}
               label={i18n.t('filter.hideSeen')}
               disabled={!ready}
               onCheckedChange={(hideSeen) => saveSettings({ ...settings, hideSeen })}
             />
-          </article>
-          <article>
+          </Card>
+          <Card as="article">
             <div className="quick-icon"><Sparkle size={22} /></div>
             <div>
               <h3>{i18n.t('filter.hideRecommended')}</h3>
               <p>{i18n.t('filter.hideRecommendedDescription')}</p>
             </div>
-            <SettingSwitch
+            <Switch
               checked={settings.hideRecommended}
               label={i18n.t('filter.hideRecommendedToggle')}
               disabled={!ready}
               onCheckedChange={(hideRecommended) => saveSettings({ ...settings, hideRecommended })}
             />
-          </article>
+          </Card>
         </div>
       </section>
 
@@ -143,14 +145,14 @@ export function FilterSettingsPanel() {
             <p>{i18n.t('filter.customRules')}</p>
             <h2 id="rules-title">{i18n.t('filter.customTitle')}</h2>
           </div>
-          <button
+          <Button
             className="primary-button"
             type="button"
             onClick={() => setEditingRule(createRule())}
           >
             <Plus size={18} weight="bold" />
             {i18n.t('filter.newRule')}
-          </button>
+          </Button>
         </div>
 
         {editingRule && (
@@ -163,20 +165,20 @@ export function FilterSettingsPanel() {
         )}
 
         {!settings.rules.length && !editingRule ? (
-          <div className="rules-empty">
+          <Card className="rules-empty">
             <Funnel size={26} />
             <h3>{i18n.t('filter.emptyTitle')}</h3>
             <p>{i18n.t('filter.emptyDescription')}</p>
-            <button type="button" onClick={() => setEditingRule(createRule())}>
+            <Button variant="secondary" type="button" onClick={() => setEditingRule(createRule())}>
               {i18n.t('filter.createRule')}
-            </button>
-          </div>
+            </Button>
+          </Card>
         ) : (
           <div className="rule-list">
             {settings.rules.map((rule) => (
-              <article className={`rule-card ${rule.enabled ? '' : 'is-disabled'}`} key={rule.id}>
+              <Card as="article" className={`rule-card ${rule.enabled ? '' : 'is-disabled'}`} key={rule.id}>
                 <div className="rule-card-main">
-                  <SettingSwitch
+                  <Switch
                     checked={rule.enabled}
                     label={i18n.t(
                       rule.enabled ? 'filter.disableRule' : 'filter.enableRule',
@@ -195,29 +197,35 @@ export function FilterSettingsPanel() {
                   </div>
                 </div>
                 <div className="rule-actions">
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     aria-label={i18n.t('filter.editRule', [rule.name])}
                     onClick={() => setEditingRule(rule)}
                   >
                     <PencilSimple size={18} />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     aria-label={i18n.t('filter.copyRule', [rule.name])}
                     onClick={() => duplicateRule(rule)}
                   >
                     <Copy size={18} />
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon"
                     aria-label={i18n.t('filter.deleteRule', [rule.name])}
                     onClick={() => deleteRule(rule)}
                   >
                     <Trash size={18} />
-                  </button>
+                  </Button>
                 </div>
-              </article>
+              </Card>
             ))}
           </div>
         )}
@@ -226,7 +234,7 @@ export function FilterSettingsPanel() {
       {deletedRule && (
         <div className="undo-toast" role="status">
           <span>{i18n.t('filter.deleted', [deletedRule.rule.name])}</span>
-          <button type="button" onClick={undoDelete}>{i18n.t('filter.undo')}</button>
+          <Button size="sm" type="button" onClick={undoDelete}>{i18n.t('filter.undo')}</Button>
         </div>
       )}
     </>

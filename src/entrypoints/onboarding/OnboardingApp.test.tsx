@@ -7,6 +7,7 @@ describe('OnboardingApp', () => {
   it('explains installation, product purpose, usage and privacy', () => {
     const markup = renderToStaticMarkup(<OnboardingApp />);
 
+    expect(markup).toContain('data-onefeed-theme="light"');
     expect(markup).toContain('background-clip:text');
     expect(markup).toContain('OneFeed 已安装成功');
     expect(markup).toContain('让信息流回到');

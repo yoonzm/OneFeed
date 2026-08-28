@@ -62,6 +62,11 @@ describe('filter settings page', () => {
     expect(container.querySelector('.settings-intro')).toBeNull();
     expect(container.querySelector('.settings-sidebar-heading h1')?.textContent).toBe('设置');
     expect(container.querySelectorAll('[role="tab"]')).toHaveLength(2);
+    expect(container.querySelectorAll('[data-slot="card"]').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('.ui-switch').length).toBeGreaterThan(0);
+    expect(container.querySelector(
+      'button:not(.ui-button):not(.ui-switch):not(.settings-menu-item)',
+    )).toBeNull();
     expect(container.textContent).toContain('顶部常用网站');
     expect(container.querySelectorAll('.header-platform-row')).toHaveLength(
       getSupportedPlatforms().length,
@@ -86,6 +91,18 @@ describe('filter settings page', () => {
     expect(container.querySelectorAll('.platform-checks .platform-icon')).toHaveLength(
       getSupportedPlatforms().length,
     );
+  });
+
+  it('switches the semantic theme on the complete settings surface', async () => {
+    const container = await renderOptions();
+    const page = container.querySelector('.options-page');
+    const themeToggle = container.querySelector<HTMLButtonElement>('.theme-button');
+
+    expect(page?.getAttribute('data-onefeed-theme')).toBe('light');
+    await act(async () => themeToggle?.click());
+
+    expect(page?.getAttribute('data-onefeed-theme')).toBe('dark');
+    expect(storedValues.colorScheme).toBe('dark');
   });
 
   it('persists the quick seen filter immediately', async () => {

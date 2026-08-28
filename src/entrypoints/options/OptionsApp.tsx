@@ -2,6 +2,7 @@ import { Funnel, MoonStars, SlidersHorizontal, Sun } from '@phosphor-icons/react
 import { i18n } from '../../i18n';
 import { useColorScheme } from '../../theme/useColorScheme';
 import { SettingsLayout, type SettingsCategory } from './components/SettingsLayout';
+import { Button } from './components/ui/Button';
 import { DisplaySettingsPanel } from './DisplaySettingsPanel';
 import { FilterSettingsPanel } from './FilterSettingsPanel';
 
@@ -33,9 +34,11 @@ export function OptionsApp() {
           <img src="/icons/icon-128.png" alt="" />
           <span>OneFeed</span>
         </div>
-        <button
+        <Button
           className="theme-button"
           type="button"
+          variant="ghost"
+          size="icon"
           aria-label={nextColorScheme === 'dark'
             ? i18n.t('common.themeSwitchDark')
             : i18n.t('common.themeSwitchLight')}
@@ -43,7 +46,7 @@ export function OptionsApp() {
           onClick={() => setColorScheme(nextColorScheme)}
         >
           {colorScheme === 'light' ? <MoonStars size={21} /> : <Sun size={21} />}
-        </button>
+        </Button>
       </header>
 
       <main id="settings-main" className="options-main">

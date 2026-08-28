@@ -9,6 +9,8 @@ import {
 } from '../../config/platforms';
 import type { FeedFilterCondition, FeedFilterRule } from '../../filters/feedFilters';
 import { i18n } from '../../i18n';
+import { Button } from './components/ui/Button';
+import { Input, NativeSelect } from './components/ui/FormControls';
 import {
   conditionSummary,
   createCondition,
@@ -66,19 +68,21 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
             ? i18n.t('filter.editorEdit')
             : i18n.t('filter.editorCreate')}</h2>
         </div>
-        <button
+        <Button
           className="icon-button"
           type="button"
+          variant="ghost"
+          size="icon"
           aria-label={i18n.t('filter.editorClose')}
           onClick={onCancel}
         >
           <X size={21} />
-        </button>
+        </Button>
       </div>
 
       <label className="field-label">
         <span>{i18n.t('filter.ruleName')} <small>{i18n.t('filter.optional')}</small></span>
-        <input
+        <Input
           type="text"
           value={draft.name}
           placeholder={i18n.t('filter.ruleNamePlaceholder')}
@@ -90,7 +94,7 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
         <legend>{i18n.t('filter.scope')}</legend>
         <div className="scope-choice">
           <label>
-            <input
+            <Input
               type="radio"
               name="scope"
               checked={allPlatforms}
@@ -99,7 +103,7 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
             {i18n.t('filter.allPlatforms')}
           </label>
           <label>
-            <input
+            <Input
               type="radio"
               name="scope"
               checked={!allPlatforms}
@@ -121,7 +125,7 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
                   key={platform.id}
                   style={{ '--platform-accent': presentation.accent } as CSSProperties}
                 >
-                  <input
+                  <Input
                     type="checkbox"
                     checked={checked}
                     onChange={() => {
@@ -149,7 +153,7 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
           {draft.conditions.map((condition, index) => (
             <div className="condition-row" key={`${condition.type}-${index}`}>
               <span className="condition-number">{index + 1}</span>
-              <select
+              <NativeSelect
                 aria-label={i18n.t('filter.conditionType', [String(index + 1)])}
                 value={condition.type}
                 onChange={(event) => updateCondition(
@@ -160,11 +164,11 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
                 <option value="keyword">{i18n.t('filter.keyword')}</option>
                 <option value="author">{i18n.t('filter.author')}</option>
                 <option value="kind">{i18n.t('filter.contentType')}</option>
-              </select>
+              </NativeSelect>
 
               {condition.type === 'keyword' && (
                 <>
-                  <select
+                  <NativeSelect
                     aria-label={i18n.t('filter.textRange', [String(index + 1)])}
                     value={condition.field}
                     onChange={(event) => updateCondition(index, {
@@ -175,8 +179,8 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
                     <option value="all">{i18n.t('filter.field.all')}</option>
                     <option value="title">{i18n.t('filter.titleOnly')}</option>
                     <option value="content">{i18n.t('filter.contentOnly')}</option>
-                  </select>
-                  <input
+                  </NativeSelect>
+                  <Input
                     type="text"
                     aria-label={i18n.t('filter.conditionKeyword', [String(index + 1)])}
                     value={condition.values.join(', ')}
@@ -191,7 +195,7 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
 
               {condition.type === 'author' && (
                 <>
-                  <select
+                  <NativeSelect
                     aria-label={i18n.t('filter.authorMatch', [String(index + 1)])}
                     value={condition.operator}
                     onChange={(event) => updateCondition(index, {
@@ -201,8 +205,8 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
                   >
                     <option value="contains">{i18n.t('filter.nameContains')}</option>
                     <option value="equals">{i18n.t('filter.nameEquals')}</option>
-                  </select>
-                  <input
+                  </NativeSelect>
+                  <Input
                     type="text"
                     aria-label={i18n.t('filter.conditionAuthor', [String(index + 1)])}
                     value={condition.value}
@@ -216,7 +220,7 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
               )}
 
               {condition.type === 'kind' && (
-                <select
+                <NativeSelect
                   className="condition-value"
                   aria-label={i18n.t('filter.conditionContentType', [String(index + 1)])}
                   value={condition.value}
@@ -228,12 +232,14 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
                   <option value="post">{i18n.t('filter.kind.post')}</option>
                   <option value="article">{i18n.t('filter.kind.article')}</option>
                   <option value="discussion">{i18n.t('filter.kind.discussion')}</option>
-                </select>
+                </NativeSelect>
               )}
 
-              <button
+              <Button
                 className="remove-condition"
                 type="button"
+                variant="ghost"
+                size="icon"
                 aria-label={i18n.t('filter.deleteCondition', [String(index + 1)])}
                 disabled={draft.conditions.length === 1}
                 onClick={() => setDraft({
@@ -242,13 +248,15 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
                 })}
               >
                 <X size={17} />
-              </button>
+              </Button>
             </div>
           ))}
         </div>
-        <button
+        <Button
           className="add-condition"
           type="button"
+          variant="ghost"
+          size="sm"
           onClick={() => setDraft({
             ...draft,
             conditions: [...draft.conditions, createCondition('keyword')],
@@ -256,7 +264,7 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
         >
           <Plus size={17} />
           {i18n.t('filter.addCondition')}
-        </button>
+        </Button>
       </fieldset>
 
       <div className="rule-preview">
@@ -267,13 +275,13 @@ export function RuleEditor({ initialRule, onCancel, onSave }: RuleEditorProps) {
       <div className="editor-actions">
         <p role="alert">{validationError || i18n.t('filter.localOnly')}</p>
         <div>
-          <button className="secondary-button" type="button" onClick={onCancel}>
+          <Button className="secondary-button" variant="outline" type="button" onClick={onCancel}>
             {i18n.t('filter.cancel')}
-          </button>
-          <button className="primary-button" type="submit" disabled={Boolean(validationError)}>
+          </Button>
+          <Button className="primary-button" type="submit" disabled={Boolean(validationError)}>
             <Check size={18} weight="bold" />
             {i18n.t('filter.saveRule')}
-          </button>
+          </Button>
         </div>
       </div>
     </form>

@@ -2,6 +2,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import { CaretRight, LockKey } from '@phosphor-icons/react';
 import type { ReactNode } from 'react';
 import { i18n } from '../../../i18n';
+import { Card } from './ui/Card';
 
 export interface SettingsCategory {
   id: string;
@@ -52,13 +53,13 @@ export function SettingsLayout({ categories }: SettingsLayoutProps) {
           ))}
         </Tabs.List>
 
-        <div className="settings-local-note">
+        <Card className="settings-local-note">
           <LockKey size={16} aria-hidden="true" />
           <div>
             <strong>{i18n.t('settings.localTitle')}</strong>
             <span>{i18n.t('settings.localDescription')}</span>
           </div>
-        </div>
+        </Card>
       </aside>
 
       <div className="settings-content">

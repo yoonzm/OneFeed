@@ -1,28 +1,30 @@
 import * as SwitchPrimitive from '@radix-ui/react-switch';
 
-interface SettingSwitchProps {
+interface SwitchProps {
   checked: boolean;
   label: string;
+  className?: string;
   disabled?: boolean;
   onCheckedChange: (checked: boolean) => void;
 }
 
-/** Radix 负责开关语义与键盘交互，视觉状态统一由 OneFeed 主题令牌控制。 */
-export function SettingSwitch({
+/** Radix 提供语义和键盘交互，样式 API 与 shadcn/ui 的 Switch 保持一致。 */
+export function Switch({
   checked,
   label,
+  className = '',
   disabled,
   onCheckedChange,
-}: SettingSwitchProps) {
+}: SwitchProps) {
   return (
     <SwitchPrimitive.Root
-      className="filter-switch"
+      className={`ui-switch ${className}`.trim()}
       checked={checked}
       aria-label={label}
       disabled={disabled}
       onCheckedChange={onCheckedChange}
     >
-      <SwitchPrimitive.Thumb className="filter-switch-thumb" />
+      <SwitchPrimitive.Thumb className="ui-switch-thumb" />
     </SwitchPrimitive.Root>
   );
 }

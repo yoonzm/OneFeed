@@ -2,8 +2,8 @@
 @import "../../styles/tailwind-theme.css";
 
 :root {
-  color: var(--color-onefeed-ink, #172033);
-  background: var(--color-onefeed-paper, #f7f8fa);
+  color: var(--color-onefeed-ink, #0a0a0a);
+  background: var(--color-onefeed-paper, #fafafa);
   font-family: var(--font-onefeed-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif);
   font-synthesis: none;
   text-rendering: optimizeLegibility;

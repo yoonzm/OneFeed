@@ -119,11 +119,11 @@ describe('content surface lifecycle', () => {
       const controller = startContentScript();
 
       const pendingStyle = document.getElementById('__universal_feed_hide_original__');
-      expect(pendingStyle?.textContent).toContain('background: #f7f8fa');
+      expect(pendingStyle?.textContent).toContain('background: #fafafa');
 
       resolveStorage?.({ enabled: true, colorScheme: 'dark' });
 
-      expect(pendingStyle?.textContent).toContain('background: #101722');
+      expect(pendingStyle?.textContent).toContain('background: #0a0a0a');
       expect(document.getElementById('__universal_feed_root__')?.dataset.onefeedTheme).toBe('dark');
       expect(document.getElementById('__universal_feed_root__')?.style.display).toBe('');
       controller.cleanup();
@@ -255,7 +255,7 @@ describe('content surface lifecycle', () => {
     controller.refresh();
 
     const pendingStyle = document.getElementById('__universal_feed_hide_original__');
-    expect(pendingStyle?.textContent).toContain('background: #101722');
+    expect(pendingStyle?.textContent).toContain('background: #0a0a0a');
     expect(document.getElementById('__universal_feed_root__')?.style.display).toBe('');
     controller.cleanup();
   });

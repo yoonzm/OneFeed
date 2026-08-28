@@ -1,0 +1,96 @@
+@import "@fontsource-variable/geist";
+
+/**
+ * 跨普通页面与 Shadow DOM 的原始主题令牌。
+ * Tailwind 映射、传统 CSS 和内联内容脚本都从这里读取，避免入口自行复制主题值。
+ */
+:root,
+:host {
+  --onefeed-paper: #fafafa;
+  --onefeed-surface: #ffffff;
+  --onefeed-ink: #0a0a0a;
+  --onefeed-body: #262626;
+  --onefeed-muted: #737373;
+  --onefeed-subtle: #8a8a8a;
+  --onefeed-faint: #a3a3a3;
+  --onefeed-line: #e5e5e5;
+  --onefeed-line-strong: #d4d4d4;
+  --onefeed-blue: #2563eb;
+  --onefeed-blue-soft: #eff6ff;
+  --onefeed-focus: #2563eb;
+  --onefeed-overlay: #0a0a0a;
+  --onefeed-code: #f5f5f5;
+  --onefeed-media: #f5f5f5;
+  --onefeed-font-sans: "Geist Variable", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --onefeed-shadow-sheet: 0 -16px 48px rgb(0 0 0 / 20%);
+
+  --color-onefeed-paper: var(--onefeed-paper);
+  --color-onefeed-surface: var(--onefeed-surface);
+  --color-onefeed-ink: var(--onefeed-ink);
+  --color-onefeed-body: var(--onefeed-body);
+  --color-onefeed-muted: var(--onefeed-muted);
+  --color-onefeed-subtle: var(--onefeed-subtle);
+  --color-onefeed-faint: var(--onefeed-faint);
+  --color-onefeed-line: var(--onefeed-line);
+  --color-onefeed-line-strong: var(--onefeed-line-strong);
+  --color-onefeed-blue: var(--onefeed-blue);
+  --color-onefeed-blue-soft: var(--onefeed-blue-soft);
+  --color-onefeed-focus: var(--onefeed-focus);
+  --color-onefeed-overlay: var(--onefeed-overlay);
+  --color-onefeed-code: var(--onefeed-code);
+  --color-onefeed-media: var(--onefeed-media);
+  --font-onefeed-sans: var(--onefeed-font-sans);
+  --font-onefeed-brand: var(--onefeed-font-sans);
+  --font-onefeed-reading: var(--onefeed-font-sans);
+  --font-weight-onefeed-emphasis: 650;
+  --radius-onefeed-sheet: 14px;
+  --shadow-onefeed-sheet: var(--onefeed-shadow-sheet);
+}
+
+[data-onefeed-theme='dark'][data-onefeed-theme],
+:host([data-onefeed-theme='dark']) {
+  color-scheme: dark;
+  --onefeed-paper: #0a0a0a;
+  --onefeed-surface: #171717;
+  --onefeed-ink: #fafafa;
+  --onefeed-body: #e5e5e5;
+  --onefeed-muted: #a3a3a3;
+  --onefeed-subtle: #8a8a8a;
+  --onefeed-faint: #737373;
+  --onefeed-line: #2a2a2a;
+  --onefeed-line-strong: #404040;
+  --onefeed-blue: #60a5fa;
+  --onefeed-blue-soft: #172554;
+  --onefeed-focus: #60a5fa;
+  --onefeed-overlay: #000000;
+  --onefeed-code: #262626;
+  --onefeed-media: #262626;
+  --onefeed-shadow-sheet: 0 -16px 48px rgb(0 0 0 / 46%);
+
+  /* @theme 会为 Tailwind 输出同名浅色映射；更具体的主题选择器负责深色覆盖。 */
+  --color-onefeed-paper: var(--onefeed-paper);
+  --color-onefeed-surface: var(--onefeed-surface);
+  --color-onefeed-ink: var(--onefeed-ink);
+  --color-onefeed-body: var(--onefeed-body);
+  --color-onefeed-muted: var(--onefeed-muted);
+  --color-onefeed-subtle: var(--onefeed-subtle);
+  --color-onefeed-faint: var(--onefeed-faint);
+  --color-onefeed-line: var(--onefeed-line);
+  --color-onefeed-line-strong: var(--onefeed-line-strong);
+  --color-onefeed-blue: var(--onefeed-blue);
+  --color-onefeed-blue-soft: var(--onefeed-blue-soft);
+  --color-onefeed-focus: var(--onefeed-focus);
+  --color-onefeed-overlay: var(--onefeed-overlay);
+  --color-onefeed-code: var(--onefeed-code);
+  --color-onefeed-media: var(--onefeed-media);
+  --shadow-onefeed-sheet: var(--onefeed-shadow-sheet);
+
+  /* 阅读器富文本仍消费这些短 Token。 */
+  --paper: var(--color-onefeed-paper);
+  --surface: var(--color-onefeed-surface);
+  --ink: var(--color-onefeed-ink);
+  --muted: var(--color-onefeed-muted);
+  --line: var(--color-onefeed-line);
+  --blue: var(--color-onefeed-blue);
+  --blue-soft: var(--color-onefeed-blue-soft);
+}
