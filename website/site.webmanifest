@@ -1,0 +1,16 @@
+{
+  "name": "OneFeed",
+  "short_name": "OneFeed",
+  "description": "One calm, consistent reading interface across the websites you already use.",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#fafafa",
+  "theme_color": "#fafafa",
+  "icons": [
+    {
+      "src": "/assets/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }
+  ]
+}

@@ -2,6 +2,8 @@
 
 [English](README.en.md) | 简体中文
 
+[官方网站](https://onefeed.fyi/) · [隐私政策](https://onefeed.fyi/privacy/) · [问题反馈](https://github.com/yoonzm/OneFeed/issues)
+
 > 把散落在不同平台的信息流，变成真正属于用户的阅读空间。
 
 OneFeed 是一个面向 Web 信息流的浏览器扩展。

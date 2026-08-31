@@ -2,6 +2,8 @@
 
 English | [简体中文](README.md)
 
+[Website](https://onefeed.fyi/en/) · [Privacy](https://onefeed.fyi/en/privacy/) · [Feedback](https://github.com/yoonzm/OneFeed/issues)
+
 > Turn scattered feeds into a reading space that belongs to you.
 
 OneFeed is a browser extension for web feeds. It creates one calm, consistent, and controllable reading experience across otherwise disconnected platforms. The content remains on the original websites, while you decide how it is presented and filtered.
