@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type { ColorScheme } from '../theme/useColorScheme';
+import type { PlatformDefinition } from '../config/platforms';
 import type { FeedChannel } from '../types/feed';
 import { useColorScheme } from '../theme/useColorScheme';
 import { PlatformBar } from './components/PlatformBar';
@@ -7,6 +8,7 @@ import { PlatformBar } from './components/PlatformBar';
 interface OneFeedShellProps {
   activePlatformId: string;
   channels?: readonly FeedChannel[];
+  platforms?: readonly PlatformDefinition[];
   onFeedChannelSelect?: (channelId: string) => boolean;
   surface: 'feed' | 'article' | 'thread';
   scrollElement: HTMLElement;
@@ -20,6 +22,7 @@ interface OneFeedShellProps {
 export function OneFeedShell({
   activePlatformId,
   channels = [],
+  platforms,
   onFeedChannelSelect,
   surface,
   scrollElement,
@@ -39,6 +42,7 @@ export function OneFeedShell({
       <PlatformBar
         activePlatformId={activePlatformId}
         channels={channels}
+        platforms={platforms}
         onFeedChannelSelect={onFeedChannelSelect}
         surface={surface}
         scrollElement={scrollElement}

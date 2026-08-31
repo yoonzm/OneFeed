@@ -32,6 +32,7 @@ export interface CommentSectionHandle {
 
 interface CommentSectionProps {
   descriptor: CommentThreadDescriptor;
+  hideImages?: boolean;
   onRequest: CommentRequest;
 }
 
@@ -58,8 +59,9 @@ function mergeSnapshots(
   };
 }
 
-function CommentItemView({ item, onPreview, onOpenReplies }: {
+function CommentItemView({ item, hideImages, onPreview, onOpenReplies }: {
   item: CommentItem;
+  hideImages: boolean;
   onPreview: (image: FeedImage) => void;
   onOpenReplies?: (item: CommentItem) => void;
 }) {
@@ -92,6 +94,7 @@ function CommentItemView({ item, onPreview, onOpenReplies }: {
           <BlockRenderer
             block={block}
             expanded
+            hideImages={hideImages}
             onPreview={onPreview}
             compactGallery
             key={`${block.type}-${index}`}
@@ -125,8 +128,9 @@ function CommentItemView({ item, onPreview, onOpenReplies }: {
   );
 }
 
-function CommentList({ items, onPreview, onOpenReplies }: {
+function CommentList({ items, hideImages, onPreview, onOpenReplies }: {
   items: CommentItem[];
+  hideImages: boolean;
   onPreview: (image: FeedImage) => void;
   onOpenReplies?: (item: CommentItem) => void;
 }) {
@@ -135,6 +139,7 @@ function CommentList({ items, onPreview, onOpenReplies }: {
       {items.map((item) => (
         <CommentItemView
           item={item}
+          hideImages={hideImages}
           onPreview={onPreview}
           onOpenReplies={onOpenReplies}
           key={item.id}
@@ -157,6 +162,7 @@ function CommentsDialog({
   onOpenReplies,
   onRetry,
   onPreview,
+  hideImages,
 }: {
   snapshot?: CommentSnapshot;
   fallbackItems: CommentItem[];
@@ -170,6 +176,7 @@ function CommentsDialog({
   onOpenReplies?: (item: CommentItem) => void;
   onRetry: () => void;
   onPreview: (image: FeedImage) => void;
+  hideImages: boolean;
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const items = snapshot?.items.length ? snapshot.items : fallbackItems;
@@ -236,11 +243,13 @@ function CommentsDialog({
           {replyRoot && (
             <CommentItemView
               item={{ ...replyRoot, parentId: undefined }}
+              hideImages={hideImages}
               onPreview={onPreview}
             />
           )}
           <CommentList
             items={items}
+            hideImages={hideImages}
             onPreview={onPreview}
             onOpenReplies={isReplyView ? undefined : onOpenReplies}
           />
@@ -277,7 +286,7 @@ function CommentsDialog({
 
 /** 平台无关的评论弹层状态机；主评论常驻，回复只作为单独的上层弹窗。 */
 export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionProps>(
-  function CommentSection({ descriptor, onRequest }, ref) {
+  function CommentSection({ descriptor, hideImages = false, onRequest }, ref) {
     const returnFocusRef = useRef<HTMLElement | null>(null);
     const replyReturnFocusRef = useRef<HTMLElement | null>(null);
     const activeRequest = useRef(0);
@@ -462,6 +471,7 @@ export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionPro
               onOpenReplies={openReplies}
               onRetry={retry}
               onPreview={setImagePreview}
+              hideImages={hideImages}
             />
             {replyRoot && (
               <CommentsDialog
@@ -476,11 +486,12 @@ export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionPro
                 onLoadMore={loadMore}
                 onRetry={retry}
                 onPreview={setImagePreview}
+                hideImages={hideImages}
               />
             )}
           </>
         )}
-        {imagePreview && (
+        {imagePreview && !hideImages && (
           <button
             className="lightbox comment-lightbox"
             type="button"

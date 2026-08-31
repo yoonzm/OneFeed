@@ -9,6 +9,7 @@ import { ThreadEntry } from './ThreadEntry';
 
 interface ThreadDetailProps {
   content: ThreadDetailContent;
+  hideImages?: boolean;
   onAction: (
     itemId: string,
     originalUrl: string,
@@ -17,7 +18,7 @@ interface ThreadDetailProps {
 }
 
 /** 讨论详情由独立主题头、Thread 条目和可选分页三部分组成。 */
-export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
+export function ThreadDetail({ content, hideImages = false, onAction }: ThreadDetailProps) {
   const [preview, setPreview] = useState<FeedImage>();
   const [questionExpanded, setQuestionExpanded] = useState(false);
   const [questionTextOverflow, setQuestionTextOverflow] = useState(false);
@@ -113,6 +114,7 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
               <BlockRenderer
                 block={block}
                 expanded={headerBodyExpanded}
+                hideImages={hideImages}
                 onPreview={setPreview}
                 key={`${block.type}-${blockIndex}`}
               />
@@ -160,6 +162,7 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
           <ThreadEntry
             item={item}
             index={index}
+            hideImages={hideImages}
             key={item.id}
             onAction={(entry, action) => onAction(entry.id, entry.originalUrl, action)}
           />
@@ -187,7 +190,7 @@ export function ThreadDetail({ content, onAction }: ThreadDetailProps) {
         </nav>
       )}
 
-      {preview && (
+      {preview && !hideImages && (
         <button
           className="lightbox"
           type="button"

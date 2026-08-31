@@ -102,4 +102,24 @@ describe('DetailArticle', () => {
     expect(markup.indexOf('查看全部 12 个回答')).toBeLessThan(markup.indexOf('林一'));
     expect(markup.indexOf('林一')).toBeLessThan(markup.indexOf('超过列表摘要长度的完整正文。'));
   });
+
+  it('hides detail content images without hiding the author avatar', () => {
+    const markup = renderToStaticMarkup(
+      <DetailArticle
+        content={{
+          ...content,
+          author: { name: '林一', avatar: 'https://example.com/avatar.jpg' },
+          body: [{
+            type: 'gallery',
+            items: [{ url: 'https://example.com/detail.jpg', alt: '详情配图' }],
+          }],
+        }}
+        hideImages
+        onAction={vi.fn()}
+      />,
+    );
+
+    expect(markup).not.toContain('detail.jpg');
+    expect(markup).toContain('avatar.jpg');
+  });
 });

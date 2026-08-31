@@ -3,6 +3,7 @@ import { getPlatformById, getPlatformDisplayName } from '../../config/platforms'
 import { DiaTextReveal } from '../../components/DiaTextReveal';
 import { PlatformIcon } from '../../components/PlatformIcon';
 import { i18n } from '../../i18n';
+import { useColorScheme } from '../../theme/useColorScheme';
 import type { CSSProperties } from 'react';
 
 const GITHUB_URL = 'https://github.com/yoonzm/OneFeed';
@@ -63,9 +64,10 @@ function ExternalIcon() {
 
 export function OnboardingApp() {
   const experienceUrl = getPlatformById('hacker-news')!.homeUrl;
+  const { colorScheme } = useColorScheme();
 
   return (
-    <div className="onboarding-page">
+    <div className="onboarding-page" data-onefeed-theme={colorScheme}>
       <a className="skip-link" href="#main">{i18n.t('common.skipToMain')}</a>
 
       <header className="site-header">

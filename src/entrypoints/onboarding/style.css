@@ -1,21 +1,12 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "../../styles/tailwind-theme.css";
+
 :root {
-  color: #172033;
-  background: #f4f7fb;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: var(--color-onefeed-ink, #0a0a0a);
+  background: var(--color-onefeed-paper, #fafafa);
+  font-family: var(--font-onefeed-sans, "Geist Variable", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --paper: #f4f7fb;
-  --surface: #ffffff;
-  --ink: #172033;
-  --body: #435066;
-  --muted: #6f7c91;
-  --subtle: #8d99aa;
-  --line: #dce3ed;
-  --blue: #1769e0;
-  --blue-deep: #1058bd;
-  --blue-soft: #e8f1ff;
-  --green: #23865e;
-  --reading: "Songti SC", STSong, "Noto Serif CJK SC", Georgia, serif;
   --utility: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 }
 
@@ -29,11 +20,8 @@ html {
 
 body {
   margin: 0;
-  background:
-    linear-gradient(90deg, transparent calc(50% - 640px), rgb(216 225 237 / 42%) calc(50% - 640px), rgb(216 225 237 / 42%) calc(50% - 639px), transparent calc(50% - 639px)),
-    linear-gradient(90deg, transparent calc(50% + 639px), rgb(216 225 237 / 42%) calc(50% + 639px), rgb(216 225 237 / 42%) calc(50% + 640px), transparent calc(50% + 640px)),
-    var(--paper);
-  color: var(--ink);
+  background: var(--color-onefeed-paper);
+  color: var(--color-onefeed-ink);
 }
 
 button,
@@ -65,8 +53,27 @@ a:focus-visible {
 }
 
 .onboarding-page {
+  --paper: var(--color-onefeed-paper);
+  --surface: var(--color-onefeed-surface);
+  --ink: var(--color-onefeed-ink);
+  --body: var(--color-onefeed-body);
+  --muted: var(--color-onefeed-muted);
+  --subtle: var(--color-onefeed-subtle);
+  --line: var(--color-onefeed-line);
+  --blue: var(--color-onefeed-blue);
+  --blue-deep: color-mix(in srgb, var(--color-onefeed-blue) 84%, var(--color-onefeed-ink));
+  --blue-soft: var(--color-onefeed-blue-soft);
+  --green: #23865e;
+  --reading: var(--font-onefeed-reading);
   min-width: 320px;
+  min-height: 100vh;
   overflow: hidden;
+  background:
+    linear-gradient(90deg, transparent calc(50% - 640px), var(--line) calc(50% - 640px), var(--line) calc(50% - 639px), transparent calc(50% - 639px)),
+    linear-gradient(90deg, transparent calc(50% + 639px), var(--line) calc(50% + 639px), var(--line) calc(50% + 640px), transparent calc(50% + 640px)),
+    var(--paper);
+  color: var(--ink);
+  font-family: var(--font-onefeed-sans);
 }
 
 .site-header {
@@ -86,7 +93,7 @@ a:focus-visible {
   width: fit-content;
   align-items: center;
   gap: 10px;
-  font-family: Georgia, var(--reading);
+  font-family: var(--font-onefeed-brand);
   font-size: 17px;
   font-weight: 700;
   letter-spacing: .02em;
@@ -229,7 +236,7 @@ a:focus-visible {
 
 .text-action {
   padding: 8px 0;
-  border-bottom: 1px solid #9bb2cf;
+  border-bottom: 1px solid var(--color-onefeed-line-strong);
   color: var(--body);
   font-size: 12px;
   text-decoration: none;
@@ -252,11 +259,11 @@ a:focus-visible {
   width: 100%;
   min-height: 470px;
   padding: 28px 28px 28px 68px;
-  border: 1px solid #28364a;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  background: #111925;
-  box-shadow: 0 30px 80px rgb(20 33 50 / 19%);
-  color: #eef3fa;
+  background: var(--surface);
+  box-shadow: 0 30px 80px rgb(0 0 0 / 12%);
+  color: var(--ink);
 }
 
 .preview-margin {
@@ -268,7 +275,7 @@ a:focus-visible {
   width: 24px;
   flex-direction: column;
   align-items: center;
-  color: #8491a4;
+  color: var(--subtle);
   font: 600 8px/1 var(--utility);
   letter-spacing: .16em;
 }
@@ -282,7 +289,7 @@ a:focus-visible {
   width: 1px;
   flex: 1;
   margin: 13px 0;
-  background: #344155;
+  background: var(--color-onefeed-line-strong);
 }
 
 .preview-margin i b {
@@ -291,7 +298,7 @@ a:focus-visible {
   left: 0;
   width: 1px;
   height: 34%;
-  background: #69a8ff;
+  background: var(--blue);
 }
 
 .preview-margin small {
@@ -309,17 +316,17 @@ a:focus-visible {
   min-height: 44px;
   align-items: flex-start;
   justify-content: space-between;
-  border-bottom: 1px solid #2d394b;
+  border-bottom: 1px solid var(--line);
 }
 
 .preview-head strong {
-  font-family: Georgia, serif;
+  font-family: var(--font-onefeed-brand);
   font-size: 14px;
   letter-spacing: .02em;
 }
 
 .preview-head span {
-  color: #9ca9ba;
+  color: var(--muted);
   font-size: 9px;
 }
 
@@ -335,11 +342,11 @@ a:focus-visible {
 
 .preview-sheet article {
   padding: 28px 0 25px;
-  border-bottom: 1px solid #2d394b;
+  border-bottom: 1px solid var(--line);
 }
 
 .preview-sheet article small {
-  color: #8998ac;
+  color: var(--subtle);
   font: 9px/1.4 var(--utility);
   letter-spacing: .02em;
 }
@@ -354,7 +361,7 @@ a:focus-visible {
 
 .preview-sheet article p {
   margin: 0;
-  color: #bdc8d6;
+  color: var(--body);
   font-family: var(--reading);
   font-size: 12px;
   line-height: 1.8;
@@ -364,7 +371,7 @@ a:focus-visible {
   display: flex;
   margin-top: 17px;
   gap: 17px;
-  color: #8f9caf;
+  color: var(--muted);
   font-size: 9px;
 }
 
@@ -380,9 +387,9 @@ a:focus-visible {
 .preview-toggle > span,
 .toggle-demo > span {
   padding: 8px 10px;
-  border: 1px solid #334158;
+  border: 1px solid var(--line);
   border-radius: 6px;
-  background: #182334;
+  background: var(--paper);
   box-shadow: 0 8px 24px rgb(0 0 0 / 18%);
 }
 
@@ -402,7 +409,7 @@ a:focus-visible {
 .preview-toggle small,
 .toggle-demo span small {
   margin-top: 2px;
-  color: #93a1b3;
+  color: var(--muted);
   font-size: 8px;
 }
 
@@ -533,9 +540,9 @@ a:focus-visible {
   grid-template-columns: 188px 1fr;
   align-items: center;
   gap: 28px;
-  border: 1px solid #cbd7e7;
+  border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgb(255 255 255 / 58%);
+  background: color-mix(in srgb, var(--surface) 74%, transparent);
 }
 
 .toolbar-illustration {
@@ -545,9 +552,9 @@ a:focus-visible {
   align-items: center;
   justify-content: flex-end;
   gap: 12px;
-  border: 1px solid #ccd5e2;
+  border: 1px solid var(--line);
   border-radius: 6px;
-  background: white;
+  background: var(--surface);
   box-shadow: 0 5px 16px rgb(32 48 70 / 7%);
   color: var(--muted);
 }
@@ -558,7 +565,7 @@ a:focus-visible {
   height: 29px;
   place-items: center;
   border-radius: 5px;
-  background: #edf1f7;
+  background: var(--color-onefeed-media);
 }
 
 .toolbar-illustration img {
@@ -573,12 +580,12 @@ a:focus-visible {
 }
 
 .platform-section {
-  background: #111925;
-  color: #edf2f8;
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .platform-section .section-heading > div > p {
-  color: #69a8ff;
+  color: var(--blue);
 }
 
 .split-heading {
@@ -591,7 +598,7 @@ a:focus-visible {
 .section-note {
   max-width: 390px;
   margin: 0 0 4px;
-  color: #9cabbc;
+  color: var(--muted);
   font-size: 12px;
   line-height: 1.75;
 }
@@ -599,8 +606,8 @@ a:focus-visible {
 .platform-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid #334052;
-  border-left: 1px solid #334052;
+  border-top: 1px solid var(--line);
+  border-left: 1px solid var(--line);
 }
 
 .platform-card {
@@ -611,8 +618,8 @@ a:focus-visible {
   grid-template-columns: 38px 1fr 18px;
   align-content: start;
   gap: 14px;
-  border-right: 1px solid #334052;
-  border-bottom: 1px solid #334052;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
   color: inherit;
   text-decoration: none;
   transition: background 160ms ease;
@@ -631,7 +638,7 @@ a:focus-visible {
 }
 
 .platform-card:hover {
-  background: #172233;
+  background: var(--blue-soft);
 }
 
 .platform-card:hover::after {
@@ -643,7 +650,7 @@ a:focus-visible {
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--platform-accent) 32%, #445269);
+  border: 1px solid color-mix(in srgb, var(--platform-accent) 32%, var(--color-onefeed-line-strong));
   border-radius: 6px;
   background: #fff;
   box-shadow: 0 4px 14px rgb(0 0 0 / 16%);
@@ -669,21 +676,21 @@ a:focus-visible {
 
 .platform-copy small {
   min-height: 38px;
-  color: #b8c3d1;
+  color: var(--muted);
   font-size: 11px;
   line-height: 1.6;
 }
 
 .platform-copy em {
   margin-top: 12px;
-  color: #7f8da1;
+  color: var(--subtle);
   font-size: 9.5px;
   font-style: normal;
 }
 
 .platform-card > svg {
   margin-top: 7px;
-  color: #748297;
+  color: var(--subtle);
 }
 
 .feature-layout {
@@ -710,9 +717,9 @@ a:focus-visible {
 .control-note {
   align-self: start;
   padding: 38px 36px;
-  border: 1px solid #cbd7e7;
+  border: 1px solid var(--line);
   border-radius: 9px;
-  background: white;
+  background: var(--surface);
   box-shadow: 0 20px 60px rgb(42 57 76 / 8%);
 }
 
@@ -827,7 +834,7 @@ a:focus-visible {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: var(--surface);
   text-align: center;
 }
 
@@ -889,7 +896,7 @@ a:focus-visible {
 
 @media (max-width: 720px) {
   body {
-    background: var(--paper);
+    background: var(--color-onefeed-paper);
   }
 
   .site-header {

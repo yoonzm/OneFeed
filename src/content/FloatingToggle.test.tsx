@@ -10,20 +10,24 @@ const toggleStyles = readFileSync(
 );
 
 describe('FloatingToggle', () => {
+  const iconUrl = 'chrome-extension://onefeed/icons/icon-32.png';
+
   it('exposes the current enabled state as an accessible switch', () => {
     const markup = renderToStaticMarkup(
-      <FloatingToggle enabled ready onToggle={vi.fn()} />,
+      <FloatingToggle enabled ready iconUrl={iconUrl} onToggle={vi.fn()} />,
     );
 
     expect(markup).toContain('role="switch"');
     expect(markup).toContain('aria-checked="true"');
+    expect(markup).toContain(`src="${iconUrl}"`);
+    expect(markup).not.toContain('<svg');
     expect(markup).toContain('关闭 OneFeed，显示原页面');
     expect(markup).toContain('OneFeed 已开启');
   });
 
   it('labels the action to resume OneFeed when disabled', () => {
     const markup = renderToStaticMarkup(
-      <FloatingToggle enabled={false} ready onToggle={vi.fn()} />,
+      <FloatingToggle enabled={false} ready iconUrl={iconUrl} onToggle={vi.fn()} />,
     );
 
     expect(markup).toContain('aria-checked="false"');
@@ -32,9 +36,21 @@ describe('FloatingToggle', () => {
   });
 
   it('keeps the switch half-hidden until hover or keyboard focus', () => {
-    expect(toggleStyles).toContain('transform: translateX(50%);');
+    expect(toggleStyles).toContain('transform: translateX(calc(50% + 6px));');
     expect(toggleStyles).toMatch(
       /\.floating-toggle:hover,\s*\.floating-toggle:focus-within\s*{[^}]*transform: translateX\(0\);/,
     );
+  });
+
+  it('uses a fixed brand surface instead of following the page theme', () => {
+    const markup = renderToStaticMarkup(
+      <FloatingToggle enabled ready iconUrl={iconUrl} onToggle={vi.fn()} />,
+    );
+
+    expect(markup).not.toContain('data-onefeed-theme');
+    expect(toggleStyles).toContain('--floating-toggle-background: #171717;');
+    expect(toggleStyles).toContain('background: var(--floating-toggle-background);');
+    expect(toggleStyles).not.toContain('background: var(--color-onefeed-ink);');
+    expect(toggleStyles).not.toContain('.toggle-enabled');
   });
 });

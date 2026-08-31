@@ -1,8 +1,10 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getSupportedPlatforms } from '../../config/platforms';
+import { getSupportedPlatforms, type PlatformId } from '../../config/platforms';
 import { FEED_FILTER_SETTINGS_KEY } from '../../filters/feedFilters';
+import { DISPLAY_PREFERENCES_KEY } from '../../preferences/displayPreferences';
+import { reorderPlatformIds } from './HeaderSettingsPanel';
 import { OptionsApp } from './OptionsApp';
 
 describe('filter settings page', () => {
@@ -42,12 +44,57 @@ describe('filter settings page', () => {
     return container;
   }
 
-  it('presents local filtering controls and every supported platform', async () => {
+  async function selectCategory(container: HTMLElement, label: string) {
+    const tab = Array.from(container.querySelectorAll<HTMLButtonElement>('[role="tab"]'))
+      .find((button) => button.textContent?.includes(label));
+    await act(async () => {
+      tab?.dispatchEvent(new MouseEvent('mousedown', {
+        bubbles: true,
+        button: 0,
+      }));
+    });
+    return tab;
+  }
+
+  it('presents three focused settings categories and every supported platform', async () => {
     const container = await renderOptions();
 
-    expect(container.querySelector('h1')?.textContent).toContain('决定哪些内容');
+    expect(container.querySelector('a[href="/board.html"]')).toBeNull();
+    expect(container.querySelector('.settings-intro')).toBeNull();
+    expect(container.querySelector('.settings-sidebar-heading h1')?.textContent).toBe('设置');
+    expect(container.querySelectorAll('[role="tab"]')).toHaveLength(3);
+    expect(container.querySelectorAll('[data-slot="card"]').length).toBeGreaterThan(0);
+    expect(container.querySelectorAll('.ui-switch').length).toBeGreaterThan(0);
+    expect(container.querySelector(
+      'button:not(.ui-button):not(.ui-switch):not(.settings-menu-item):not(.platform-drag-handle)',
+    )).toBeNull();
+    expect(container.textContent).toContain('顶部常用网站');
+    expect(container.querySelectorAll('.header-platform-row')).toHaveLength(
+      getSupportedPlatforms().length,
+    );
+    expect(container.querySelector('.header-platform-row')?.getAttribute('style') ?? '')
+      .not.toContain('--platform-accent');
+    expect(container.querySelectorAll('.platform-drag-handle')).toHaveLength(
+      getSupportedPlatforms().length,
+    );
+    expect(container.querySelector('.platform-drag-handle')?.tagName).toBe('BUTTON');
+    expect(container.querySelector('.platform-drag-handle')?.getAttribute('aria-label')).toBeTruthy();
+    expect(container.querySelector('.move-up, .move-down')).toBeNull();
     expect(container.textContent).toContain('隐藏已读内容');
     expect(container.textContent).toContain('隐藏平台推荐');
+
+    const headerTab = Array.from(container.querySelectorAll<HTMLButtonElement>('[role="tab"]'))
+      .find((button) => button.textContent?.includes('Header 设置'));
+    const contentDisplayTab = await selectCategory(container, '内容展示设置');
+    const contentDisplayPanel = container.querySelector('.settings-panel[data-state="active"]');
+    expect(headerTab?.getAttribute('data-state')).toBe('inactive');
+    expect(contentDisplayTab?.getAttribute('data-state')).toBe('active');
+    expect(contentDisplayPanel?.querySelector('.image-settings-card')).not.toBeNull();
+    expect(contentDisplayPanel?.querySelector('.platform-order-card')).toBeNull();
+
+    const filterTab = await selectCategory(container, '内容过滤设置');
+    expect(contentDisplayTab?.getAttribute('data-state')).toBe('inactive');
+    expect(filterTab?.getAttribute('data-state')).toBe('active');
 
     const create = Array.from(container.querySelectorAll('button'))
       .find((button) => button.textContent?.includes('新建规则'));
@@ -62,13 +109,87 @@ describe('filter settings page', () => {
     );
   });
 
+  it('switches the semantic theme on the complete settings surface', async () => {
+    const container = await renderOptions();
+    const page = container.querySelector('.options-page');
+    const themeToggle = container.querySelector<HTMLButtonElement>('.theme-button');
+
+    expect(page?.getAttribute('data-onefeed-theme')).toBe('light');
+    await act(async () => themeToggle?.click());
+
+    expect(page?.getAttribute('data-onefeed-theme')).toBe('dark');
+    expect(storedValues.colorScheme).toBe('dark');
+  });
+
   it('persists the quick seen filter immediately', async () => {
     const container = await renderOptions();
+    await selectCategory(container, '内容过滤设置');
     const toggle = container.querySelector<HTMLButtonElement>('[aria-label="隐藏已读内容"]');
 
     await act(async () => toggle?.click());
 
     expect(storedValues[FEED_FILTER_SETTINGS_KEY]).toMatchObject({ hideSeen: true });
     expect(toggle?.getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('preserves display preferences across header and content categories', async () => {
+    const container = await renderOptions();
+    const firstPlatform = getSupportedPlatforms()[0]!;
+    const displayName = container.querySelector(
+      `.header-platform-row[data-platform-id="${firstPlatform.id}"] .header-platform-name`,
+    )?.textContent;
+    const visibility = container.querySelector<HTMLButtonElement>(
+      `.header-platform-row[data-platform-id="${firstPlatform.id}"] [role="switch"]`,
+    );
+    expect(visibility?.getAttribute('aria-checked')).toBe('true');
+    await act(async () => visibility?.click());
+    expect(storedValues[DISPLAY_PREFERENCES_KEY]).toMatchObject({
+      hiddenHeaderPlatformIds: [firstPlatform.id],
+    });
+
+    expect(displayName).toBeTruthy();
+
+    await selectCategory(container, '内容展示设置');
+    const feedImages = container.querySelector<HTMLButtonElement>(
+      '[aria-label="信息流列表显示图片"]',
+    );
+    await act(async () => feedImages?.click());
+    expect(storedValues[DISPLAY_PREFERENCES_KEY]).toMatchObject({
+      hiddenHeaderPlatformIds: [firstPlatform.id],
+      hideFeedImages: true,
+    });
+  });
+
+  it('reorders platform ids using the active and destination rows', () => {
+    const platformIds = getSupportedPlatforms().map((platform) => platform.id as PlatformId);
+
+    expect(reorderPlatformIds(platformIds, platformIds[0]!, platformIds[2]!)).toEqual([
+      platformIds[1],
+      platformIds[2],
+      platformIds[0],
+      ...platformIds.slice(3),
+    ]);
+    expect(reorderPlatformIds(platformIds, platformIds[0]!, platformIds[0]!)).toBe(platformIds);
+  });
+
+  it('persists independent image visibility for feed and detail surfaces', async () => {
+    const container = await renderOptions();
+    await selectCategory(container, '内容展示设置');
+    const feedImages = container.querySelector<HTMLButtonElement>(
+      '[aria-label="信息流列表显示图片"]',
+    );
+    const detailImages = container.querySelector<HTMLButtonElement>(
+      '[aria-label="详情页显示图片"]',
+    );
+
+    expect(feedImages?.getAttribute('aria-checked')).toBe('true');
+    expect(detailImages?.getAttribute('aria-checked')).toBe('true');
+    await act(async () => feedImages?.click());
+    await act(async () => detailImages?.click());
+
+    expect(storedValues[DISPLAY_PREFERENCES_KEY]).toMatchObject({
+      hideFeedImages: true,
+      hideDetailImages: true,
+    });
   });
 });

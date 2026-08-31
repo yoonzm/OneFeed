@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ColorScheme } from '../theme/useColorScheme';
 import { i18n } from '../i18n';
+import { getHeaderPlatforms } from '../preferences/displayPreferences';
+import { useDisplayPreferences } from '../preferences/useDisplayPreferences';
 import type { CommentCommand, CommentRequestResult } from '../types/comments';
 import type { FeedActionDescriptor } from '../types/feed';
 import { OneFeedShell } from './OneFeedShell';
@@ -28,6 +30,10 @@ export default function DetailApp({
 }: DetailAppProps) {
   const content = useDetailStore((state) => state.content);
   const [progress, setProgress] = useState(0);
+  const { preferences, ready: displayReady } = useDisplayPreferences();
+  const headerPlatforms = useMemo(() => (
+    getHeaderPlatforms(preferences, activePlatformId)
+  ), [activePlatformId, preferences]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,6 +68,7 @@ export default function DetailApp({
   return (
     <OneFeedShell
       activePlatformId={activePlatformId}
+      platforms={headerPlatforms}
       surface={surface}
       scrollElement={scrollElement}
       initialColorScheme={initialColorScheme}
@@ -74,21 +81,30 @@ export default function DetailApp({
         </div>
 
         <main>
-          {content?.kind === 'article' ? (
+          {!displayReady ? (
+            <section className="empty-state" aria-live="polite">
+              <span className="scan-mark" aria-hidden="true" />
+            </section>
+          ) : content?.kind === 'article' ? (
             <DetailArticle
               content={content}
+              hideImages={preferences.hideDetailImages}
               onAction={(action) => handleAction(content.id, content.originalUrl, action)}
               onCommentRequest={onCommentRequest}
             />
           ) : content?.kind === 'thread' ? (
-            <ThreadDetail content={content} onAction={handleAction} />
+            <ThreadDetail
+              content={content}
+              hideImages={preferences.hideDetailImages}
+              onAction={handleAction}
+            />
           ) : (
             <section className="empty-state" aria-live="polite">
               <span className="scan-mark" aria-hidden="true" />
             </section>
           )}
         </main>
-        {content && (
+        {content && displayReady && (
           <footer className="reader-footer">
             {content.kind === 'thread'
               ? i18n.t(content.entryKind === 'answer'

@@ -1,4 +1,5 @@
 import { i18n } from '../i18n';
+import { handleOpenOptionsMessage } from '../runtimeMessages';
 
 const DISABLED_BADGE_COLOR = '#5f6b7e';
 
@@ -44,6 +45,13 @@ export default defineBackground({
     /** 工具栏图标始终打开启动中心；全局接管状态由页面内开关明确控制。 */
     chrome.action.onClicked.addListener(() => {
       void chrome.tabs.create({ url: chrome.runtime.getURL('/board.html') });
+    });
+
+    /** 内容脚本不直接依赖 openOptionsPage；由 Service Worker 创建扩展设置标签页。 */
+    chrome.runtime.onMessage.addListener((message) => {
+      handleOpenOptionsMessage(message, () => {
+        void chrome.tabs.create({ url: chrome.runtime.getURL('/options.html') });
+      });
     });
 
     /** 页面悬浮开关与启动中心共用同一状态，任一入口变更后都要同步反馈。 */

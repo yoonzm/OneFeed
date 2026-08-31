@@ -21,14 +21,17 @@ interface FeedCardProps {
   item: FeedItem;
   index: number;
   isSeen?: boolean;
+  hideImages?: boolean;
   onSeen?: () => void;
   onAction: (item: FeedItem, action: FeedActionDescriptor) => void;
 }
 
 type FeedMediaBlock = Extract<FeedBlock, { type: 'gallery' | 'video' }>;
 
-/** Feed 只保留首个有效内容媒体，并将图库收敛为单图右侧预览。 */
-function getSideMedia(item: FeedItem): FeedMediaBlock | undefined {
+/** 关闭列表图片后不创建右侧媒体区，避免卡片残留视频或空白网格轨道。 */
+function getSideMedia(item: FeedItem, hideImages: boolean): FeedMediaBlock | undefined {
+  if (hideImages) return undefined;
+
   for (const block of item.previewBlocks) {
     if (block.type === 'gallery') {
       const image = block.items[0];
@@ -48,12 +51,13 @@ export function FeedCard({
   item,
   index,
   isSeen = false,
+  hideImages = false,
   onSeen,
   onAction,
 }: FeedCardProps) {
   const [preview, setPreview] = useState<FeedImage>();
   const densityClassName = getDensityClassName(item, item.previewBlocks);
-  const sideMedia = getSideMedia(item);
+  const sideMedia = getSideMedia(item, hideImages);
   const contentBlocks = item.previewBlocks.filter(
     (block) => block.type !== 'gallery' && block.type !== 'video',
   );
@@ -65,7 +69,12 @@ export function FeedCard({
     >
       <div className="card-main">
         <ItemTitle item={item} linked onOpen={onSeen} />
-        <ItemBody blocks={contentBlocks} expanded={false} onPreview={setPreview} />
+        <ItemBody
+          blocks={contentBlocks}
+          expanded={false}
+          hideImages={hideImages}
+          onPreview={setPreview}
+        />
 
         {sideMedia && (
           <div className="card-media-aside">
@@ -74,6 +83,7 @@ export function FeedCard({
               expanded={false}
               onPreview={setPreview}
               compactGallery
+              hideImages={hideImages}
             />
           </div>
         )}
@@ -109,7 +119,10 @@ export function FeedCard({
         </span>
       )}
 
-      <ItemLightbox preview={preview} onClose={() => setPreview(undefined)} />
+      <ItemLightbox
+        preview={hideImages ? undefined : preview}
+        onClose={() => setPreview(undefined)}
+      />
     </article>
   );
 }

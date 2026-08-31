@@ -28,7 +28,7 @@ describe('reader app shells', () => {
     expect(markup).toContain('background-clip:text');
     expect(markup).toContain('aria-label="切换平台"');
     expect(markup).toContain('aria-label="切换到深色主题"');
-    expect(markup).toContain('href="https://github.com/yoonzm/OneFeed"');
+    expect(markup).not.toContain('href="https://github.com/yoonzm/OneFeed"');
     expect(markup).toContain('href="https://www.zhihu.com/"');
     expect(markup).toContain('href="https://x.com/home"');
     expect(markup).toContain('aria-current="page"');

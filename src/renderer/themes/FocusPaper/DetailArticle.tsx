@@ -12,12 +12,18 @@ import {
 
 interface DetailArticleProps {
   content: ArticleDetail;
+  hideImages?: boolean;
   onAction: (action: FeedActionDescriptor) => void;
   onCommentRequest?: (command: CommentCommand) => Promise<CommentRequestResult>;
 }
 
 /** 单篇内容视图：保留作者元信息，并始终完整渲染所有标准 Block。 */
-export function DetailArticle({ content, onAction, onCommentRequest }: DetailArticleProps) {
+export function DetailArticle({
+  content,
+  hideImages = false,
+  onAction,
+  onCommentRequest,
+}: DetailArticleProps) {
   const [preview, setPreview] = useState<FeedImage>();
   const commentsRef = useRef<CommentSectionHandle>(null);
 
@@ -50,6 +56,7 @@ export function DetailArticle({ content, onAction, onCommentRequest }: DetailArt
             <BlockRenderer
               block={block}
               expanded
+              hideImages={hideImages}
               onPreview={setPreview}
               key={`${block.type}-${blockIndex}`}
             />
@@ -103,6 +110,7 @@ export function DetailArticle({ content, onAction, onCommentRequest }: DetailArt
           <BlockRenderer
             block={block}
             expanded
+            hideImages={hideImages}
             onPreview={setPreview}
             key={`${block.type}-${blockIndex}`}
           />
@@ -123,11 +131,12 @@ export function DetailArticle({ content, onAction, onCommentRequest }: DetailArt
           key={content.comments.targetId}
           ref={commentsRef}
           descriptor={content.comments}
+          hideImages={hideImages}
           onRequest={onCommentRequest}
         />
       )}
 
-      {preview && (
+      {preview && !hideImages && (
         <button
           className="lightbox"
           type="button"

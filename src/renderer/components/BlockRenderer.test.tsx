@@ -3,13 +3,14 @@ import { describe, expect, it, vi } from 'vitest';
 import type { FeedBlock } from '../../types/feed';
 import { BlockRenderer } from './BlockRenderer';
 
-function render(block: FeedBlock, compactGallery = false): string {
+function render(block: FeedBlock, compactGallery = false, hideImages = false): string {
   return renderToStaticMarkup(
     <BlockRenderer
       block={block}
       expanded={false}
       onPreview={vi.fn()}
       compactGallery={compactGallery}
+      hideImages={hideImages}
     />,
   );
 }
@@ -103,5 +104,40 @@ describe('BlockRenderer', () => {
     expect(quote).toContain('引用内容');
     expect(poll).toContain('支持');
     expect(poll).toContain('共 8 票');
+  });
+
+  it('hides content images while preserving text, links, emoji and playable video', () => {
+    const gallery = render({
+      type: 'gallery',
+      items: [{ url: 'https://example.com/image.jpg', alt: '示例图片' }],
+    }, false, true);
+    const richText = render({
+      type: 'richText',
+      html: '<p>正文<img src="https://example.com/photo.jpg"><img data-onefeed-kind="emoji" src="https://example.com/emoji.png"></p>',
+      plainText: '正文',
+    }, false, true);
+    const link = render({
+      type: 'linkPreview',
+      preview: {
+        url: 'https://example.com/',
+        title: '示例链接',
+        image: 'https://example.com/link.jpg',
+      },
+    }, false, true);
+    const video = render({
+      type: 'video',
+      media: {
+        url: 'https://example.com/video.mp4',
+        poster: 'https://example.com/poster.jpg',
+      },
+    }, false, true);
+
+    expect(gallery).toBe('');
+    expect(richText).toContain('content-images-hidden');
+    expect(richText).toContain('data-onefeed-kind="emoji"');
+    expect(link).toContain('示例链接');
+    expect(link).not.toContain('link.jpg');
+    expect(video).toContain('video.mp4');
+    expect(video).not.toContain('poster.jpg');
   });
 });

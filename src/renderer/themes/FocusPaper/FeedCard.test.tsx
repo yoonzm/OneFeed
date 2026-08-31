@@ -412,4 +412,34 @@ describe('FeedCard', () => {
       '  }',
     ].join('\n'));
   });
+
+  it('removes the feed side-media region without hiding author avatars', () => {
+    const item: FeedItem = {
+      ...shortReply,
+      author: { name: 'Alice', avatar: 'https://example.com/avatar.jpg' },
+      previewBlocks: [
+        {
+          type: 'gallery',
+          items: [{ url: 'https://example.com/content.jpg', alt: '正文配图' }],
+        },
+        {
+          type: 'video',
+          media: {
+            url: 'https://example.com/video.mp4',
+            poster: 'https://example.com/poster.jpg',
+          },
+        },
+      ],
+    };
+    const markup = renderToStaticMarkup(
+      <FeedCard item={item} index={0} hideImages onAction={vi.fn()} />,
+    );
+
+    expect(markup).not.toContain('content.jpg');
+    expect(markup).not.toContain('poster.jpg');
+    expect(markup).not.toContain('video.mp4');
+    expect(markup).not.toContain('feed-card-side-media');
+    expect(markup).not.toContain('card-media-aside');
+    expect(markup).toContain('avatar.jpg');
+  });
 });

@@ -6,7 +6,7 @@
 - **Short description:** Rearrange supported website feeds into one focused, consistent reading interface that you can pause at any time.
 - **Recommended category:** Productivity
 - **Language:** English
-- **Version:** 0.1.14
+- **Version:** 0.1.15
 
 ## Detailed description
 
@@ -20,6 +20,7 @@ Current features include:
 - a launch center for recently used platforms, supported websites, global state, settings, and appearance;
 - unified feed, article, question, answer, topic, comment, and reply reading where supported, including individual Weibo posts and Xiaohongshu notes;
 - local read markers and display filters for read state, keywords, authors, platforms, and content types;
+- settings for header website visibility and order, plus feed and detail image display;
 - compact image previews, light and dark appearances, and continued feed loading;
 - delegated original-site interactions with an explicit return-to-source fallback;
 - a floating switch and launch-center switch that restore the original page immediately;
@@ -36,7 +37,7 @@ Read feeds from supported websites that the user currently has open and rearrang
 
 ### storage
 
-Stores the enabled state, theme preferences, recently used platforms, display-filter rules, and opened-item identifiers locally on the user's device.
+Stores the enabled state, theme preferences, header website visibility and order, feed and detail image preferences, recently used platforms, display-filter rules, and opened-item identifiers locally on the user's device.
 
 ### Supported website access
 

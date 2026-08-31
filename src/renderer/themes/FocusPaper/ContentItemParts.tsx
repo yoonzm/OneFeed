@@ -17,6 +17,7 @@ interface ItemBodyProps {
   blocks: readonly FeedBlock[];
   expanded: boolean;
   onPreview: (image: FeedImage) => void;
+  hideImages?: boolean;
 }
 
 interface ItemMetaProps {
@@ -47,7 +48,7 @@ export function ItemTitle({ item, linked = false, onOpen }: ItemTitleProps) {
   );
 }
 
-export function ItemBody({ blocks, expanded, onPreview }: ItemBodyProps) {
+export function ItemBody({ blocks, expanded, onPreview, hideImages }: ItemBodyProps) {
   if (!blocks.length) return null;
 
   return (
@@ -58,6 +59,7 @@ export function ItemBody({ blocks, expanded, onPreview }: ItemBodyProps) {
           expanded={expanded}
           onPreview={onPreview}
           compactGallery
+          hideImages={hideImages}
           key={`${block.type}-${blockIndex}`}
         />
       ))}
