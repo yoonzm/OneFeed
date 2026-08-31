@@ -92,7 +92,10 @@ describe('BaseAdapter', () => {
   it('discovers added site channels and proxies selection through the original control', async () => {
     document.body.innerHTML = `
       <nav>
-        <button data-feed-channel data-value="latest" aria-selected="true">最新</button>
+        <button data-feed-channel data-value="latest" aria-selected="true">
+          最新
+          <style data-emotion="css channel">.css-channel { color: blue; }</style>
+        </button>
         <button data-feed-channel data-value="top">热门</button>
       </nav>`;
     const channelsListener = vi.fn();
