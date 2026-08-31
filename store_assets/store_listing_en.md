@@ -55,6 +55,6 @@ Final selections should match the fields shown in the Chrome Web Store Privacy p
 
 ## Links
 
-- **Homepage:** https://onefeed.fyi/en/
+- **Homepage:** https://onefeed.fyi/
 - **Support:** https://github.com/yoonzm/OneFeed/issues
-- **Privacy policy:** https://onefeed.fyi/en/privacy/
+- **Privacy policy:** https://onefeed.fyi/privacy/

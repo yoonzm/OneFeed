@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OneFeed 隐私政策</title>
+    <meta name="description" content="了解 OneFeed Chrome 扩展如何在浏览器本地处理页面内容、扩展设置与过滤规则。" />
+    <meta name="theme-color" content="#fafafa" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://onefeed.fyi/zh-cn/privacy/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://onefeed.fyi/zh-cn/privacy/" />
+    <link rel="alternate" hreflang="en" href="https://onefeed.fyi/privacy/" />
+    <link rel="alternate" hreflang="x-default" href="https://onefeed.fyi/privacy/" />
+    <link rel="icon" href="/assets/icon-128.png" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">跳到主要内容</a>
+    <header class="site-header legal-site-header">
+      <div class="header-inner">
+        <a class="brand" href="/zh-cn/" aria-label="OneFeed 首页"><img src="/assets/icon-128.png" alt="" width="32" height="32" /><span>OneFeed</span></a>
+        <a class="language-link" href="/privacy/" lang="en" data-language-choice="en">English</a>
+      </div>
+    </header>
+
+    <main class="legal-main" id="main">
+      <header class="legal-hero">
+        <p class="section-kicker">Privacy / 隐私</p>
+        <h1>OneFeed 隐私政策</h1>
+        <p class="legal-meta"><span>生效日期：2026 年 8 月 26 日</span><span>适用版本：{{VERSION}}</span></p>
+      </header>
+
+      <div class="legal-content">
+        <section>
+          <h2>概述</h2>
+          <p>OneFeed 是一款将受支持网站的信息流重新排版为统一阅读界面的浏览器扩展。本政策说明扩展在当前版本中如何处理数据。当前版本支持微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX 与 36氪；未来新增网站支持时会同步更新本政策和相应权限说明。</p>
+        </section>
+        <section>
+          <h2>处理的数据</h2>
+          <p>为了生成统一信息流和受支持的评论阅读界面，扩展会在用户访问受支持网站时读取当前页面已经展示的内容，包括标题、正文、评论、回复、作者公开信息、图片、互动数量、发布时间和内容链接。</p>
+          <p>扩展还会使用 <code>chrome.storage.local</code> 在用户设备上保存统一信息流的启用状态、主题偏好、顶部网站显隐与顺序、信息流及详情页图片显示偏好、最近使用的平台、展示过滤规则，以及已打开信息流条目的本地标识。</p>
+        </section>
+        <section>
+          <h2>数据用途</h2>
+          <p>页面内容仅用于：</p>
+          <ul>
+            <li>在用户当前页面中生成统一阅读界面；</li>
+            <li>在受支持的文章详情中统一展示评论与回复；</li>
+            <li>支持图片预览和原页面互动跳转；</li>
+            <li>对同一页面中的信息流条目进行本地去重；</li>
+            <li>在统一阅读界面中标记用户已经打开过的条目；</li>
+            <li>按用户设置的已读状态、关键词、作者、平台和内容类型规则在本地过滤展示内容；</li>
+            <li>按用户设置调整统一阅读界面的顶部网站顺序，并控制信息流与详情页是否展示内容图片。</li>
+          </ul>
+        </section>
+        <section>
+          <h2>数据传输与共享</h2>
+          <p>当前版本不会将页面内容、浏览记录或扩展设置发送给开发者服务器或第三方，不出售用户数据，也不将数据用于广告、信用评估或与扩展核心功能无关的用途。</p>
+          <p>所有页面解析、内容清洗和界面渲染均在用户浏览器本地完成。</p>
+        </section>
+        <section>
+          <h2>数据保存与删除</h2>
+          <p>扩展不会建立云端用户数据库。启用状态、主题偏好、顶部网站及图片显示偏好、最近使用的平台、展示过滤规则和已打开条目标识保存在浏览器的扩展本地存储中。用户可以通过卸载扩展清除这些数据，也可以在 Chrome 的扩展管理页面中清除扩展数据。</p>
+        </section>
+        <section>
+          <h2>权限说明</h2>
+          <ul>
+            <li><strong>storage：</strong>在本地保存启用状态、主题偏好、顶部网站及图片显示偏好、最近使用的平台、展示过滤规则和已打开条目标识。</li>
+            <li><strong>微博：</strong>读取并重新排版用户当前打开的微博热门信息流、受支持的单条微博详情与内容检索结果。</li>
+            <li><strong>X：</strong>读取并重新排版用户当前打开的 X 首页时间线及其受支持频道。</li>
+            <li><strong>小红书：</strong>读取并重新排版用户当前打开的小红书发现页、内容频道及受支持的笔记详情。</li>
+            <li><strong>Reddit：</strong>读取并重新排版用户当前打开的 Reddit 首页、排序页和社区信息流。</li>
+            <li><strong>知乎：</strong>读取并重新排版用户当前打开的知乎信息流、问题与回答、回答评论与回复，以及受支持的专栏文章详情页。</li>
+            <li><strong>Hacker News：</strong>读取并重新排版用户当前打开的新闻、问答、展示与招聘列表，并在本地加载公开分页内容。</li>
+            <li><strong>Linux DO：</strong>读取并重新排版用户当前打开的话题列表和主题回复页面。</li>
+            <li><strong>V2EX：</strong>读取并重新排版用户当前打开的主题列表和主题回复页面。</li>
+            <li><strong>36氪：</strong>读取并重新排版用户当前打开的信息流和文章详情页。</li>
+          </ul>
+          <p>扩展不会在上述受支持网站之外的页面运行。</p>
+        </section>
+        <section>
+          <h2>政策变更</h2>
+          <p>如果未来版本增加云端同步、AI 分析或其他需要传输数据的功能，本政策会在功能上线前更新，并按照适用要求向用户提供明确披露和选择。</p>
+        </section>
+        <section>
+          <h2>联系方式</h2>
+          <p>如对本政策或扩展的数据处理方式有疑问，请通过项目的 <a href="https://github.com/yoonzm/OneFeed/issues">GitHub Issues</a> 联系开发者。</p>
+        </section>
+      </div>
+      <a class="legal-back" href="/zh-cn/">← 返回 OneFeed 首页</a>
+    </main>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

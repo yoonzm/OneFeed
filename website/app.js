@@ -1,3 +1,39 @@
+import {
+  getLanguageRedirect,
+  languagePreferenceKey,
+  resolvePreferredLanguage,
+} from './language-routing.js';
+
+function readLanguagePreference() {
+  try {
+    return window.localStorage.getItem(languagePreferenceKey);
+  } catch {
+    return null;
+  }
+}
+
+function saveLanguagePreference(language) {
+  try {
+    window.localStorage.setItem(languagePreferenceKey, language);
+  } catch {
+    // Language switching must still work when storage is unavailable.
+  }
+}
+
+const browserLanguages = navigator.languages?.length ? navigator.languages : [navigator.language];
+const preferredLanguage = resolvePreferredLanguage(browserLanguages, readLanguagePreference());
+const languageRedirect = getLanguageRedirect(window.location.pathname, preferredLanguage);
+
+if (languageRedirect) {
+  window.location.replace(`${languageRedirect}${window.location.search}${window.location.hash}`);
+}
+
+document.querySelectorAll('[data-language-choice]').forEach((link) => {
+  link.addEventListener('click', () => {
+    saveLanguagePreference(link.dataset.languageChoice);
+  });
+});
+
 const navToggle = document.querySelector('[data-nav-toggle]');
 const siteHeader = document.querySelector('[data-site-header]');
 

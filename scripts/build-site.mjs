@@ -29,7 +29,7 @@ await cp(
 );
 
 const packageJson = JSON.parse(await readFile(resolve(repositoryRoot, 'package.json'), 'utf8'));
-const htmlFiles = ['index.html', 'en/index.html', 'privacy/index.html', 'en/privacy/index.html'];
+const htmlFiles = ['index.html', 'privacy/index.html', 'zh-cn/index.html', 'zh-cn/privacy/index.html'];
 
 for (const relativePath of htmlFiles) {
   const filePath = resolve(outputDirectory, relativePath);

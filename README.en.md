@@ -2,7 +2,7 @@
 
 English | [简体中文](README.md)
 
-[Website](https://onefeed.fyi/en/) · [Privacy](https://onefeed.fyi/en/privacy/) · [Feedback](https://github.com/yoonzm/OneFeed/issues)
+[Website](https://onefeed.fyi/) · [Privacy](https://onefeed.fyi/privacy/) · [Feedback](https://github.com/yoonzm/OneFeed/issues)
 
 > Turn scattered feeds into a reading space that belongs to you.
 

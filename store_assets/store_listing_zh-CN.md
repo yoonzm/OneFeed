@@ -72,6 +72,6 @@ OneFeed 不提供或收集任何目标网站账号凭据。
 
 ## 链接
 
-- **主页**：https://onefeed.fyi/
+- **主页**：https://onefeed.fyi/zh-cn/
 - **支持**：https://github.com/yoonzm/OneFeed/issues
-- **隐私政策**：https://onefeed.fyi/privacy/
+- **隐私政策**：https://onefeed.fyi/zh-cn/privacy/

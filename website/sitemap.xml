@@ -6,31 +6,31 @@
     <lastmod>2026-08-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://onefeed.fyi/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://onefeed.fyi/en/" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://onefeed.fyi/zh-cn/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://onefeed.fyi/" />
   </url>
   <url>
-    <loc>https://onefeed.fyi/en/</loc>
+    <loc>https://onefeed.fyi/zh-cn/</loc>
     <lastmod>2026-08-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://onefeed.fyi/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://onefeed.fyi/en/" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://onefeed.fyi/zh-cn/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://onefeed.fyi/" />
   </url>
   <url>
     <loc>https://onefeed.fyi/privacy/</loc>
     <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://onefeed.fyi/privacy/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://onefeed.fyi/en/privacy/" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://onefeed.fyi/zh-cn/privacy/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://onefeed.fyi/privacy/" />
   </url>
   <url>
-    <loc>https://onefeed.fyi/en/privacy/</loc>
+    <loc>https://onefeed.fyi/zh-cn/privacy/</loc>
     <lastmod>2026-08-26</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
-    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://onefeed.fyi/privacy/" />
-    <xhtml:link rel="alternate" hreflang="en" href="https://onefeed.fyi/en/privacy/" />
+    <xhtml:link rel="alternate" hreflang="zh-CN" href="https://onefeed.fyi/zh-cn/privacy/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://onefeed.fyi/privacy/" />
   </url>
 </urlset>
