@@ -25,6 +25,6 @@
 - 隐私政策：`docs/Privacy_Policy.md`
 - Chrome Web Store 上传包：`.output/onefeed-<version>-chrome.zip`
 
-在填写商店隐私政策 URL 前，需要先将 `docs/Privacy_Policy.md` 推送到公开 GitHub 仓库，确认以下地址可以在未登录状态访问：
+在填写商店隐私政策 URL 前，需要先部署官网，并确认以下地址可以在未登录状态访问：
 
-https://github.com/yoonzm/OneFeed/blob/master/docs/Privacy_Policy.md
+https://onefeed.fyi/privacy/

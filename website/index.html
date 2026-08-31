@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OneFeed — 把多平台信息流变成安静、统一的阅读空间</title>
+    <meta name="description" content="OneFeed 是一款 Chrome 信息流阅读扩展，为微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX 和 36氪提供统一、安静、可控的阅读界面。" />
+    <meta name="theme-color" content="#fafafa" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://onefeed.fyi/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://onefeed.fyi/" />
+    <link rel="alternate" hreflang="en" href="https://onefeed.fyi/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://onefeed.fyi/en/" />
+    <link rel="icon" href="/assets/icon-128.png" />
+    <link rel="apple-touch-icon" href="/assets/icon-128.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <link rel="stylesheet" href="/styles.css" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="OneFeed" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:title" content="OneFeed — 让阅读方式重新属于你" />
+    <meta property="og:description" content="在多个网站之上，建立一层统一、安静、可控的阅读界面。" />
+    <meta property="og:url" content="https://onefeed.fyi/" />
+    <meta property="og:image" content="https://onefeed.fyi/assets/onefeed-social-preview.png" />
+    <meta property="og:image:width" content="1573" />
+    <meta property="og:image:height" content="1000" />
+    <meta property="og:image:alt" content="OneFeed 多平台统一阅读界面预览" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="OneFeed — 让阅读方式重新属于你" />
+    <meta name="twitter:description" content="把多平台信息流变成安静、统一、可控的阅读空间。" />
+    <meta name="twitter:image" content="https://onefeed.fyi/assets/onefeed-social-preview.png" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "OneFeed",
+        "url": "https://onefeed.fyi/",
+        "image": "https://onefeed.fyi/assets/icon-128.png",
+        "description": "将受支持网站的信息流重新排版为专注、统一、可随时关闭的阅读界面。",
+        "applicationCategory": "BrowserApplication",
+        "operatingSystem": "Chrome",
+        "softwareVersion": "{{VERSION}}",
+        "inLanguage": ["zh-CN", "en"],
+        "installUrl": "https://chromewebstore.google.com/detail/onefeed-%E2%80%94-one-way-to-read/phndibmgpccnhkpmcpijjfbllgadiabd",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        },
+        "sameAs": [
+          "https://github.com/yoonzm/OneFeed",
+          "https://chromewebstore.google.com/detail/onefeed-%E2%80%94-one-way-to-read/phndibmgpccnhkpmcpijjfbllgadiabd"
+        ]
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "OneFeed 会把我的浏览数据上传到服务器吗？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "不会。当前版本的页面解析、内容清洗、过滤规则和界面渲染都在浏览器本地完成，不会把页面内容、浏览记录或扩展设置发送给开发者服务器或第三方。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "OneFeed 是 RSS 阅读器吗？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "不是。OneFeed 在你已经打开的受支持网站上工作，保留原站内容、登录状态和必要互动，同时用统一界面重新排版可稳定支持的信息流与详情页。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "原网站功能还能使用吗？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "可以。受支持的互动会交给原页面完成，无法可靠代理的复杂功能会明确回退原站；你也可以随时暂停 OneFeed，立即恢复原页面。"
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "目前支持哪些网站？",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "当前支持微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX 和 36氪的指定信息流与详情页面。不同平台的支持边界以项目 README 为准。"
+            }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body id="top">
+    <a class="skip-link" href="#main">跳到主要内容</a>
+
+    <header class="site-header" data-site-header>
+      <div class="header-inner">
+        <a class="brand" href="#top" aria-label="OneFeed 首页">
+          <img src="/assets/icon-128.png" alt="" width="32" height="32" />
+          <span>OneFeed</span>
+        </a>
+        <nav class="site-nav" aria-label="主要导航">
+          <a href="#why">为什么</a>
+          <a href="#platforms">支持网站</a>
+          <a href="#features">功能</a>
+          <a href="#faq">常见问题</a>
+          <a class="nav-language" href="/en/" lang="en">English</a>
+        </nav>
+        <a class="language-link" href="/en/" lang="en">English</a>
+        <button class="nav-toggle" type="button" aria-label="打开导航" aria-expanded="false" data-nav-toggle>
+          <span></span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main">
+      <div class="page-shell">
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <p class="eyebrow">Chrome 扩展 · 所有处理均在本地完成</p>
+            <h1 id="hero-title">把信息流，重新排成<em>你想读</em>的样子。</h1>
+            <p class="hero-intro">OneFeed 在你正在访问的网站上，覆盖一层统一、安静、可控的阅读界面。内容仍然来自原来的世界，阅读方式重新属于你。</p>
+            <div class="hero-actions">
+              <a class="primary-action" href="https://chromewebstore.google.com/detail/onefeed-%E2%80%94-one-way-to-read/phndibmgpccnhkpmcpijjfbllgadiabd" target="_blank" rel="noopener noreferrer">添加到 Chrome</a>
+              <a class="secondary-action" href="#demo">先看它如何工作</a>
+            </div>
+            <p class="hero-note">无需 OneFeed 账号 · 随时恢复原页面 · 当前版本 {{VERSION}}</p>
+          </div>
+
+          <div class="demo-wrap" id="demo" data-demo>
+            <div class="demo-control">
+              <span class="demo-label">同一批内容，两种阅读方式</span>
+              <div class="demo-switch" role="group" aria-label="切换界面预览">
+                <button type="button" data-demo-mode="original" data-status="正在显示原网站界面示意" aria-pressed="false">原网站</button>
+                <button type="button" data-demo-mode="onefeed" data-status="正在显示 OneFeed 统一阅读界面" aria-pressed="true">OneFeed</button>
+              </div>
+            </div>
+            <p class="sr-only" aria-live="polite" data-demo-status>正在显示 OneFeed 统一阅读界面</p>
+            <div class="browser-frame" aria-label="OneFeed 界面效果演示">
+              <div class="browser-bar" aria-hidden="true">
+                <span class="browser-dots"><i></i><i></i><i></i></span>
+                <span class="browser-address">onefeed / reading surface</span>
+              </div>
+
+              <div class="browser-panel noise-panel" data-demo-panel="original" hidden>
+                <div class="noise-topbar">
+                  <span class="noise-logo">发现</span>
+                  <span class="noise-pills"><i></i><i></i><i></i></span>
+                  <span class="noise-actions"><i></i><i></i></span>
+                </div>
+                <div class="noise-columns">
+                  <aside class="noise-sidebar" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span></aside>
+                  <div class="noise-feed">
+                    <article class="noise-card noise-card--warm"><strong>如何在信息过载的时代保持专注？</strong><p></p></article>
+                    <article class="noise-card noise-card--red"><strong>把今天真正重要的内容留下来</strong><p></p></article>
+                    <article class="noise-card"><strong>A quieter feed starts with fewer decisions</strong><p></p></article>
+                  </div>
+                  <aside class="noise-aside" aria-hidden="true"><b></b><i></i><i></i><i></i><i></i></aside>
+                </div>
+                <span class="noise-float" aria-hidden="true">+</span>
+              </div>
+
+              <div class="browser-panel focus-panel" data-demo-panel="onefeed">
+                <div class="reading-rail" aria-hidden="true">READ · 03 ITEMS</div>
+                <div class="focus-content">
+                  <div class="focus-brand">
+                    <span><img src="/assets/icon-128.png" alt="" width="20" height="20" />OneFeed</span>
+                    <small>统一信息流 · 专注阅读</small>
+                  </div>
+                  <article class="focus-item">
+                    <div class="focus-meta"><b>知乎</b><span>林一 · 2 小时前</span></div>
+                    <h3>如何在信息过载的时代保持专注？</h3>
+                    <p>先把信息变少，再把真正重要的内容留下。统一排版减少在不同平台之间切换时的注意力损耗。</p>
+                    <div class="focus-actions"><span>赞同 1280 · 评论 86</span><a href="#features" tabindex="-1">查看原文 ↗</a></div>
+                  </article>
+                  <article class="focus-item">
+                    <div class="focus-meta"><b>Hacker News</b><span>Focus Reader · 4 小时前</span></div>
+                    <h3>A quieter feed starts with fewer decisions</h3>
+                    <p>保留内容与必要互动，移除重复装饰，让每次打开页面都回到同一种阅读节奏。</p>
+                    <div class="focus-actions"><span>124 points · 32 comments</span><a href="#features" tabindex="-1">查看原文 ↗</a></div>
+                  </article>
+                  <article class="focus-item">
+                    <div class="focus-meta"><b>36氪</b><span>今日阅读 · 刚刚</span></div>
+                    <h3>把今天真正重要的内容留下来</h3>
+                  </article>
+                </div>
+              </div>
+            </div>
+            <p class="demo-caption">交互式界面示意 · 内容为脱敏示例，不代表目标网站真实页面</p>
+          </div>
+        </section>
+
+        <section class="section" id="why" aria-labelledby="why-title">
+          <div class="manifesto-layout">
+            <div class="section-heading">
+              <p class="section-kicker">阅读权 / The right to read</p>
+              <h2 id="why-title">网页在换，阅读规则不必跟着换。</h2>
+              <p>平台提供内容和社区；界面密度、筛选方式与注意力分配，应该由你决定。</p>
+            </div>
+            <div class="rights-list">
+              <article class="right-item">
+                <span class="right-mark">A</span>
+                <div><h3>统一视觉表达</h3><p>跨越不同网站，把标题、正文、作者、图片和互动信息放进同一种清晰的阅读层级。</p></div>
+              </article>
+              <article class="right-item">
+                <span class="right-mark">B</span>
+                <div><h3>按你的规则筛选</h3><p>在本地隐藏已读、推荐内容，或按关键词、作者、平台和内容类型建立过滤规则。</p></div>
+              </article>
+              <article class="right-item">
+                <span class="right-mark">C</span>
+                <div><h3>保留原站上下文</h3><p>内容仍来自原网站。受支持的互动继续由原页面完成，需要时一键返回或暂停接管。</p></div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="platforms" aria-labelledby="platform-title">
+          <div class="platform-header">
+            <div class="section-heading">
+              <p class="section-kicker">Supported now</p>
+              <h2 id="platform-title">一个阅读入口，跨过九种平台语言。</h2>
+            </div>
+            <p class="platform-count"><strong>9</strong><br />个已支持网站</p>
+          </div>
+          <div class="platform-grid" aria-label="当前支持的网站">
+            <div class="platform-item"><img src="/assets/platform-icons/weibo.svg" alt="" /><span><strong>微博</strong><small>热门、详情与搜索</small></span></div>
+            <div class="platform-item"><img src="/assets/platform-icons/twitter.svg" alt="" /><span><strong>X</strong><small>首页时间线</small></span></div>
+            <div class="platform-item"><img src="/assets/platform-icons/xiaohongshu.svg" alt="" /><span><strong>小红书</strong><small>发现页与笔记</small></span></div>
+            <div class="platform-item"><img src="/assets/platform-icons/reddit.svg" alt="" /><span><strong>Reddit</strong><small>首页、排序与社区</small></span></div>
+            <div class="platform-item"><img src="/assets/platform-icons/zhihu.svg" alt="" /><span><strong>知乎</strong><small>信息流、问答与文章</small></span></div>
+            <div class="platform-item"><img src="/assets/platform-icons/hacker-news.svg" alt="" /><span><strong>Hacker News</strong><small>新闻、问答与招聘</small></span></div>
+            <div class="platform-item"><img src="/assets/platform-icons/linux-do.svg" alt="" /><span><strong>Linux DO</strong><small>话题与回复</small></span></div>
+            <div class="platform-item"><img src="/assets/platform-icons/v2ex.svg" alt="" /><span><strong>V2EX</strong><small>主题与回复</small></span></div>
+            <div class="platform-item"><img src="/assets/platform-icons/36kr.svg" alt="" /><span><strong>36氪</strong><small>资讯与文章</small></span></div>
+          </div>
+          <p class="platform-note">OneFeed 只接管已经验证且能稳定解析的页面；未支持的详情、播放器或复杂互动会保留原站界面。具体支持边界以项目 README 为准。</p>
+        </section>
+
+        <section class="section" id="features" aria-labelledby="features-title">
+          <div class="section-heading">
+            <p class="section-kicker">What stays in your hands</p>
+            <h2 id="features-title">不是另一个内容平台，而是你与平台之间的一层个人界面。</h2>
+          </div>
+          <div class="features-grid">
+            <article class="feature-card">
+              <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 5h14M5 12h9M5 19h12" /></svg></span>
+              <h3>Focus Paper 阅读界面</h3>
+              <p>统一标题、摘要、作者、图片与互动信息的层级，并提供浅色和深色外观，减少切换网站时的认知负担。</p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4" /></svg></span>
+              <h3>本地展示过滤</h3>
+              <p>隐藏已读与推荐内容，或按关键词、作者、平台、内容类型设置规则。命中内容不会从原页面或本地数据中删除。</p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 7h10v10H7zM4 12H2m20 0h-2M12 4V2m0 20v-2" /></svg></span>
+              <h3>设置跟着你走</h3>
+              <p>网站顺序、图片显示、明暗外观、最近使用和过滤规则保存在 Chrome 扩展本地存储中。</p>
+            </article>
+            <article class="feature-card">
+              <span class="feature-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 7 4 12l5 5M4 12h11a5 5 0 0 0 5-5" /></svg></span>
+              <h3>原站能力随时可达</h3>
+              <p>点赞、评论、收藏等互动在可可靠代理时交给原页面完成；你也可以暂停 OneFeed，立即恢复原网站。</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" aria-labelledby="privacy-title">
+          <div class="privacy-callout">
+            <div>
+              <p class="section-kicker">Local-first privacy</p>
+              <h2 id="privacy-title">你的阅读，不需要先经过<em>我们的服务器</em>。</h2>
+            </div>
+            <div class="privacy-copy">
+              <p>当前版本不会把页面内容、浏览记录或扩展设置发送给开发者服务器或第三方。页面解析、内容清洗、过滤与界面渲染都在你的浏览器里完成。</p>
+              <div class="privacy-points" aria-label="隐私要点"><span>NO ACCOUNT</span><span>LOCAL STORAGE</span><span>NO ADS</span></div>
+              <a class="privacy-link" href="/privacy/">阅读完整隐私政策 →</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="start" aria-labelledby="start-title">
+          <div class="section-heading">
+            <p class="section-kicker">Three steps</p>
+            <h2 id="start-title">安装，然后照常打开你要读的网站。</h2>
+          </div>
+          <div class="steps">
+            <article class="step"><span class="step-number">01 / 安装</span><h3>添加到 Chrome</h3><p>安装 OneFeed 后无需注册新账号，扩展会跟随 Chrome 的界面语言。</p></article>
+            <article class="step"><span class="step-number">02 / 打开</span><h3>访问受支持页面</h3><p>照常打开知乎、Hacker News、微博等网站；OneFeed 会在已验证的页面上建立统一阅读界面。</p></article>
+            <article class="step"><span class="step-number">03 / 调整</span><h3>设置你的阅读规则</h3><p>选择网站顺序、图片显示与本地过滤规则。需要原页面时，随时一键暂停。</p></article>
+          </div>
+        </section>
+
+        <section class="section" id="faq" aria-labelledby="faq-title">
+          <div class="faq-layout">
+            <div class="section-heading">
+              <p class="section-kicker">Questions, answered</p>
+              <h2 id="faq-title">先把重要的问题说清楚。</h2>
+            </div>
+            <div class="faq-list">
+              <details><summary>OneFeed 会把我的浏览数据上传到服务器吗？</summary><p>不会。当前版本的页面解析、内容清洗、过滤规则和界面渲染都在浏览器本地完成，不会把页面内容、浏览记录或扩展设置发送给开发者服务器或第三方。</p></details>
+              <details><summary>OneFeed 是 RSS 阅读器吗？</summary><p>不是。OneFeed 在你已经打开的受支持网站上工作，保留原站内容、登录状态和必要互动，同时用统一界面重新排版可稳定支持的信息流与详情页。</p></details>
+              <details><summary>原网站功能还能使用吗？</summary><p>可以。受支持的互动会交给原页面完成，无法可靠代理的复杂功能会明确回退原站；你也可以随时暂停 OneFeed，立即恢复原页面。</p></details>
+              <details><summary>目前支持哪些网站？</summary><p>当前支持微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX 和 36氪的指定信息流与详情页面。不同平台的支持边界以项目 README 为准。</p></details>
+            </div>
+          </div>
+        </section>
+
+        <section class="closing-section" aria-labelledby="closing-title">
+          <div class="closing-grid">
+            <div class="closing-copy"><p class="section-kicker">One feed. Your way.</p><h2 id="closing-title">把注意力留给真正值得读的内容。</h2></div>
+            <div class="closing-side">
+              <p>OneFeed 仍在早期阶段。关注项目发布，或告诉我们你最希望支持的网站与阅读方式。</p>
+              <div class="closing-actions"><a class="primary-action" href="https://chromewebstore.google.com/detail/onefeed-%E2%80%94-one-way-to-read/phndibmgpccnhkpmcpijjfbllgadiabd" target="_blank" rel="noopener noreferrer">添加到 Chrome</a><a class="secondary-action" href="https://github.com/yoonzm/OneFeed/issues" rel="noopener noreferrer">提交反馈</a></div>
+            </div>
+          </div>
+          <footer class="site-footer">
+            <div class="footer-brand"><img src="/assets/icon-128.png" alt="" width="24" height="24" /><span>OneFeed</span></div>
+            <nav class="footer-nav" aria-label="页脚导航"><a href="/privacy/">隐私政策</a><a href="https://github.com/yoonzm/OneFeed">GitHub</a><a href="https://github.com/yoonzm/OneFeed/issues">反馈</a><a href="/en/" lang="en">English</a></nav>
+            <span class="copyright">© <span data-current-year>2026</span> OneFeed</span>
+          </footer>
+        </section>
+      </div>
+    </main>
+
+    <script src="/app.js" defer></script>
+  </body>
+</html>

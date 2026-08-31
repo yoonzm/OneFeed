@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OneFeed Privacy Policy</title>
+    <meta name="description" content="Learn how the OneFeed Chrome extension processes page content, extension settings, and display filters locally in your browser." />
+    <meta name="theme-color" content="#fafafa" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://onefeed.fyi/en/privacy/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://onefeed.fyi/privacy/" />
+    <link rel="alternate" hreflang="en" href="https://onefeed.fyi/en/privacy/" />
+    <link rel="alternate" hreflang="x-default" href="https://onefeed.fyi/en/privacy/" />
+    <link rel="icon" href="/assets/icon-128.png" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header legal-site-header">
+      <div class="header-inner">
+        <a class="brand" href="/en/" aria-label="OneFeed home"><img src="/assets/icon-128.png" alt="" width="32" height="32" /><span>OneFeed</span></a>
+        <a class="language-link" href="/privacy/" lang="zh-CN">简体中文</a>
+      </div>
+    </header>
+
+    <main class="legal-main" id="main">
+      <header class="legal-hero">
+        <p class="section-kicker">Privacy</p>
+        <h1>OneFeed Privacy Policy</h1>
+        <p class="legal-meta"><span>Effective: August 26, 2026</span><span>Applies to version {{VERSION}}</span></p>
+      </header>
+
+      <div class="legal-content">
+        <section>
+          <h2>Overview</h2>
+          <p>OneFeed is a browser extension that rearranges feeds from supported websites into a unified reading interface. This policy explains how the current version processes data. The current version supports Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, and 36Kr. This policy and the relevant permission disclosures will be updated when support for additional websites is released.</p>
+        </section>
+        <section>
+          <h2>Data processed</h2>
+          <p>To create the unified feed and supported comment-reading interface, the extension reads content already displayed on the current supported page. This may include titles, body text, comments, replies, publicly visible author information, images, interaction counts, publication times, and content links.</p>
+          <p>The extension also uses <code>chrome.storage.local</code> to store the enabled state, theme preferences, header website visibility and order, feed and detail image preferences, recently used platforms, display-filter rules, and local identifiers for feed items the user has opened.</p>
+        </section>
+        <section>
+          <h2>How the data is used</h2>
+          <p>Page content is used only to:</p>
+          <ul>
+            <li>create the unified reading interface on the current page;</li>
+            <li>display comments and replies for supported article pages;</li>
+            <li>support image previews and links or delegated interactions with the original page;</li>
+            <li>deduplicate feed items on the same page locally;</li>
+            <li>mark feed items that the user has opened;</li>
+            <li>filter displayed content locally according to the user's read-state, keyword, author, platform, and content-type rules;</li>
+            <li>apply the user's header website order and feed or detail image preferences.</li>
+          </ul>
+        </section>
+        <section>
+          <h2>Data transfer and sharing</h2>
+          <p>The current version does not send page content, browsing history, or extension settings to a developer server or third party. It does not sell user data or use it for advertising, credit assessment, or purposes unrelated to the extension's core functionality.</p>
+          <p>All page parsing, content sanitization, and interface rendering happen locally in the user's browser.</p>
+        </section>
+        <section>
+          <h2>Storage and deletion</h2>
+          <p>OneFeed does not maintain a cloud user database. The enabled state, theme preferences, header website and image preferences, recently used platforms, display-filter rules, and opened-item identifiers are stored in the browser's local extension storage. Users can remove this data by uninstalling the extension or clearing its data from Chrome's extension management page.</p>
+        </section>
+        <section>
+          <h2>Permissions</h2>
+          <ul>
+            <li><strong>storage:</strong> Saves the enabled state, theme preferences, header website and image preferences, recently used platforms, display-filter rules, and opened-item identifiers locally.</li>
+            <li><strong>Weibo:</strong> Reads and rearranges supported trending feeds, individual post pages, and content-search results opened by the user.</li>
+            <li><strong>X:</strong> Reads and rearranges the supported home timeline and feed channels opened by the user.</li>
+            <li><strong>Xiaohongshu:</strong> Reads and rearranges supported Explore feeds, content channels, and note pages opened by the user.</li>
+            <li><strong>Reddit:</strong> Reads and rearranges supported home, sorted, and community feeds opened by the user.</li>
+            <li><strong>Zhihu:</strong> Reads and rearranges supported feeds, questions, answers, comments, replies, and article pages opened by the user.</li>
+            <li><strong>Hacker News:</strong> Reads and rearranges public News, Ask, Show, and Jobs lists opened by the user, and loads public pagination locally.</li>
+            <li><strong>Linux DO:</strong> Reads and rearranges supported topic lists and topic reply pages opened by the user.</li>
+            <li><strong>V2EX:</strong> Reads and rearranges supported topic lists and topic reply pages opened by the user.</li>
+            <li><strong>36Kr:</strong> Reads and rearranges supported feeds and article pages opened by the user.</li>
+          </ul>
+          <p>The extension does not run outside these supported websites.</p>
+        </section>
+        <section>
+          <h2>Policy changes</h2>
+          <p>If a future version introduces cloud synchronization, AI analysis, or another feature that transfers data, this policy will be updated before that feature is released, with clear disclosure and user choice where required.</p>
+        </section>
+        <section>
+          <h2>Contact</h2>
+          <p>For questions about this policy or OneFeed's data handling, contact the developer through <a href="https://github.com/yoonzm/OneFeed/issues">GitHub Issues</a>.</p>
+        </section>
+      </div>
+      <a class="legal-back" href="/en/">← Back to OneFeed</a>
+    </main>
+  </body>
+</html>

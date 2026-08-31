@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "wxt",
     "build": "wxt build",
+    "build:site": "node scripts/build-site.mjs",
     "zip": "wxt zip",
     "publish:chrome": "node scripts/publish-chrome.mjs",
     "compile": "tsc --noEmit",
