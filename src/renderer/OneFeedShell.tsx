@@ -39,20 +39,22 @@ export function OneFeedShell({
       className="min-h-full bg-onefeed-paper text-onefeed-ink transition-colors duration-200"
       data-onefeed-theme={colorScheme}
     >
-      <PlatformBar
-        activePlatformId={activePlatformId}
-        channels={channels}
-        platforms={platforms}
-        onFeedChannelSelect={onFeedChannelSelect}
-        surface={surface}
-        scrollElement={scrollElement}
-        colorScheme={colorScheme}
-        themeReady={ready}
-        hiddenItemCount={hiddenItemCount}
-        initialSearchQuery={initialSearchQuery}
-        onColorSchemeChange={setColorScheme}
-        onSearch={onSearch}
-      />
+      {surface === 'feed' && (
+        <PlatformBar
+          activePlatformId={activePlatformId}
+          channels={channels}
+          platforms={platforms}
+          onFeedChannelSelect={onFeedChannelSelect}
+          surface={surface}
+          scrollElement={scrollElement}
+          colorScheme={colorScheme}
+          themeReady={ready}
+          hiddenItemCount={hiddenItemCount}
+          initialSearchQuery={initialSearchQuery}
+          onColorSchemeChange={setColorScheme}
+          onSearch={onSearch}
+        />
+      )}
       {children}
     </div>
   );

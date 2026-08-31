@@ -54,6 +54,11 @@ a { color: inherit; }
   padding: 0 48px 56px 88px;
 }
 
+.detail-app {
+  min-height: 100vh;
+  padding-left: 48px;
+}
+
 /* 阅读进度是辅助信息，窄屏下隐藏以让内容获得完整宽度。 */
 .reading-rail {
   position: fixed;

@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect } from 'react';
 import type { ColorScheme } from '../theme/useColorScheme';
 import { i18n } from '../i18n';
-import { getHeaderPlatforms } from '../preferences/displayPreferences';
 import { useDisplayPreferences } from '../preferences/useDisplayPreferences';
 import type { CommentCommand, CommentRequestResult } from '../types/comments';
 import type { FeedActionDescriptor } from '../types/feed';
@@ -29,18 +28,11 @@ export default function DetailApp({
   onCommentRequest,
 }: DetailAppProps) {
   const content = useDetailStore((state) => state.content);
-  const [progress, setProgress] = useState(0);
   const { preferences, ready: displayReady } = useDisplayPreferences();
-  const headerPlatforms = useMemo(() => (
-    getHeaderPlatforms(preferences, activePlatformId)
-  ), [activePlatformId, preferences]);
 
   useEffect(() => {
     const handleScroll = () => {
       const available = scrollElement.scrollHeight - scrollElement.clientHeight;
-      const nextProgress = available > 0 ? scrollElement.scrollTop / available : 0;
-      setProgress(Math.min(1, Math.max(0, nextProgress)));
-
       // 只有无限 Thread 需要借原页面触底加载；文章和分页 Thread 不应产生副作用。
       if (
         content?.kind === 'thread' &&
@@ -68,18 +60,11 @@ export default function DetailApp({
   return (
     <OneFeedShell
       activePlatformId={activePlatformId}
-      platforms={headerPlatforms}
       surface={surface}
       scrollElement={scrollElement}
       initialColorScheme={initialColorScheme}
     >
       <div className="reader-app detail-app">
-        <div className="reading-rail" aria-hidden="true">
-          <span className="rail-label">READ</span>
-          <span className="rail-track"><i style={{ height: `${progress * 100}%` }} /></span>
-          <span className="rail-percent">{Math.round(progress * 100)}%</span>
-        </div>
-
         <main>
           {!displayReady ? (
             <section className="empty-state" aria-live="polite">

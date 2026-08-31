@@ -11,7 +11,7 @@ describe('reader app shells', () => {
     useDetailStore.getState().clear();
   });
 
-  it.each(['feed', 'detail'] as const)('renders platform navigation on the %s surface', (surface) => {
+  it('renders platform navigation on the feed surface', () => {
     const commonProps = {
       activePlatformId: 'zhihu',
       scrollElement: document.createElement('div'),
@@ -19,9 +19,7 @@ describe('reader app shells', () => {
       onLoadMore: vi.fn(async () => ({ kind: 'exhausted' as const })),
     };
     const markup = renderToStaticMarkup(
-      surface === 'feed'
-        ? <FeedApp {...commonProps} />
-        : <DetailApp {...commonProps} surface="article" />,
+      <FeedApp {...commonProps} />,
     );
 
     expect(markup).toContain('OneFeed');
@@ -93,6 +91,8 @@ describe('reader app shells', () => {
     expect(markup).not.toContain('正在整理详情');
     expect(markup).not.toContain('正文出现后');
     expect(markup).not.toContain('已读完本文');
+    expect(markup).not.toContain('<header');
+    expect(markup).not.toContain('reading-rail');
   });
 
   it('places the current site channel control beside the active platform name', () => {
