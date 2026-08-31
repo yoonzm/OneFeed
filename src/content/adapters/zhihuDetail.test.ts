@@ -17,6 +17,24 @@ describe('isZhihuDetailUrl', () => {
 });
 
 describe('Zhihu answer detail', () => {
+  it('ignores CSS-in-JS style text embedded in the author container', () => {
+    document.body.innerHTML = `
+      <h1 class="QuestionHeader-title">初三女儿累得实在不行了</h1>
+      <article class="ContentItem AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+        <div class="AuthorInfo-name">
+          <a class="UserLink-link" href="/people/reader">嘿嘿 Mo</a>
+          <style data-emotion="css author">.css-author { margin-left: .3em; }</style>
+        </div>
+        <div class="RichContent-inner"><p>回答正文。</p></div>
+      </article>`;
+
+    const url = new URL('https://www.zhihu.com/question/1/answer/42');
+    const root = findZhihuDetailRoot(document, url);
+    const detail = root ? parseZhihuDetail(root, url) : null;
+
+    expect(detail?.author.name).toBe('嘿嘿 Mo');
+  });
+
   it('selects the answer from the URL instead of the first answer on the page', () => {
     document.body.innerHTML = `
       <h1 class="QuestionHeader-title">如何保持专注？</h1>

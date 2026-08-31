@@ -6,7 +6,7 @@
 - **Short description:** Rearrange supported website feeds into one focused, consistent reading interface that you can pause at any time.
 - **Recommended category:** Productivity
 - **Language:** English
-- **Version:** 0.1.15
+- **Version:** 0.1.16
 
 ## Detailed description
 
@@ -55,6 +55,6 @@ Final selections should match the fields shown in the Chrome Web Store Privacy p
 
 ## Links
 
-- **Homepage:** https://onefeed.fyi/en/
+- **Homepage:** https://onefeed.fyi/
 - **Support:** https://github.com/yoonzm/OneFeed/issues
-- **Privacy policy:** https://onefeed.fyi/en/privacy/
+- **Privacy policy:** https://onefeed.fyi/privacy/

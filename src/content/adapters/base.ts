@@ -51,7 +51,12 @@ export function collectFeedChannelBindings(
   const knownIds = new Set<string>();
 
   Array.from(root.querySelectorAll<HTMLElement>(selector)).forEach((element, index) => {
-    const label = element.textContent?.replace(/\s+/g, ' ').trim() || '';
+    // CSS-in-JS may temporarily place style tags inside navigation controls during hydration.
+    // Their textContent is not visible UI and must not leak into OneFeed's channel label.
+    const labelSource = element.cloneNode(true) as HTMLElement;
+    labelSource.querySelectorAll('style, script, template, noscript')
+      .forEach((node) => node.remove());
+    const label = labelSource.textContent?.replace(/\s+/g, ' ').trim() || '';
     if (!label) return;
 
     const rawHref = element.getAttribute('href')?.trim();
