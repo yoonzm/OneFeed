@@ -75,7 +75,13 @@ export function createZhihuSearchUrl(query: string, currentUrl: URL): URL | unde
 
 function firstText(element: Element, selectors: string[]): string {
   for (const selector of selectors) {
-    const text = element.querySelector(selector)?.textContent?.trim();
+    const match = element.querySelector(selector);
+    if (!match) continue;
+    // 知乎水合时会把 CSS-in-JS 的 style 标签插入作者等文本容器，不能将其源码视为可见文本。
+    const textSource = match.cloneNode(true) as Element;
+    textSource.querySelectorAll('style, script, template, noscript')
+      .forEach((node) => node.remove());
+    const text = textSource.textContent?.replace(/\s+/g, ' ').trim();
     if (text) return text;
   }
   return '';
