@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   compareChromeVersions,
   getHighestStoreVersion,
+  getPublicationDecision,
   parseChromeVersion,
 } from './publish-chrome.mjs';
 
@@ -32,5 +33,49 @@ describe('Chrome Web Store version handling', () => {
     };
 
     expect(getHighestStoreVersion(status)).toBe('0.2.0');
+  });
+
+  it('defers before packaging while another revision is under review', () => {
+    const status = {
+      submittedItemRevisionStatus: {
+        state: 'PENDING_REVIEW',
+        distributionChannels: [{ crxVersion: '0.1.15' }],
+      },
+    };
+
+    expect(getPublicationDecision(status, '0.1.16')).toEqual({
+      kind: 'deferred',
+      submittedState: 'PENDING_REVIEW',
+      storeVersion: '0.1.15',
+    });
+  });
+
+  it('skips packaging when the local version is already in the store', () => {
+    const status = {
+      publishedItemRevisionStatus: {
+        distributionChannels: [{ crxVersion: '0.1.16' }],
+      },
+    };
+
+    expect(getPublicationDecision(status, '0.1.16')).toEqual({
+      kind: 'skipped',
+      storeVersion: '0.1.16',
+    });
+  });
+
+  it('allows packaging only for a newer local version', () => {
+    const status = {
+      publishedItemRevisionStatus: {
+        distributionChannels: [{ crxVersion: '0.1.15' }],
+      },
+    };
+
+    expect(getPublicationDecision(status, '0.1.16')).toEqual({
+      kind: 'publish',
+      storeVersion: '0.1.15',
+    });
+    expect(() => getPublicationDecision(status, '0.1.14')).toThrow(
+      'Local version 0.1.14 must be greater than Chrome Web Store version 0.1.15',
+    );
   });
 });
