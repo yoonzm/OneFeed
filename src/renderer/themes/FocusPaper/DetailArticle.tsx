@@ -93,9 +93,13 @@ export function DetailArticle({
         )}
         <div>
           <strong>{content.author.name}</strong>
-          {primaryTime !== undefined && (
+          {(primaryTime !== undefined || Boolean(content.metadataLabels?.length)) && (
             <span>
-              <time title={timeTitle}>{formatDateTime(primaryTime)}</time>
+              {primaryTime !== undefined && (
+                <time title={timeTitle}>{formatDateTime(primaryTime)}</time>
+              )}
+              {primaryTime !== undefined && Boolean(content.metadataLabels?.length) && ' · '}
+              {content.metadataLabels?.join(' · ')}
             </span>
           )}
         </div>

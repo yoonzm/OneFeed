@@ -142,6 +142,36 @@ describe('DetailArticle', () => {
     expect(container.querySelector('time')?.title).toBe(`编辑于 ${formatDateTime(updatedAt)}`);
   });
 
+  it('renders source metadata after the primary time and without an absent time', () => {
+    const updatedAt = '2026-08-13T10:30:00+08:00';
+    const timedMarkup = renderToStaticMarkup(
+      <DetailArticle
+        content={{ ...content, updatedAt, metadataLabels: ['广西'] }}
+        onAction={vi.fn()}
+      />,
+    );
+    const metadataOnlyMarkup = renderToStaticMarkup(
+      <DetailArticle
+        content={{
+          ...content,
+          publishedAt: undefined,
+          metadataLabels: ['广西'],
+        }}
+        onAction={vi.fn()}
+      />,
+    );
+    const container = document.createElement('div');
+
+    container.innerHTML = timedMarkup;
+    expect(container.querySelector('.author-row time')?.parentElement?.textContent).toBe(
+      `${formatDateTime(updatedAt)} · 广西`,
+    );
+
+    container.innerHTML = metadataOnlyMarkup;
+    expect(container.querySelector('.author-row strong')?.nextElementSibling?.textContent).toBe('广西');
+    expect(container.querySelector('.author-row time')).toBeNull();
+  });
+
   it('hides detail content images without hiding the author avatar', () => {
     const markup = renderToStaticMarkup(
       <DetailArticle
