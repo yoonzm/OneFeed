@@ -54,6 +54,8 @@ export interface ArticleDetail {
   publishedAt?: string | number;
   /** 原文最近更新时间。 */
   updatedAt?: string | number;
+  /** 与作者或时间相邻展示的原站元信息，例如回答者的 IP 属地。 */
+  metadataLabels?: string[];
   /** 正文标题；由上级问题提供标题时也允许存在。 */
   title?: string;
   /** 单篇正文所属问题或主题的辅助内容与导航。 */

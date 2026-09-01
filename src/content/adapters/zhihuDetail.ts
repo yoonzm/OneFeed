@@ -88,6 +88,16 @@ function metricValue(value: number | undefined, fallback: number): number {
   return Number.isFinite(value) ? value! : fallback;
 }
 
+function answerLocationLabel(element: Element): string | undefined {
+  const metadataRow = element.querySelector('.ContentItem-time');
+  if (!metadataRow?.querySelector('a, time, [datetime]')) return undefined;
+
+  // 知乎把属地作为时间链接后的文本节点，例如“编辑于…・广西”。
+  const location = metadataRow.cloneNode(true) as Element;
+  location.querySelectorAll('a, time, [datetime], style, script').forEach((node) => node.remove());
+  return location.textContent?.replace(/^[\s·・|]+|[\s·・|]+$/g, '').trim() || undefined;
+}
+
 function questionNavigation(
   root: ParentNode,
   url: URL,
@@ -186,6 +196,7 @@ export function parseZhihuDetail(
   );
   const commentCount = metricValue(metadata.commentCount, expandedCommentCount || replies);
   const supportsComments = hasZhihuActionControl(element, 'reply');
+  const locationLabel = parsed.role === 'answer' ? answerLocationLabel(element) : undefined;
 
   return {
     id: `zhihu_${originId}`,
@@ -195,8 +206,9 @@ export function parseZhihuDetail(
     kind: 'article',
     role: parsed.role,
     author: parsed.author,
-    publishedAt: metadata.dateCreated ?? metadata.datePublished,
-    updatedAt: metadata.dateModified,
+    publishedAt: metadata.dateCreated ?? metadata.datePublished ?? parsed.publishedAt,
+    updatedAt: metadata.dateModified ?? parsed.updatedAt,
+    metadataLabels: locationLabel ? [locationLabel] : undefined,
     title: pageTitle(root) || parsed.title,
     context: questionContext(root, url),
     body: orderedBody,

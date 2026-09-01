@@ -24,6 +24,7 @@ Operate only on the repository that contains this skill. Resolve the repository 
 1. Read the repository `AGENTS.md` and obey it.
 2. Inspect `git status --short`, current branch, remotes, `git log origin/master..dev`, and ahead/behind state. Fetch remote refs before making release decisions.
 3. Verify the release infrastructure exists:
+   - `.github/workflows/ci.yml`
    - `.github/workflows/publish-chrome.yml`
    - `scripts/publish-chrome.mjs`
    - `docs/Privacy_Policy.md`
@@ -31,8 +32,9 @@ Operate only on the repository that contains this skill. Resolve the repository 
    - required store PNG assets
 4. Compare the versions in `package.json`, the root package in `package-lock.json`, generated Manifest if present, privacy policy, and store listing. Do not trust an existing `.output` ZIP as current.
 5. Check that the privacy-policy URL in the store listing is publicly accessible without authentication. A private URL returning `404` is a release blocker.
-6. Treat a dirty worktree as a blocker unless every change is clearly part of the release requested by the user. Never include unrelated user changes in a release commit.
-7. Report blockers with exact files or settings. In audit mode, stop here.
+6. Confirm the `master` branch requires the CI `verify` job before merge and that repository auto-merge is available. The publishing workflow trusts this gate and does not repeat the full test suite.
+7. Treat a dirty worktree as a blocker unless every change is clearly part of the release requested by the user. Never include unrelated user changes in a release commit.
+8. Report blockers with exact files or settings. In audit mode, stop here.
 
 ## Prepare the release
 
@@ -48,19 +50,16 @@ Operate only on the repository that contains this skill. Resolve the repository 
 4. Update explicit old-version references in `docs/Privacy_Policy.md` and `store_assets/store_listing_zh-CN.md`. Correct store claims or test instructions made stale by the commits being released. Do not invent functionality.
 5. Confirm the new version is a valid Chrome version and is strictly greater than the previous local version. The publishing script separately compares it with submitted and published store versions.
 
-## Verify and package
+## Verify the release package
 
-Run, in order:
+The pull-request CI is the authoritative clean-install quality gate. Locally, build the exact release package and check its diff without repeating the full CI suite:
 
 ```powershell
-npm ci
-npm run lint
-npm run compile
-npm test
-npm run build
 npm run zip
 git diff --check
 ```
+
+`wxt zip` already performs a production build. Do not run a separate `npm run build` first. If dependencies are not installed or the ZIP command fails because the installation is stale, run `npm ci` once and retry; otherwise do not reinstall dependencies solely for a release.
 
 Before `npm run zip`, remove only old generated `.output/*-chrome.zip` files after resolving and verifying that `.output` is inside the OneFeed repository. Do not delete source files or broad directories.
 
@@ -78,13 +77,15 @@ Stop before commit if any command fails. Fix only failures within release scope 
 1. Commit only the reviewed release changes using `release: prepare v<version>`.
 2. Push `dev` to `origin` without force.
 3. Create or reuse a pull request from `dev` to `master`. Prefer an authenticated GitHub connector or `gh`; otherwise use an existing signed-in browser session. Do not install tools, authenticate accounts, or expose credentials automatically.
-4. Wait for required checks. Merge through the pull request only after they pass. Never push directly to `master` or bypass branch protection.
+4. Enable auto-merge for the pull request so GitHub merges it only after the required CI `verify` job passes. If auto-merge is unavailable, wait for the check and merge manually only after success. Never push directly to `master` or bypass branch protection.
 5. Do not create a version tag unless explicitly requested; the `package.json` change on `master` already triggers the publishing workflow.
 6. If no authenticated PR mechanism is available, stop after pushing `dev` and give the user the compare URL. Do not claim the release is complete.
 
 ## Monitor store submission
 
 After the merge, locate and monitor `.github/workflows/publish-chrome.yml` for the merge commit until it reaches a terminal state.
+
+The workflow first queries Chrome Web Store status. It intentionally skips dependency installation and packaging when the local version is already present or another submission is pending review. When publication is eligible, it performs a clean install, builds the ZIP, verifies store state again, and submits it.
 
 - Success means the workflow built the same version and reported a submission, an intentional defer because another version is pending review, or a justified skip because the version is already uploaded.
 - Failure means the release is incomplete. Report the failing step and relevant log excerpt; do not rerun blindly or create another version.

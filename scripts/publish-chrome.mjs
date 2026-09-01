@@ -49,6 +49,30 @@ export function getHighestStoreVersion(status) {
   );
 }
 
+export function getPublicationDecision(status, localVersion) {
+  parseChromeVersion(localVersion);
+  const submittedState = status.submittedItemRevisionStatus?.state;
+  const storeVersion = getHighestStoreVersion(status);
+
+  if (submittedState === 'PENDING_REVIEW' || submittedState === 'STAGED') {
+    return { kind: 'deferred', submittedState, storeVersion };
+  }
+
+  if (storeVersion) {
+    const comparison = compareChromeVersions(localVersion, storeVersion);
+    if (comparison === 0 && submittedState !== 'REJECTED' && submittedState !== 'CANCELLED') {
+      return { kind: 'skipped', storeVersion };
+    }
+    if (comparison <= 0) {
+      throw new Error(
+        `Local version ${localVersion} must be greater than Chrome Web Store version ${storeVersion}`,
+      );
+    }
+  }
+
+  return { kind: 'publish', storeVersion };
+}
+
 function requireEnvironment(name) {
   const value = process.env[name]?.trim();
   if (!value) {
@@ -100,6 +124,28 @@ async function report(title, details) {
   }
 }
 
+async function setWorkflowOutput(name, value) {
+  if (process.env.GITHUB_OUTPUT) {
+    await appendFile(process.env.GITHUB_OUTPUT, `${name}=${value}\n`, 'utf8');
+  }
+}
+
+async function reportDecision(decision, localVersion) {
+  if (decision.kind === 'deferred') {
+    await report('Chrome Web Store publication deferred', [
+      `Current submission state: \`${decision.submittedState}\`.`,
+      `Local version \`${localVersion}\` will be retried by the scheduled workflow.`,
+    ]);
+    return;
+  }
+
+  if (decision.kind === 'skipped') {
+    await report('Chrome Web Store publication skipped', [
+      `Version \`${localVersion}\` is already uploaded or published.`,
+    ]);
+  }
+}
+
 function normalizeUploadState(state) {
   return state?.replace(/^UPLOAD_/, '');
 }
@@ -121,6 +167,27 @@ async function waitForUpload(accessToken, itemUrl) {
   throw new Error('Chrome Web Store upload did not finish within two minutes');
 }
 
+async function preflightChromeExtension() {
+  const accessToken = requireEnvironment('CWS_ACCESS_TOKEN');
+  const publisherId = requireEnvironment('CWS_PUBLISHER_ID');
+  const extensionId = requireEnvironment('CWS_EXTENSION_ID');
+  const itemName = `publishers/${encodeURIComponent(publisherId)}/items/${encodeURIComponent(extensionId)}`;
+  const itemUrl = `${apiOrigin}/v2/${itemName}`;
+  const packageJson = JSON.parse(await readFile(resolve('package.json'), 'utf8'));
+  const localVersion = packageJson.version;
+  const currentStatus = await requestJson(`${itemUrl}:fetchStatus`, accessToken);
+  const decision = getPublicationDecision(currentStatus, localVersion);
+
+  await setWorkflowOutput('should_publish', decision.kind === 'publish');
+  if (decision.kind === 'publish') {
+    await report('Chrome Web Store publication ready', [
+      `Version \`${localVersion}\` is newer than the current store version.`,
+    ]);
+    return;
+  }
+  await reportDecision(decision, localVersion);
+}
+
 async function publishChromeExtension() {
   const accessToken = requireEnvironment('CWS_ACCESS_TOKEN');
   const publisherId = requireEnvironment('CWS_PUBLISHER_ID');
@@ -133,30 +200,10 @@ async function publishChromeExtension() {
   parseChromeVersion(localVersion);
 
   const currentStatus = await requestJson(`${itemUrl}:fetchStatus`, accessToken);
-  const submittedState = currentStatus.submittedItemRevisionStatus?.state;
-  const storeVersion = getHighestStoreVersion(currentStatus);
-
-  if (submittedState === 'PENDING_REVIEW' || submittedState === 'STAGED') {
-    await report('Chrome Web Store publication deferred', [
-      `Current submission state: \`${submittedState}\`.`,
-      `Local version \`${localVersion}\` will be retried by the scheduled workflow.`,
-    ]);
+  const decision = getPublicationDecision(currentStatus, localVersion);
+  if (decision.kind !== 'publish') {
+    await reportDecision(decision, localVersion);
     return;
-  }
-
-  if (storeVersion) {
-    const comparison = compareChromeVersions(localVersion, storeVersion);
-    if (comparison === 0 && submittedState !== 'REJECTED' && submittedState !== 'CANCELLED') {
-      await report('Chrome Web Store publication skipped', [
-        `Version \`${localVersion}\` is already uploaded or published.`,
-      ]);
-      return;
-    }
-    if (comparison <= 0) {
-      throw new Error(
-        `Local version ${localVersion} must be greater than Chrome Web Store version ${storeVersion}`,
-      );
-    }
   }
 
   const zipPath = await findZipPath();
@@ -199,7 +246,10 @@ const isDirectExecution = process.argv[1]
   && pathToFileURL(resolve(process.argv[1])).href === import.meta.url;
 
 if (isDirectExecution) {
-  publishChromeExtension().catch((error) => {
+  const command = process.argv.includes('--check-only')
+    ? preflightChromeExtension
+    : publishChromeExtension;
+  command().catch((error) => {
     console.error(error instanceof Error ? error.message : error);
     console.error(`Required OAuth scope: ${chromeWebStoreScope}`);
     process.exitCode = 1;

@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { ArticleDetail } from '../../../types/detail';
+import { formatDateTime } from '../../../i18n';
 import { DetailArticle } from './DetailArticle';
 
 const readerStyles = readFileSync(resolve('src/renderer/styles.css'), 'utf8');
@@ -79,7 +80,7 @@ describe('DetailArticle', () => {
     expect(markup).toContain('rel="noreferrer"');
     expect(markup).toContain('超过列表摘要长度的完整正文。');
     expect(markup).toContain('avatar-fallback');
-    expect(markup).toContain('<time>');
+    expect(markup).toContain('<time ');
     expect(markup).not.toContain(content.source.name);
     expect(markup).not.toContain('展开全文');
     expect(markup).not.toContain('查看原文');
@@ -101,6 +102,74 @@ describe('DetailArticle', () => {
     );
     expect(markup.indexOf('查看全部 12 个回答')).toBeLessThan(markup.indexOf('林一'));
     expect(markup.indexOf('林一')).toBeLessThan(markup.indexOf('超过列表摘要长度的完整正文。'));
+  });
+
+  it('prioritizes the edited time and exposes every available time on hover', () => {
+    const updatedAt = '2026-08-13T10:30:00+08:00';
+    const markup = renderToStaticMarkup(
+      <DetailArticle content={{ ...content, updatedAt }} onAction={vi.fn()} />,
+    );
+    const container = document.createElement('div');
+    container.innerHTML = markup;
+    const time = container.querySelector('time');
+
+    expect(time?.textContent).toBe(formatDateTime(updatedAt));
+    expect(time?.title).toBe([
+      `发布于 ${formatDateTime(content.publishedAt!)}`,
+      `编辑于 ${formatDateTime(updatedAt)}`,
+    ].join(' · '));
+  });
+
+  it('only includes the available time in the hover text', () => {
+    const updatedAt = '2026-08-13T10:30:00+08:00';
+    const publishedMarkup = renderToStaticMarkup(
+      <DetailArticle content={content} onAction={vi.fn()} />,
+    );
+    const updatedMarkup = renderToStaticMarkup(
+      <DetailArticle
+        content={{ ...content, publishedAt: undefined, updatedAt }}
+        onAction={vi.fn()}
+      />,
+    );
+    const container = document.createElement('div');
+
+    container.innerHTML = publishedMarkup;
+    expect(container.querySelector('time')?.title).toBe(
+      `发布于 ${formatDateTime(content.publishedAt!)}`,
+    );
+
+    container.innerHTML = updatedMarkup;
+    expect(container.querySelector('time')?.title).toBe(`编辑于 ${formatDateTime(updatedAt)}`);
+  });
+
+  it('renders source metadata after the primary time and without an absent time', () => {
+    const updatedAt = '2026-08-13T10:30:00+08:00';
+    const timedMarkup = renderToStaticMarkup(
+      <DetailArticle
+        content={{ ...content, updatedAt, metadataLabels: ['广西'] }}
+        onAction={vi.fn()}
+      />,
+    );
+    const metadataOnlyMarkup = renderToStaticMarkup(
+      <DetailArticle
+        content={{
+          ...content,
+          publishedAt: undefined,
+          metadataLabels: ['广西'],
+        }}
+        onAction={vi.fn()}
+      />,
+    );
+    const container = document.createElement('div');
+
+    container.innerHTML = timedMarkup;
+    expect(container.querySelector('.author-row time')?.parentElement?.textContent).toBe(
+      `${formatDateTime(updatedAt)} · 广西`,
+    );
+
+    container.innerHTML = metadataOnlyMarkup;
+    expect(container.querySelector('.author-row strong')?.nextElementSibling?.textContent).toBe('广西');
+    expect(container.querySelector('.author-row time')).toBeNull();
   });
 
   it('hides detail content images without hiding the author avatar', () => {

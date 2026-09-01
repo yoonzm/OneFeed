@@ -125,6 +125,44 @@ describe('Zhihu answer detail', () => {
     ]);
   });
 
+  it('uses structured dates when the detail metadata omits them', () => {
+    document.body.innerHTML = `
+      <h1 class="QuestionHeader-title">如何保持专注？</h1>
+      <article class="ContentItem AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+        <a class="UserLink-link" href="/people/reader">林一</a>
+        <meta itemprop="dateCreated" content="2026-08-01T10:00:00Z" />
+        <meta itemprop="dateModified" content="2026-08-02T10:00:00Z" />
+        <div class="RichContent-inner"><p>回答正文。</p></div>
+      </article>`;
+
+    const url = new URL('https://www.zhihu.com/question/1/answer/42');
+    const root = findZhihuDetailRoot(document, url);
+    const detail = root ? parseZhihuDetail(root, url) : null;
+
+    expect(detail).toMatchObject({
+      publishedAt: '2026-08-01T10:00:00Z',
+      updatedAt: '2026-08-02T10:00:00Z',
+    });
+  });
+
+  it('extracts the IP location shown after the answer time', () => {
+    document.body.innerHTML = `
+      <h1 class="QuestionHeader-title">如何保持专注？</h1>
+      <article class="ContentItem AnswerItem" data-zop='{"type":"answer","itemId":"42"}'>
+        <a class="UserLink-link" href="/people/reader">林一</a>
+        <div class="RichContent-inner"><p>回答正文。</p></div>
+        <div class="ContentItem-time">
+          <a href="/question/1/answer/42">编辑于2026-08-02 18:30</a>・广西
+        </div>
+      </article>`;
+
+    const url = new URL('https://www.zhihu.com/question/1/answer/42');
+    const root = findZhihuDetailRoot(document, url);
+    const detail = root ? parseZhihuDetail(root, url) : null;
+
+    expect(detail).toMatchObject({ metadataLabels: ['广西'] });
+  });
+
   it('keeps the question navigation when the background is absent', () => {
     document.body.innerHTML = `
       <h1 class="QuestionHeader-title">如何保持专注？</h1>

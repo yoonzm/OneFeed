@@ -47,18 +47,6 @@ jobs:
             exit 1
           fi
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Verify
-        run: |
-          npm run lint
-          npm run compile
-          npm test
-
-      - name: Package extension
-        run: npm run zip
-
       - id: google-auth
         name: Authenticate to Google Cloud
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
@@ -68,7 +56,24 @@ jobs:
           service_account: ${{ vars.GCP_SERVICE_ACCOUNT }}
           access_token_scopes: https://www.googleapis.com/auth/chromewebstore
 
+      - id: preflight
+        name: Check store publication status
+        run: node scripts/publish-chrome.mjs --check-only
+        env:
+          CWS_ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
+          CWS_PUBLISHER_ID: ${{ vars.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ vars.CWS_EXTENSION_ID }}
+
+      - name: Install dependencies
+        if: steps.preflight.outputs.should_publish == 'true'
+        run: npm ci
+
+      - name: Package extension
+        if: steps.preflight.outputs.should_publish == 'true'
+        run: npm run zip
+
       - name: Upload and submit for review
+        if: steps.preflight.outputs.should_publish == 'true'
         run: npm run publish:chrome
         env:
           CWS_ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
