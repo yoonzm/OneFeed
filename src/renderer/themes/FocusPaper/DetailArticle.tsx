@@ -26,6 +26,15 @@ export function DetailArticle({
 }: DetailArticleProps) {
   const [preview, setPreview] = useState<FeedImage>();
   const commentsRef = useRef<CommentSectionHandle>(null);
+  const primaryTime = content.updatedAt ?? content.publishedAt;
+  const timeTitle = [
+    content.publishedAt !== undefined
+      ? i18n.t('reader.published', [formatDateTime(content.publishedAt)])
+      : undefined,
+    content.updatedAt !== undefined
+      ? i18n.t('reader.edited', [formatDateTime(content.updatedAt)])
+      : undefined,
+  ].filter((label): label is string => label !== undefined).join(' · ');
 
   const handleAction = (action: FeedActionDescriptor) => {
     if (action.kind === 'reply' && content.comments && onCommentRequest) {
@@ -84,13 +93,9 @@ export function DetailArticle({
         )}
         <div>
           <strong>{content.author.name}</strong>
-          {(content.publishedAt !== undefined || content.updatedAt !== undefined) && (
+          {primaryTime !== undefined && (
             <span>
-              {content.publishedAt !== undefined && (
-                <time>{formatDateTime(content.publishedAt)}</time>
-              )}
-              {content.publishedAt !== undefined && content.updatedAt !== undefined && ' · '}
-              {content.updatedAt !== undefined && i18n.t('reader.edited')}
+              <time title={timeTitle}>{formatDateTime(primaryTime)}</time>
             </span>
           )}
         </div>
