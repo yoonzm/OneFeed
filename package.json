@@ -2,7 +2,7 @@
   "name": "onefeed",
   "description": "把不同网站的信息流统一成你喜欢的阅读体验，让你重新掌握信息流的界面、内容密度与阅读方式。",
   "private": true,
-  "version": "0.1.16",
+  "version": "0.1.17",
   "type": "module",
   "engines": {
     "node": ">=22"
