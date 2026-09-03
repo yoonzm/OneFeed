@@ -25,6 +25,7 @@ import { formatNumber, i18n } from '../../i18n';
 import { OPEN_OPTIONS_MESSAGE_TYPE } from '../../runtimeMessages';
 import type { ColorScheme } from '../../theme/useColorScheme';
 import type { FeedChannel } from '../../types/feed';
+import { FeedSortControl, type FeedSortControlProps } from './FeedSortControl';
 import { ThemeSwitch } from './ThemeSwitch';
 
 type ReaderSurface = 'feed' | 'article' | 'thread';
@@ -45,6 +46,7 @@ interface PlatformBarProps {
   initialSearchQuery?: string;
   onColorSchemeChange: (colorScheme: ColorScheme) => void;
   onSearch?: (query: string) => boolean;
+  feedSort?: FeedSortControlProps;
 }
 
 export function PlatformBar({
@@ -60,6 +62,7 @@ export function PlatformBar({
   initialSearchQuery,
   onColorSchemeChange,
   onSearch,
+  feedSort,
 }: PlatformBarProps) {
   const activePlatform = getPlatformById(activePlatformId);
   const activeChannel = channels.find((channel) => channel.active);
@@ -375,6 +378,7 @@ export function PlatformBar({
                 : <MagnifyingGlass size={16} aria-hidden="true" />}
             </button>
           )}
+          {feedSort && <FeedSortControl {...feedSort} />}
           <span className="h-4 w-px shrink-0 bg-onefeed-line" aria-hidden="true" />
           <ThemeSwitch
             colorScheme={colorScheme}

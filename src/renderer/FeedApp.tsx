@@ -11,9 +11,15 @@ import type {
   FeedItem,
   FeedLoadResult,
 } from '../types/feed';
+import {
+  getAvailableFeedSortFields,
+  sortFeedItems,
+  type FeedSort,
+} from './feedSorting';
 import { OneFeedShell } from './OneFeedShell';
 import { useFeedStore } from './store/useFeedStore';
 import { FeedCard } from './themes/FocusPaper/FeedCard';
+import { useFeedSortPreference } from './useFeedSortPreference';
 import { getSeenFeedItemKey, useSeenFeedItems } from './useSeenFeedItems';
 
 interface FeedAppProps {
@@ -32,7 +38,7 @@ type FeedLoadState =
   | { phase: 'idle' | 'loading' | 'exhausted' }
   | { phase: 'failed'; retryable: boolean };
 
-/** Feed Surface 外壳：连接状态库、阅读进度和原页面的无限加载。 */
+/** Feed Surface 外壳：连接状态库和原页面的无限加载。 */
 export default function FeedApp({
   activePlatformId,
   channels,
@@ -46,7 +52,6 @@ export default function FeedApp({
 }: FeedAppProps) {
   const items = useFeedStore((state) => state.items);
   const hasItems = items.length > 0;
-  const [progress, setProgress] = useState(0);
   const [loadState, setLoadState] = useState<FeedLoadState>({ phase: 'idle' });
   const loadSentinelRef = useRef<HTMLSpanElement>(null);
   const loadInFlightRef = useRef(false);
@@ -56,6 +61,7 @@ export default function FeedApp({
   const { markSeen, seenItemKeys } = useSeenFeedItems();
   const { settings: filterSettings, ready: filtersReady } = useFeedFilters();
   const { preferences, ready: displayReady } = useDisplayPreferences();
+  const { sort: feedSort, ready: sortReady, saveSort } = useFeedSortPreference(activePlatformId);
   const headerPlatforms = useMemo(() => (
     getHeaderPlatforms(preferences, activePlatformId)
   ), [activePlatformId, preferences]);
@@ -63,7 +69,17 @@ export default function FeedApp({
     isSeen: (item) => seenItemKeys.has(getSeenFeedItemKey(item)),
   }), [filterSettings, items, seenItemKeys]);
   const visibleItems = filterResult.visibleItems;
-  const hasVisibleItems = filtersReady && displayReady && visibleItems.length > 0;
+  const availableSortFields = useMemo(() => getAvailableFeedSortFields(items), [items]);
+  const effectiveFeedSort = useMemo<FeedSort>(() => (
+    feedSort.field === 'original' || availableSortFields.includes(feedSort.field)
+      ? feedSort
+      : { field: 'original' }
+  ), [availableSortFields, feedSort]);
+  const sortedVisibleItems = useMemo(
+    () => sortFeedItems(visibleItems, effectiveFeedSort),
+    [effectiveFeedSort, visibleItems],
+  );
+  const hasVisibleItems = filtersReady && displayReady && sortReady && visibleItems.length > 0;
 
   useEffect(() => {
     mountedRef.current = true;
@@ -71,16 +87,6 @@ export default function FeedApp({
       mountedRef.current = false;
     };
   }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const available = scrollElement.scrollHeight - scrollElement.clientHeight;
-      const nextProgress = available > 0 ? scrollElement.scrollTop / available : 0;
-      setProgress(Math.min(1, Math.max(0, nextProgress)));
-    };
-    scrollElement.addEventListener('scroll', handleScroll, { passive: true });
-    return () => scrollElement.removeEventListener('scroll', handleScroll);
-  }, [scrollElement]);
 
   const requestMore = useCallback(async (manualRetry = false) => {
     if (
@@ -148,6 +154,11 @@ export default function FeedApp({
     }
   };
 
+  const handleSortChange = (sort: FeedSort) => {
+    saveSort(sort);
+    scrollElement.scrollTo?.({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <OneFeedShell
       activePlatformId={activePlatformId}
@@ -160,34 +171,37 @@ export default function FeedApp({
       hiddenItemCount={filtersReady ? filterResult.hiddenItems.length : 0}
       initialSearchQuery={initialSearchQuery}
       onSearch={onSearch}
+      feedSort={hasVisibleItems && availableSortFields.length > 0
+        ? {
+            availableFields: availableSortFields,
+            value: effectiveFeedSort,
+            onChange: handleSortChange,
+          }
+        : undefined}
     >
       <div className="reader-app">
-        <div className="reading-rail" aria-hidden="true">
-          <span className="rail-label">READ</span>
-          <span className="rail-track"><i style={{ height: `${progress * 100}%` }} /></span>
-          <span className="rail-percent">{Math.round(progress * 100)}%</span>
-        </div>
-
         <main>
-          {!hasItems || !filtersReady || !displayReady ? (
+          {!hasItems || !filtersReady || !displayReady || !sortReady ? (
             <section className="empty-state" aria-live="polite">
               <span className="scan-mark" aria-hidden="true" />
             </section>
           ) : (
-            visibleItems.map((item, index) => {
-              const seenItemKey = getSeenFeedItemKey(item);
-              return (
-                <FeedCard
-                  key={item.id}
-                  item={item}
-                  index={index}
-                  isSeen={seenItemKeys.has(seenItemKey)}
-                  hideImages={preferences.hideFeedImages}
-                  onSeen={() => markSeen(seenItemKey)}
-                  onAction={handleAction}
-                />
-              );
-            })
+            <>
+              {sortedVisibleItems.map((item, index) => {
+                const seenItemKey = getSeenFeedItemKey(item);
+                return (
+                  <FeedCard
+                    key={item.id}
+                    item={item}
+                    index={index}
+                    isSeen={seenItemKeys.has(seenItemKey)}
+                    hideImages={preferences.hideFeedImages}
+                    onSeen={() => markSeen(seenItemKey)}
+                    onAction={handleAction}
+                  />
+                );
+              })}
+            </>
           )}
         </main>
         {hasVisibleItems && (

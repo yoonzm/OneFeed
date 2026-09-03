@@ -1,14 +1,14 @@
 # OneFeed Privacy Policy
 
-Effective date: August 26, 2026
+Effective date: September 3, 2026
 
-OneFeed is a browser extension that rearranges feeds from supported websites into a unified reading interface. This policy explains how version `0.1.16` processes data. The current version supports Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, and 36Kr. This policy and the relevant permission disclosures will be updated when support for additional websites is released.
+OneFeed is a browser extension that rearranges feeds from supported websites into a unified reading interface. This policy explains how version `0.1.18` processes data. The current version supports Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, and 36Kr. This policy and the relevant permission disclosures will be updated when support for additional websites is released.
 
 ## Data processed
 
 To create the unified feed and supported comment-reading interface, the extension reads content already displayed on the current supported page. This may include titles, body text, comments, replies, publicly visible author information, images, interaction counts, publication times, and content links.
 
-The extension also uses `chrome.storage.local` to store the enabled state, theme preferences, header website visibility and order, feed and detail image preferences, recently used platforms, display-filter rules, and local identifiers for feed items the user has opened.
+The extension also uses `chrome.storage.local` to store the enabled state, theme preferences, header website visibility and order, feed and detail image preferences, per-platform feed sorting choices, recently used platforms, display-filter rules, and local identifiers for feed items the user has opened.
 
 ## How the data is used
 
@@ -20,6 +20,7 @@ Page content is used only to:
 - deduplicate feed items on the same page locally;
 - mark feed items that the user has opened;
 - filter displayed content locally according to the user's read-state, keyword, author, platform, and content-type rules;
+- sort loaded feed content according to the user's choice for the current platform;
 - apply the user's header website order and feed or detail image preferences.
 
 ## Data transfer and sharing
@@ -30,11 +31,11 @@ All page parsing, content sanitization, and interface rendering happen locally i
 
 ## Storage and deletion
 
-OneFeed does not maintain a cloud user database. The enabled state, theme preferences, header website and image preferences, recently used platforms, display-filter rules, and opened-item identifiers are stored in the browser's local extension storage. Users can remove this data by uninstalling the extension or clearing its data from Chrome's extension management page.
+OneFeed does not maintain a cloud user database. The enabled state, theme preferences, header website and image preferences, per-platform feed sorting choices, recently used platforms, display-filter rules, and opened-item identifiers are stored in the browser's local extension storage. Users can remove this data by uninstalling the extension or clearing its data from Chrome's extension management page.
 
 ## Permissions
 
-- **storage:** Saves the enabled state, theme preferences, header website and image preferences, recently used platforms, display-filter rules, and opened-item identifiers locally.
+- **storage:** Saves the enabled state, theme preferences, header website and image preferences, per-platform feed sorting choices, recently used platforms, display-filter rules, and opened-item identifiers locally.
 - **Weibo site access:** Reads and rearranges supported Weibo trending feeds, individual post pages, and content-search results opened by the user.
 - **X site access:** Reads and rearranges the supported X home timeline and its feed channels opened by the user.
 - **Xiaohongshu site access:** Reads and rearranges supported Xiaohongshu Explore feeds, content channels, and note pages opened by the user.

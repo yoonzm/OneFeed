@@ -8,9 +8,10 @@ import {
 import type { FeedItem, FeedLoadResult } from '../types/feed';
 import FeedApp from './FeedApp';
 import { useFeedStore } from './store/useFeedStore';
+import { getFeedSortPreferenceStorageKey } from './useFeedSortPreference';
 import { getSeenFeedItemStorageKey } from './useSeenFeedItems';
 
-function feedItem(): FeedItem {
+function feedItem(overrides: Partial<FeedItem> = {}): FeedItem {
   return {
     id: 'item-1',
     platform: 'zhihu',
@@ -22,6 +23,7 @@ function feedItem(): FeedItem {
     previewBlocks: [],
     metrics: [],
     actions: [],
+    ...overrides,
   };
 }
 
@@ -147,5 +149,77 @@ describe('FeedApp', () => {
     expect(hiddenStatus?.textContent).toBe('1');
     expect(container.textContent).not.toContain('临时显示');
     expect(onLoadMore).not.toHaveBeenCalled();
+  });
+
+  it('sorts the visible loaded items from the inline list control', async () => {
+    useFeedStore.setState({
+      items: [
+        feedItem({
+          id: 'low',
+          title: '较少点赞',
+          metrics: [{ kind: 'reactions', value: 2 }],
+        }),
+        feedItem({
+          id: 'high',
+          title: '较多点赞',
+          metrics: [{ kind: 'reactions', value: 20 }],
+        }),
+      ],
+    });
+    const container = await renderFeed(async () => ({ kind: 'exhausted' }));
+    const sortTrigger = container.querySelector<HTMLButtonElement>(
+      '[aria-label="当前排序：原始顺序"]',
+    );
+
+    expect(sortTrigger).not.toBeNull();
+    expect(sortTrigger?.closest('header')).not.toBeNull();
+    expect(sortTrigger?.className).toContain('size-8');
+    expect(Array.from(container.querySelectorAll('.feed-card h2')).map((title) => title.textContent))
+      .toEqual(['较少点赞', '较多点赞']);
+
+    await act(async () => sortTrigger?.click());
+    const descendingLikes = container.querySelector<HTMLButtonElement>(
+      '[role="menuitemradio"][aria-label="点赞 · 从高到低"]',
+    );
+    await act(async () => descendingLikes?.click());
+
+    expect(Array.from(container.querySelectorAll('.feed-card h2')).map((title) => title.textContent))
+      .toEqual(['较多点赞', '较少点赞']);
+    expect(sortTrigger?.getAttribute('aria-label')).toBe('当前排序：点赞 · 从高到低');
+    expect(sortTrigger?.className).toContain('text-onefeed-blue');
+    expect(chrome.storage.local.set).toHaveBeenCalledWith({
+      [getFeedSortPreferenceStorageKey('zhihu')]: {
+        field: 'reactions',
+        direction: 'descending',
+      },
+    });
+  });
+
+  it('restores the saved sort for the active platform', async () => {
+    storedValues[getFeedSortPreferenceStorageKey('zhihu')] = {
+      field: 'reactions',
+      direction: 'descending',
+    };
+    useFeedStore.setState({
+      items: [
+        feedItem({
+          id: 'low',
+          title: '较少点赞',
+          metrics: [{ kind: 'reactions', value: 2 }],
+        }),
+        feedItem({
+          id: 'high',
+          title: '较多点赞',
+          metrics: [{ kind: 'reactions', value: 20 }],
+        }),
+      ],
+    });
+
+    const container = await renderFeed(async () => ({ kind: 'exhausted' }));
+
+    expect(Array.from(container.querySelectorAll('.feed-card h2')).map((title) => title.textContent))
+      .toEqual(['较多点赞', '较少点赞']);
+    expect(container.querySelector('[aria-label="当前排序：点赞 · 从高到低"]'))
+      .not.toBeNull();
   });
 });

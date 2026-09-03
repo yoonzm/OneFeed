@@ -3,6 +3,7 @@ import type { ColorScheme } from '../theme/useColorScheme';
 import type { PlatformDefinition } from '../config/platforms';
 import type { FeedChannel } from '../types/feed';
 import { useColorScheme } from '../theme/useColorScheme';
+import type { FeedSortControlProps } from './components/FeedSortControl';
 import { PlatformBar } from './components/PlatformBar';
 
 interface OneFeedShellProps {
@@ -16,6 +17,7 @@ interface OneFeedShellProps {
   hiddenItemCount?: number;
   initialSearchQuery?: string;
   onSearch?: (query: string) => boolean;
+  feedSort?: FeedSortControlProps;
   children: ReactNode;
 }
 
@@ -30,6 +32,7 @@ export function OneFeedShell({
   hiddenItemCount = 0,
   initialSearchQuery,
   onSearch,
+  feedSort,
   children,
 }: OneFeedShellProps) {
   const { colorScheme, ready, setColorScheme } = useColorScheme(initialColorScheme);
@@ -53,6 +56,7 @@ export function OneFeedShell({
           initialSearchQuery={initialSearchQuery}
           onColorSchemeChange={setColorScheme}
           onSearch={onSearch}
+          feedSort={feedSort}
         />
       )}
       {children}
