@@ -38,7 +38,7 @@ type FeedLoadState =
   | { phase: 'idle' | 'loading' | 'exhausted' }
   | { phase: 'failed'; retryable: boolean };
 
-/** Feed Surface 外壳：连接状态库、阅读进度和原页面的无限加载。 */
+/** Feed Surface 外壳：连接状态库和原页面的无限加载。 */
 export default function FeedApp({
   activePlatformId,
   channels,
@@ -52,7 +52,6 @@ export default function FeedApp({
 }: FeedAppProps) {
   const items = useFeedStore((state) => state.items);
   const hasItems = items.length > 0;
-  const [progress, setProgress] = useState(0);
   const [loadState, setLoadState] = useState<FeedLoadState>({ phase: 'idle' });
   const loadSentinelRef = useRef<HTMLSpanElement>(null);
   const loadInFlightRef = useRef(false);
@@ -88,16 +87,6 @@ export default function FeedApp({
       mountedRef.current = false;
     };
   }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const available = scrollElement.scrollHeight - scrollElement.clientHeight;
-      const nextProgress = available > 0 ? scrollElement.scrollTop / available : 0;
-      setProgress(Math.min(1, Math.max(0, nextProgress)));
-    };
-    scrollElement.addEventListener('scroll', handleScroll, { passive: true });
-    return () => scrollElement.removeEventListener('scroll', handleScroll);
-  }, [scrollElement]);
 
   const requestMore = useCallback(async (manualRetry = false) => {
     if (
@@ -191,12 +180,6 @@ export default function FeedApp({
         : undefined}
     >
       <div className="reader-app">
-        <div className="reading-rail" aria-hidden="true">
-          <span className="rail-label">READ</span>
-          <span className="rail-track"><i style={{ height: `${progress * 100}%` }} /></span>
-          <span className="rail-percent">{Math.round(progress * 100)}%</span>
-        </div>
-
         <main>
           {!hasItems || !filtersReady || !displayReady || !sortReady ? (
             <section className="empty-state" aria-live="polite">

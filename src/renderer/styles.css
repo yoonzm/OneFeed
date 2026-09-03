@@ -51,36 +51,12 @@ a { color: inherit; }
   width: min(100%, 1040px);
   min-height: calc(100vh - 53px);
   margin: 0 auto;
-  padding: 0 48px 56px 88px;
+  padding: 0 48px 56px;
 }
 
 .detail-app {
   min-height: 100vh;
-  padding-left: 48px;
 }
-
-/* 阅读进度是辅助信息，窄屏下隐藏以让内容获得完整宽度。 */
-.reading-rail {
-  position: fixed;
-  top: 84px;
-  width: 24px;
-  margin-left: -56px;
-  color: var(--muted);
-  text-align: center;
-  font: 600 9px/1 "SFMono-Regular", Consolas, monospace;
-  letter-spacing: .16em;
-}
-
-.rail-label { writing-mode: vertical-rl; }
-.rail-track {
-  display: block;
-  width: 2px;
-  height: min(32vh, 220px);
-  margin: 12px auto;
-  background: var(--line);
-}
-.rail-track i { display: block; width: 100%; background: var(--blue); transition: height 100ms linear; }
-.rail-percent { display: block; letter-spacing: 0; transform: rotate(-90deg); }
 
 /* Feed 与 Thread 条目共享标题、正文、元信息三层骨架；各 Surface 独立控制交互。 */
 .item-card {
@@ -549,7 +525,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--color-onefeed-f
 /* 移动端优先保证正文宽度，并让操作区自然换行。 */
 @media (max-width: 720px) {
   .reader-app { padding: 0 16px 40px; }
-  .reading-rail { display: none; }
   .item-card { padding: 16px 0; }
   .detail-article { padding-top: 32px; }
   .thread-header { padding: 32px 0 26px; }
