@@ -172,21 +172,21 @@ describe('FeedApp', () => {
     );
 
     expect(sortTrigger).not.toBeNull();
-    expect(sortTrigger?.closest('main')).toBeNull();
-    expect(sortTrigger?.closest('[data-onefeed-feed-sort]')?.className)
-      .toContain('absolute');
+    expect(sortTrigger?.closest('header')).not.toBeNull();
+    expect(sortTrigger?.className).toContain('size-8');
     expect(Array.from(container.querySelectorAll('.feed-card h2')).map((title) => title.textContent))
       .toEqual(['较少点赞', '较多点赞']);
 
     await act(async () => sortTrigger?.click());
-    const descendingLikes = Array.from(container.querySelectorAll<HTMLButtonElement>(
-      '[role="menuitemradio"]',
-    )).find((button) => button.textContent?.includes('点赞从高到低'));
+    const descendingLikes = container.querySelector<HTMLButtonElement>(
+      '[role="menuitemradio"][aria-label="点赞 · 从高到低"]',
+    );
     await act(async () => descendingLikes?.click());
 
     expect(Array.from(container.querySelectorAll('.feed-card h2')).map((title) => title.textContent))
       .toEqual(['较多点赞', '较少点赞']);
-    expect(sortTrigger?.textContent).toContain('点赞 · 从高到低');
+    expect(sortTrigger?.getAttribute('aria-label')).toBe('当前排序：点赞 · 从高到低');
+    expect(sortTrigger?.className).toContain('text-onefeed-blue');
     expect(chrome.storage.local.set).toHaveBeenCalledWith({
       [getFeedSortPreferenceStorageKey('zhihu')]: {
         field: 'reactions',

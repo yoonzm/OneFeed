@@ -1,5 +1,5 @@
-import { ArrowsDownUp, CaretDown, Check } from '@phosphor-icons/react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { ArrowDown, ArrowsDownUp, ArrowUp, Check } from '@phosphor-icons/react';
+import { useEffect, useRef, useState } from 'react';
 import { i18n } from '../../i18n';
 import type {
   FeedSort,
@@ -7,17 +7,10 @@ import type {
   FeedSortField,
 } from '../feedSorting';
 
-interface FeedSortControlProps {
+export interface FeedSortControlProps {
   availableFields: readonly FeedSortField[];
   value: FeedSort;
   onChange: (value: FeedSort) => void;
-}
-
-interface FeedSortOption {
-  id: string;
-  label: string;
-  fieldLabel?: string;
-  value: FeedSort;
 }
 
 function fieldLabel(field: FeedSortField): string {
@@ -39,28 +32,6 @@ function directionLabel(field: FeedSortField, direction: FeedSortDirection): str
     : i18n.t('reader.sortLowest');
 }
 
-function sortId(sort: FeedSort): string {
-  return sort.field === 'original' ? sort.field : `${sort.field}-${sort.direction}`;
-}
-
-function createOptions(availableFields: readonly FeedSortField[]): FeedSortOption[] {
-  return [
-    {
-      id: 'original',
-      label: i18n.t('reader.sortOriginal'),
-      value: { field: 'original' },
-    },
-    ...availableFields.flatMap((field) => (
-      (['descending', 'ascending'] as const).map((direction) => ({
-        id: `${field}-${direction}`,
-        fieldLabel: fieldLabel(field),
-        label: directionLabel(field, direction),
-        value: { field, direction },
-      }))
-    )),
-  ];
-}
-
 export function FeedSortControl({
   availableFields,
   value,
@@ -70,12 +41,9 @@ export function FeedSortControl({
   const controlRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const options = useMemo(() => createOptions(availableFields), [availableFields]);
-  const currentId = sortId(value);
-  const currentOption = options.find((option) => option.id === currentId) || options[0]!;
-  const currentLabel = currentOption.fieldLabel
-    ? `${currentOption.fieldLabel} · ${currentOption.label}`
-    : currentOption.label;
+  const currentLabel = value.field === 'original'
+    ? i18n.t('reader.sortOriginal')
+    : `${fieldLabel(value.field)} · ${directionLabel(value.field, value.direction)}`;
 
   useEffect(() => {
     if (!open) return undefined;
@@ -101,76 +69,90 @@ export function FeedSortControl({
     };
   }, [open]);
 
-  const selectSort = (option: FeedSortOption) => {
-    onChange(option.value);
+  const selectSort = (sort: FeedSort) => {
+    onChange(sort);
     setOpen(false);
     triggerRef.current?.focus();
   };
 
   return (
-    <div ref={controlRef} className="relative flex justify-end">
+    <div ref={controlRef} className="relative flex">
       <button
         ref={triggerRef}
-        className="group inline-flex min-h-11 cursor-pointer items-center gap-1.5 rounded-md border-0 bg-onefeed-paper/95 px-2 text-[11px] text-onefeed-muted backdrop-blur-sm transition-colors hover:text-onefeed-blue focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-onefeed-focus"
+        className={`grid size-8 shrink-0 cursor-pointer place-items-center rounded-md border-0 bg-transparent p-0 transition-colors duration-150 hover:bg-onefeed-blue-soft focus-visible:outline-3 focus-visible:outline-offset-2 focus-visible:outline-onefeed-focus ${
+          open || value.field !== 'original' ? 'text-onefeed-blue' : 'text-onefeed-ink'
+        }`}
         type="button"
         aria-label={i18n.t('reader.sortCurrent', [currentLabel])}
+        title={i18n.t('reader.sortCurrent', [currentLabel])}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls="onefeed-feed-sort-menu"
         onClick={() => setOpen((current) => !current)}
       >
-        <ArrowsDownUp size={13} aria-hidden="true" />
-        <span>{i18n.t('reader.sortLabel')}</span>
-        <strong className="font-onefeed-emphasis text-onefeed-ink transition-colors group-hover:text-onefeed-blue">
-          {currentLabel}
-        </strong>
-        <CaretDown
-          className={`transition-transform ${open ? 'rotate-180' : ''}`}
-          size={10}
-          weight="bold"
-          aria-hidden="true"
-        />
+        <ArrowsDownUp size={16} aria-hidden="true" />
       </button>
 
       {open && (
         <div
           ref={menuRef}
           id="onefeed-feed-sort-menu"
-          className="absolute top-full right-0 z-10 grid w-[232px] overflow-hidden rounded-md border border-onefeed-line bg-onefeed-surface p-1 shadow-[0_14px_36px_rgb(15_22_34_/_16%)]"
+          className="absolute top-[42px] right-0 z-30 grid w-[200px] overflow-hidden rounded-md border border-onefeed-line bg-onefeed-surface p-1 shadow-[0_14px_36px_rgb(15_22_34_/_16%)] max-[720px]:top-11"
           role="menu"
           aria-label={i18n.t('reader.sortLoaded')}
         >
-          <span
-            className="px-2.5 pt-1.5 pb-2 font-onefeed-brand text-[9px] tracking-[.08em] text-onefeed-faint"
-            role="presentation"
+          <button
+            className={`flex min-h-9 w-full cursor-pointer items-center justify-between rounded-[3px] border-0 px-2.5 text-left text-[11px] focus-visible:outline-3 focus-visible:outline-offset-[-2px] focus-visible:outline-onefeed-focus ${
+              value.field === 'original'
+                ? 'bg-onefeed-blue-soft text-onefeed-blue'
+                : 'bg-transparent text-onefeed-muted hover:bg-onefeed-paper hover:text-onefeed-ink'
+            }`}
+            type="button"
+            role="menuitemradio"
+            aria-checked={value.field === 'original'}
+            onClick={() => selectSort({ field: 'original' })}
           >
-            {i18n.t('reader.sortLoaded')}
-          </span>
-          {options.map((option, index) => {
-            const selected = option.id === currentId;
-            return (
-              <button
-                className={`flex min-h-9 w-full cursor-pointer items-center justify-between gap-3 rounded-[3px] border-0 px-2.5 text-left text-[11px] focus-visible:outline-3 focus-visible:outline-offset-[-2px] focus-visible:outline-onefeed-focus ${
-                  selected
-                    ? 'bg-onefeed-blue-soft text-onefeed-blue'
-                    : 'bg-transparent text-onefeed-muted hover:bg-onefeed-paper hover:text-onefeed-ink'
-                } ${index === 1 ? 'mt-1' : ''}`}
-                type="button"
-                role="menuitemradio"
-                aria-checked={selected}
-                key={option.id}
-                onClick={() => selectSort(option)}
-              >
-                <span className="min-w-0">
-                  {option.fieldLabel && (
-                    <span className="mr-1.5 text-onefeed-ink">{option.fieldLabel}</span>
-                  )}
-                  <span>{option.label}</span>
-                </span>
-                {selected && <Check className="shrink-0" size={12} weight="bold" aria-hidden="true" />}
-              </button>
-            );
-          })}
+            <span>{i18n.t('reader.sortOriginal')}</span>
+            {value.field === 'original' && (
+              <Check className="shrink-0" size={12} weight="bold" aria-hidden="true" />
+            )}
+          </button>
+
+          {availableFields.map((field) => (
+            <div
+              className="flex min-h-10 items-center justify-between gap-3 border-t border-onefeed-line px-2.5 text-[11px]"
+              role="group"
+              aria-label={fieldLabel(field)}
+              key={field}
+            >
+              <span className="text-onefeed-ink">{fieldLabel(field)}</span>
+              <span className="flex gap-1">
+                {(['descending', 'ascending'] as const).map((direction) => {
+                  const selected = value.field === field && value.direction === direction;
+                  const optionLabel = `${fieldLabel(field)} · ${directionLabel(field, direction)}`;
+                  const DirectionIcon = direction === 'descending' ? ArrowDown : ArrowUp;
+                  return (
+                    <button
+                      className={`grid size-8 cursor-pointer place-items-center rounded-[3px] border-0 p-0 focus-visible:outline-3 focus-visible:outline-offset-[-2px] focus-visible:outline-onefeed-focus ${
+                        selected
+                          ? 'bg-onefeed-blue-soft text-onefeed-blue'
+                          : 'bg-transparent text-onefeed-muted hover:bg-onefeed-paper hover:text-onefeed-ink'
+                      }`}
+                      type="button"
+                      role="menuitemradio"
+                      aria-label={optionLabel}
+                      aria-checked={selected}
+                      title={optionLabel}
+                      key={direction}
+                      onClick={() => selectSort({ field, direction })}
+                    >
+                      <DirectionIcon size={14} weight="bold" aria-hidden="true" />
+                    </button>
+                  );
+                })}
+              </span>
+            </div>
+          ))}
         </div>
       )}
     </div>

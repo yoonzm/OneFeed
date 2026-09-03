@@ -11,7 +11,6 @@ import type {
   FeedItem,
   FeedLoadResult,
 } from '../types/feed';
-import { FeedSortControl } from './components/FeedSortControl';
 import {
   getAvailableFeedSortFields,
   sortFeedItems,
@@ -183,6 +182,13 @@ export default function FeedApp({
       hiddenItemCount={filtersReady ? filterResult.hiddenItems.length : 0}
       initialSearchQuery={initialSearchQuery}
       onSearch={onSearch}
+      feedSort={hasVisibleItems && availableSortFields.length > 0
+        ? {
+            availableFields: availableSortFields,
+            value: effectiveFeedSort,
+            onChange: handleSortChange,
+          }
+        : undefined}
     >
       <div className="reader-app">
         <div className="reading-rail" aria-hidden="true">
@@ -190,21 +196,6 @@ export default function FeedApp({
           <span className="rail-track"><i style={{ height: `${progress * 100}%` }} /></span>
           <span className="rail-percent">{Math.round(progress * 100)}%</span>
         </div>
-
-        {hasVisibleItems && availableSortFields.length > 0 && (
-          <div
-            className="pointer-events-none absolute top-1 right-12 z-10 max-[720px]:right-4"
-            data-onefeed-feed-sort="true"
-          >
-            <div className="pointer-events-auto">
-              <FeedSortControl
-                availableFields={availableSortFields}
-                value={effectiveFeedSort}
-                onChange={handleSortChange}
-              />
-            </div>
-          </div>
-        )}
 
         <main>
           {!hasItems || !filtersReady || !displayReady || !sortReady ? (
