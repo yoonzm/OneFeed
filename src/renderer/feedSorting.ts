@@ -7,12 +7,37 @@ export type FeedSort =
   | { field: 'original' }
   | { field: FeedSortField; direction: FeedSortDirection };
 
+export const DEFAULT_FEED_SORT: FeedSort = { field: 'original' };
+
 const SORT_FIELDS: readonly FeedSortField[] = [
   'publishedAt',
   'reactions',
   'replies',
   'bookmarks',
 ];
+
+const SORT_DIRECTIONS: readonly FeedSortDirection[] = ['ascending', 'descending'];
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+export function normalizeFeedSort(value: unknown): FeedSort {
+  if (!isRecord(value)) return DEFAULT_FEED_SORT;
+  if (value.field === 'original') return DEFAULT_FEED_SORT;
+  if (
+    typeof value.field === 'string' &&
+    SORT_FIELDS.includes(value.field as FeedSortField) &&
+    typeof value.direction === 'string' &&
+    SORT_DIRECTIONS.includes(value.direction as FeedSortDirection)
+  ) {
+    return {
+      field: value.field as FeedSortField,
+      direction: value.direction as FeedSortDirection,
+    };
+  }
+  return DEFAULT_FEED_SORT;
+}
 
 function finiteValue(value: number | undefined): number | undefined {
   return value !== undefined && Number.isFinite(value) ? value : undefined;

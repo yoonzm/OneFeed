@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { FeedItem } from '../types/feed';
 import {
   getAvailableFeedSortFields,
+  normalizeFeedSort,
   sortFeedItems,
 } from './feedSorting';
 
@@ -59,5 +60,12 @@ describe('feed sorting', () => {
 
     expect(getAvailableFeedSortFields(items))
       .toEqual(['publishedAt', 'replies', 'bookmarks']);
+  });
+
+  it('falls back to the original order for invalid stored preferences', () => {
+    expect(normalizeFeedSort({ field: 'views', direction: 'descending' }))
+      .toEqual({ field: 'original' });
+    expect(normalizeFeedSort({ field: 'reactions', direction: 'sideways' }))
+      .toEqual({ field: 'original' });
   });
 });

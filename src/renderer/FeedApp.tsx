@@ -20,6 +20,7 @@ import {
 import { OneFeedShell } from './OneFeedShell';
 import { useFeedStore } from './store/useFeedStore';
 import { FeedCard } from './themes/FocusPaper/FeedCard';
+import { useFeedSortPreference } from './useFeedSortPreference';
 import { getSeenFeedItemKey, useSeenFeedItems } from './useSeenFeedItems';
 
 interface FeedAppProps {
@@ -54,7 +55,6 @@ export default function FeedApp({
   const hasItems = items.length > 0;
   const [progress, setProgress] = useState(0);
   const [loadState, setLoadState] = useState<FeedLoadState>({ phase: 'idle' });
-  const [feedSort, setFeedSort] = useState<FeedSort>({ field: 'original' });
   const loadSentinelRef = useRef<HTMLSpanElement>(null);
   const loadInFlightRef = useRef(false);
   const autoLoadBlockedRef = useRef(false);
@@ -63,6 +63,7 @@ export default function FeedApp({
   const { markSeen, seenItemKeys } = useSeenFeedItems();
   const { settings: filterSettings, ready: filtersReady } = useFeedFilters();
   const { preferences, ready: displayReady } = useDisplayPreferences();
+  const { sort: feedSort, ready: sortReady, saveSort } = useFeedSortPreference(activePlatformId);
   const headerPlatforms = useMemo(() => (
     getHeaderPlatforms(preferences, activePlatformId)
   ), [activePlatformId, preferences]);
@@ -80,7 +81,7 @@ export default function FeedApp({
     () => sortFeedItems(visibleItems, effectiveFeedSort),
     [effectiveFeedSort, visibleItems],
   );
-  const hasVisibleItems = filtersReady && displayReady && visibleItems.length > 0;
+  const hasVisibleItems = filtersReady && displayReady && sortReady && visibleItems.length > 0;
 
   useEffect(() => {
     mountedRef.current = true;
@@ -166,7 +167,7 @@ export default function FeedApp({
   };
 
   const handleSortChange = (sort: FeedSort) => {
-    setFeedSort(sort);
+    saveSort(sort);
     scrollElement.scrollTo?.({ top: 0, behavior: 'smooth' });
   };
 
@@ -206,7 +207,7 @@ export default function FeedApp({
         )}
 
         <main>
-          {!hasItems || !filtersReady || !displayReady ? (
+          {!hasItems || !filtersReady || !displayReady || !sortReady ? (
             <section className="empty-state" aria-live="polite">
               <span className="scan-mark" aria-hidden="true" />
             </section>
