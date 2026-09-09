@@ -6,7 +6,9 @@
 - **Short description:** Rearrange supported website feeds into one focused, consistent reading interface that you can pause at any time.
 - **Recommended category:** Productivity
 - **Language:** English
-- **Version:** 0.1.19
+- **Version:** 0.1.20
+
+In this release, hidden detail images remain available as “Image” text links. Click a link to preview its image in a popup; closing the popup preserves the hidden-image preference. To verify, disable detail images in settings, open an article containing images, and open and close each image link.
 
 ## Detailed description
 
