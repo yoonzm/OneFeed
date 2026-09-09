@@ -13,6 +13,7 @@ import { V2exThreadAdapter } from './v2exThread';
 import { WeiboAdapter } from './weibo';
 import { WeiboDetailAdapter } from './weiboDetail';
 import { WereadAdapter } from './weread';
+import { WereadDetailAdapter } from './wereadDetail';
 import { XiaohongshuAdapter } from './xiaohongshu';
 import { XiaohongshuDetailAdapter } from './xiaohongshuDetail';
 import { ZhihuAdapter } from './zhihu';
@@ -157,6 +158,14 @@ describe('createAdapter', () => {
       adapter: expect.any(XiaohongshuDetailAdapter),
       source: { id: 'xiaohongshu', name: '小红书' },
     });
+    expect(createAdapter(
+      new URL('https://weread.qq.com/web/reader/abc123'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'article',
+      adapter: expect.any(WereadDetailAdapter),
+      source: { id: 'weread', name: '微信读书' },
+    });
   });
 
   it('selects thread adapters for question and topic detail routes', () => {
@@ -200,8 +209,6 @@ describe('createAdapter', () => {
     )).toBeNull();
     expect(createAdapter(new URL('https://www.zhihu.com/search?type=content'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();
-    expect(createAdapter(new URL('https://weread.qq.com/web/reader/abc123'), listeners()))
-      .toBeNull();
     expect(createAdapter(new URL('https://weread.qq.com/web/bookDetail/abc123'), listeners()))
       .toBeNull();
     expect(createAdapter(new URL('https://weread.qq.com/web/shelf'), listeners())).toBeNull();
@@ -240,7 +247,7 @@ describe('createAdapter', () => {
     expect(isSupportedUrl(new URL(
       'https://weread.qq.com/web/search/books?keyword=%E9%98%85%E8%AF%BB',
     ))).toBe(true);
-    expect(isSupportedUrl(new URL('https://weread.qq.com/web/reader/abc123'))).toBe(false);
+    expect(isSupportedUrl(new URL('https://weread.qq.com/web/reader/abc123'))).toBe(true);
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/item?id=43876543'))).toBe(false);
     expect(isSupportedUrl(new URL('https://www.reddit.com/'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.reddit.com/r/typescript/comments/abc123/topic/')))

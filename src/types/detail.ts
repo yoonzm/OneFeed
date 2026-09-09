@@ -31,6 +31,18 @@ export interface ArticleActionSlot {
   actions: FeedActionDescriptor[];
 }
 
+/** Adapter 驱动的文章分页，用于原站一次只暴露一个可读章节的文档。 */
+export interface ArticlePagination {
+  /** 当前内容在原文档中的位置，从 1 开始。 */
+  currentPage: number;
+  /** 可从原站目录确认的总页数。 */
+  totalPages: number;
+  /** 上一页动作；位于文档开头时缺失。 */
+  previous?: FeedActionDescriptor;
+  /** 下一页动作；位于文档末尾时缺失。 */
+  next?: FeedActionDescriptor;
+}
+
 /**
  * 单篇正文 Surface，例如微博动态、知乎回答详情或专栏文章。
  * 它与 FeedItem 分开建模，确保详情正文不会被列表预览截断规则影响。
@@ -62,6 +74,8 @@ export interface ArticleDetail {
   context?: ArticleContext;
   /** 按原文顺序排列且不受 Feed 预览截断影响的完整正文。 */
   body: FeedBlock[];
+  /** 多页文档可选的原站代理导航。 */
+  pagination?: ArticlePagination;
   /** 按详情布局位置划分的可选操作区域。 */
   actionSlots?: {
     /** 靠近作者信息展示的操作和统计。 */

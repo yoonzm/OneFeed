@@ -100,8 +100,8 @@
     },
     "weread": {
       "name": "WeRead",
-      "scope": "Public rankings, categories, and book search",
-      "access": "Browse without signing in"
+      "scope": "Public discovery and paged reading",
+      "access": "Reader content follows source access"
     }
   },
   "board": {

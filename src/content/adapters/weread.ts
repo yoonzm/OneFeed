@@ -101,7 +101,7 @@ export function parseWereadCard(
     platform: 'weread',
     source: WEREAD_SOURCE,
     originalUrl,
-    // 首期只重排公开图书列表；阅读器正文和个人数据路由必须保持原站体验。
+    // 图书列表只负责发现入口；阅读器正文由独立的 Article Detail Adapter 接管。
     kind: 'article',
     role: 'article',
     title,

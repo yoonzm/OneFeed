@@ -10,7 +10,7 @@ OneFeed is a browser extension for web feeds. It creates one calm, consistent, a
 
 ## Current coverage
 
-OneFeed supports selected pages on Weibo, X, Xiaohongshu, Reddit, Zhihu, WeRead, Hacker News, Linux DO, V2EX, and 36Kr. WeRead coverage is limited to public rankings, book categories, and populated book-search results; reader pages, book-detail pages, personal shelves, notes, and reading progress remain untouched.
+OneFeed supports selected pages on Weibo, X, Xiaohongshu, Reddit, Zhihu, WeRead, Hacker News, Linux DO, V2EX, and 36Kr. WeRead coverage includes public rankings, book categories, populated book-search results, and a unified article view for the currently readable chapter with Previous/Next controls backed by the source reader. Book-detail pages, personal shelves, notes, and reading-progress pages remain untouched, and OneFeed does not bypass source access controls. WeRead warns that third-party plugins may put accounts at risk; enable this integration only after assessing that risk.
 
 ## Why OneFeed
 

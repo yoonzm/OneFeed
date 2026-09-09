@@ -1,6 +1,6 @@
 # OneFeed Privacy Policy
 
-Effective date: September 3, 2026
+Effective date: September 9, 2026
 
 OneFeed is a browser extension that rearranges feeds from supported websites into a unified reading interface. This policy explains how version `0.1.18` processes data. The current version supports Weibo, X, Xiaohongshu, Reddit, Zhihu, WeRead, Hacker News, Linux DO, V2EX, and 36Kr. This policy and the relevant permission disclosures will be updated when support for additional websites is released.
 
@@ -45,7 +45,7 @@ OneFeed does not maintain a cloud user database. The enabled state, theme prefer
 - **Linux DO site access:** Reads and rearranges supported Linux DO topic lists and topic reply pages opened by the user.
 - **V2EX site access:** Reads and rearranges supported V2EX topic lists and topic reply pages opened by the user.
 - **36Kr site access:** Reads and rearranges supported 36Kr feeds and article pages opened by the user.
-- **WeRead site access:** Reads and rearranges public book rankings, categories, and populated keyword or author search results opened by the user. It does not read or take over reader pages, personal shelves, notes, or reading-progress pages.
+- **WeRead site access:** Reads and rearranges public book rankings, categories, populated keyword or author search results, and chapter text and catalog position already exposed to the current user on reader pages. It activates the source reader's existing chapter controls only when the user selects Previous or Next in OneFeed. The extension does not call private reading APIs, bypass payment or access restrictions, or take over personal shelves, notes, or reading-progress pages.
 
 The extension does not run outside these supported websites.
 
