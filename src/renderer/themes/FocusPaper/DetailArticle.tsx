@@ -67,6 +67,7 @@ export function DetailArticle({
               block={block}
               expanded
               hideImages={hideImages}
+              showHiddenImageLinks
               onPreview={setPreview}
               key={`${block.type}-${blockIndex}`}
             />
@@ -121,6 +122,7 @@ export function DetailArticle({
             block={block}
             expanded
             hideImages={hideImages}
+            showHiddenImageLinks
             onPreview={setPreview}
             key={`${block.type}-${blockIndex}`}
           />
@@ -168,7 +170,7 @@ export function DetailArticle({
         />
       )}
 
-      {preview && !hideImages && (
+      {preview && (
         <button
           className="lightbox"
           type="button"

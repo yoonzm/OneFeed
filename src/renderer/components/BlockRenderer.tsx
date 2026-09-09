@@ -1,4 +1,4 @@
-import type { ComponentType } from 'react';
+import { useMemo, type ComponentType } from 'react';
 import { formatNumber, i18n } from '../../i18n';
 import type { FeedBlock, FeedImage } from '../../types/feed';
 
@@ -8,9 +8,51 @@ interface BlockComponentProps {
   onPreview: (image: FeedImage) => void;
   compactGallery?: boolean;
   hideImages?: boolean;
+  showHiddenImageLinks?: boolean;
 }
 
-function RichTextBlock({ block, expanded, hideImages }: BlockComponentProps) {
+const imageLinkClassName = 'text-[var(--blue)] underline underline-offset-3';
+
+function HiddenImageLink({ image, onPreview }: {
+  image: FeedImage;
+  onPreview: (image: FeedImage) => void;
+}) {
+  return (
+    <a className={imageLinkClassName} href={image.url} onClick={(event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      onPreview(image);
+    }}>
+      {i18n.t('block.image')}
+    </a>
+  );
+}
+
+function RichTextBlock({ block, expanded, hideImages, showHiddenImageLinks, onPreview }: BlockComponentProps) {
+  const html = block.type === 'richText' ? block.html : '';
+  const imageLabel = i18n.t('block.image');
+  const hiddenContent = useMemo(() => {
+    if (!hideImages || !showHiddenImageLinks) return { html, images: [] };
+    // 在惰性模板内替换图片，避免隐藏模式先挂载图片并触发资源加载。
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    const images: FeedImage[] = [];
+    template.content.querySelectorAll<HTMLImageElement>('img:not([data-onefeed-kind="emoji"])').forEach((image) => {
+      const url = image.getAttribute('src');
+      if (!url) return;
+      const link = document.createElement('a');
+      link.href = url;
+      link.className = imageLinkClassName;
+      link.textContent = imageLabel;
+      link.dataset.hiddenImageIndex = String(images.length);
+      images.push({ url, alt: image.alt });
+      // 原站图片可能已有链接；先解包以免生成嵌套 a 标签。
+      const parentLink = image.closest('a');
+      if (parentLink) parentLink.replaceWith(...parentLink.childNodes);
+      image.replaceWith(link);
+    });
+    return { html: template.innerHTML, images };
+  }, [html, hideImages, showHiddenImageLinks, imageLabel]);
   if (block.type !== 'richText') return null;
 
   // FeedBlock 契约要求 Adapter 先清洗 html；Renderer 只负责保持富文本结构。
@@ -19,13 +61,28 @@ function RichTextBlock({ block, expanded, hideImages }: BlockComponentProps) {
       className={`${expanded ? 'content content-expanded' : 'content'}${
         hideImages ? ' content-images-hidden' : ''
       }`}
-      dangerouslySetInnerHTML={{ __html: block.html }}
+      onClick={(event) => {
+        const link = (event.target as Element).closest<HTMLAnchorElement>('a[data-hidden-image-index]');
+        const image = link && hiddenContent.images[Number(link.dataset.hiddenImageIndex)];
+        if (!image) return;
+        event.preventDefault();
+        event.stopPropagation();
+        onPreview(image);
+      }}
+      dangerouslySetInnerHTML={{ __html: hiddenContent.html }}
     />
   );
 }
 
-function GalleryBlock({ block, onPreview, compactGallery = false, hideImages }: BlockComponentProps) {
-  if (block.type !== 'gallery' || hideImages) return null;
+function GalleryBlock({ block, onPreview, compactGallery = false, hideImages, showHiddenImageLinks }: BlockComponentProps) {
+  if (block.type !== 'gallery') return null;
+  if (hideImages) return showHiddenImageLinks ? (
+    <div className="flex flex-wrap gap-x-3 gap-y-1">
+      {block.items.map((image, index) => (
+        <HiddenImageLink image={image} onPreview={onPreview} key={`${image.url}-${index}`} />
+      ))}
+    </div>
+  ) : null;
 
   const visibleItems = compactGallery ? block.items.slice(0, 4) : block.items;
   const remainingCount = compactGallery ? block.items.length - visibleItems.length : 0;
@@ -65,10 +122,13 @@ function GalleryBlock({ block, onPreview, compactGallery = false, hideImages }: 
   );
 }
 
-function VideoBlock({ block, hideImages }: BlockComponentProps) {
+function VideoBlock({ block, hideImages, showHiddenImageLinks, onPreview }: BlockComponentProps) {
   if (block.type !== 'video') return null;
 
   if (!block.media.url) {
+    if (block.media.poster && hideImages && showHiddenImageLinks) {
+      return <HiddenImageLink image={{ url: block.media.poster, alt: block.media.alt || '' }} onPreview={onPreview} />;
+    }
     return block.media.poster && !hideImages ? (
       <img
         className="video-poster"
@@ -92,20 +152,25 @@ function VideoBlock({ block, hideImages }: BlockComponentProps) {
   );
 }
 
-function LinkPreviewBlock({ block, hideImages }: BlockComponentProps) {
+function LinkPreviewBlock({ block, hideImages, showHiddenImageLinks, onPreview }: BlockComponentProps) {
   if (block.type !== 'linkPreview') return null;
 
   return (
-    <a className="link-preview" href={block.preview.url} target="_blank" rel="noreferrer">
-      {block.preview.image && !hideImages && (
-        <img src={block.preview.image} alt="" loading="lazy" />
+    <>
+      <a className="link-preview" href={block.preview.url} target="_blank" rel="noreferrer">
+        {block.preview.image && !hideImages && (
+          <img src={block.preview.image} alt="" loading="lazy" />
+        )}
+        <span>
+          {block.preview.siteName && <small>{block.preview.siteName}</small>}
+          <strong>{block.preview.title || block.preview.url}</strong>
+          {block.preview.description && <p>{block.preview.description}</p>}
+        </span>
+      </a>
+      {block.preview.image && hideImages && showHiddenImageLinks && (
+        <HiddenImageLink image={{ url: block.preview.image, alt: block.preview.title || '' }} onPreview={onPreview} />
       )}
-      <span>
-        {block.preview.siteName && <small>{block.preview.siteName}</small>}
-        <strong>{block.preview.title || block.preview.url}</strong>
-        {block.preview.description && <p>{block.preview.description}</p>}
-      </span>
-    </a>
+    </>
   );
 }
 
@@ -171,6 +236,7 @@ export function BlockRenderer({
   onPreview,
   compactGallery,
   hideImages,
+  showHiddenImageLinks,
 }: BlockRendererProps) {
   // 注册表让新增标准 Block 保持集中且穷尽，避免在主题组件中加入平台判断。
   const Renderer = blockRegistry[block.type];
@@ -181,6 +247,7 @@ export function BlockRenderer({
       onPreview={onPreview}
       compactGallery={compactGallery}
       hideImages={hideImages}
+      showHiddenImageLinks={showHiddenImageLinks}
     />
   );
 }

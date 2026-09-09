@@ -45,6 +45,7 @@ export function ThreadEntry({ item, index, hideImages = false, onAction }: Threa
           blocks={contentBlocks}
           expanded={contentExpanded}
           hideImages={hideImages}
+          showHiddenImageLinks
           onPreview={setPreview}
         />
 
@@ -83,7 +84,7 @@ export function ThreadEntry({ item, index, hideImages = false, onAction }: Threa
       </div>
 
       <ItemLightbox
-        preview={hideImages ? undefined : preview}
+        preview={preview}
         onClose={() => setPreview(undefined)}
       />
     </article>
