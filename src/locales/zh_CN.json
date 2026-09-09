@@ -403,6 +403,7 @@
     "emoji": "表情"
   },
   "block": {
+    "image": "图片",
     "previewImageInGallery": "预览图片 $1，共 $2 张",
     "previewImage": "预览图片 $1",
     "videoPoster": "视频封面",

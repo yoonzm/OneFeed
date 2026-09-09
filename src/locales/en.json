@@ -403,6 +403,7 @@
     "emoji": "Emoji"
   },
   "block": {
+    "image": "Image",
     "previewImageInGallery": "Preview image $1 of $2",
     "previewImage": "Preview image $1",
     "videoPoster": "Video poster",

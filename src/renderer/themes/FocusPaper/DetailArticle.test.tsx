@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { act } from 'react';
+import { createRoot } from 'react-dom/client';
 import { describe, expect, it, vi } from 'vitest';
 import type { ArticleDetail } from '../../../types/detail';
 import { formatDateTime } from '../../../i18n';
@@ -188,8 +190,49 @@ describe('DetailArticle', () => {
       />,
     );
 
-    expect(markup).not.toContain('detail.jpg');
+    expect(markup).toContain('href="https://example.com/detail.jpg"');
+    expect(markup).toContain('>图片</a>');
+    expect(markup).not.toContain('src="https://example.com/detail.jpg"');
     expect(markup).toContain('avatar.jpg');
+  });
+
+  it('opens each hidden gallery and inline image in the lightbox and closes it', async () => {
+    const container = document.createElement('div');
+    const root = createRoot(container);
+    try {
+      await act(async () => root.render(
+        <DetailArticle content={{
+          ...content,
+          body: [{
+            type: 'richText',
+            html: '<p>正文<a href="https://example.com/source"><img src="https://example.com/inline.jpg" alt="行内图"></a><img data-onefeed-kind="emoji" src="https://example.com/emoji.png"></p>',
+            plainText: '正文',
+          }, {
+            type: 'gallery',
+            items: Array.from({ length: 6 }, (_, index) => ({
+              url: `https://example.com/gallery-${index}.jpg`, alt: `配图 ${index}`,
+            })),
+          }],
+        }} hideImages onAction={vi.fn()} />,
+      ));
+      const body = container.querySelector('.detail-article > .detail-body:not(.detail-context)')!;
+      const links = Array.from(body.querySelectorAll('a'));
+      expect(links).toHaveLength(7);
+      expect(body.querySelectorAll('img')).toHaveLength(1);
+      expect(body.querySelector('img')?.dataset.onefeedKind).toBe('emoji');
+      expect(body.querySelector('a a')).toBeNull();
+      for (const link of links) {
+        expect(link.textContent).toBe('图片');
+        const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+        await act(async () => { link.dispatchEvent(event); });
+        expect(event.defaultPrevented).toBe(true);
+        expect(container.querySelector('.lightbox img')?.getAttribute('src')).toBe(link.href);
+        await act(async () => { container.querySelector<HTMLButtonElement>('.lightbox')!.click(); });
+        expect(container.querySelector('.lightbox')).toBeNull();
+      }
+    } finally {
+      await act(async () => root.unmount());
+    }
   });
 
   it('renders adapter-backed article pagination below the body', () => {

@@ -115,6 +115,7 @@ export function ThreadDetail({ content, hideImages = false, onAction }: ThreadDe
                 block={block}
                 expanded={headerBodyExpanded}
                 hideImages={hideImages}
+                showHiddenImageLinks
                 onPreview={setPreview}
                 key={`${block.type}-${blockIndex}`}
               />
@@ -190,7 +191,7 @@ export function ThreadDetail({ content, hideImages = false, onAction }: ThreadDe
         </nav>
       )}
 
-      {preview && !hideImages && (
+      {preview && (
         <button
           className="lightbox"
           type="button"

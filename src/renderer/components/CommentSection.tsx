@@ -95,6 +95,7 @@ function CommentItemView({ item, hideImages, onPreview, onOpenReplies }: {
             block={block}
             expanded
             hideImages={hideImages}
+            showHiddenImageLinks
             onPreview={onPreview}
             compactGallery
             key={`${block.type}-${index}`}
@@ -491,7 +492,7 @@ export const CommentSection = forwardRef<CommentSectionHandle, CommentSectionPro
             )}
           </>
         )}
-        {imagePreview && !hideImages && (
+        {imagePreview && (
           <button
             className="lightbox comment-lightbox"
             type="button"
