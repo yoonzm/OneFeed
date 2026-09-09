@@ -394,7 +394,8 @@
     "allComments": "已加载当前全部评论",
     "allReplies": "已加载当前全部回复",
     "closeImagePreview": "关闭评论图片预览",
-    "image": "评论图片"
+    "image": "评论图片",
+    "emoji": "表情"
   },
   "block": {
     "previewImageInGallery": "预览图片 $1，共 $2 张",
@@ -437,6 +438,7 @@
     "hotList": "热榜",
     "popularity": "热度",
     "zhihuUser": "知乎用户",
+    "xiaohongshuUser": "小红书用户",
     "v2exUser": "V2EX 用户",
     "linuxDoUser": "Linux DO 用户",
     "viewAllAnswers": "查看全部回答",

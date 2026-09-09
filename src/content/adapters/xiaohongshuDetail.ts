@@ -1,12 +1,14 @@
 import DOMPurify from 'dompurify';
 import { i18n } from '../../i18n';
 import type { ArticleDetail } from '../../types/detail';
+import type { CommentCommand, CommentRequestResult } from '../../types/comments';
 import type { FeedBlock, FeedImage } from '../../types/feed';
 import type { DetailAdapterDefinition, DetailListener } from './detail';
 import {
   parseXiaohongshuCount,
   XIAOHONGSHU_SOURCE,
 } from './xiaohongshu';
+import { XiaohongshuCommentsController } from './xiaohongshuComments';
 
 const DETAIL_ROOT_SELECTOR = '#noteContainer.note-container';
 const SUPPORTED_HOSTS = new Set(['xiaohongshu.com', 'www.xiaohongshu.com']);
@@ -306,6 +308,9 @@ export function parseXiaohongshuDetail(
   const engageBar = element.querySelector('.engage-bar-container');
   const likeControl = engageBar?.querySelector<HTMLElement>('.like-wrapper');
   const collectControl = engageBar?.querySelector<HTMLElement>('.collect-wrapper');
+  const commentsSupported = Boolean(
+    engageBar?.querySelector('.chat-wrapper') || element.querySelector('.comments-container'),
+  );
   const reactions = countFrom(
     normalizedText(likeControl?.querySelector('.count')),
     metaValues(root, 'og:xhs:note_like')[0],
@@ -378,9 +383,26 @@ export function parseXiaohongshuDetail(
             enabled: Boolean(collectControl),
             fallback: 'openOriginal',
           },
+          ...(commentsSupported ? [{
+            id: 'reply',
+            kind: 'reply' as const,
+            label: i18n.t('adapter.comments'),
+            count: replies,
+            enabled: true,
+          }] : []),
         ],
       },
     },
+    comments: commentsSupported ? {
+      targetId: `xiaohongshu_${noteId}`,
+      count: replies,
+      capabilities: {
+        preview: true,
+        all: true,
+        loadMore: true,
+        replies: true,
+      },
+    } : undefined,
   };
 }
 
@@ -405,6 +427,10 @@ export class XiaohongshuDetailAdapter {
   private timer?: number;
   private runtimeElement?: Element;
   private itemId?: string;
+  private readonly comments = new XiaohongshuCommentsController(
+    () => this.runtimeElement,
+    () => this.itemId,
+  );
 
   constructor(private readonly onDetail: DetailListener) {}
 
@@ -422,11 +448,16 @@ export class XiaohongshuDetailAdapter {
     window.clearTimeout(this.timer);
     this.runtimeElement = undefined;
     this.itemId = undefined;
+    this.comments.disconnect();
   }
 
   triggerAction(itemId: string, actionId: string): boolean {
     if (itemId !== this.itemId) return false;
     return triggerXiaohongshuDetailAction(this.runtimeElement, actionId);
+  }
+
+  requestComments(command: CommentCommand): Promise<CommentRequestResult> {
+    return this.comments.request(command);
   }
 
   private processDetail(): void {

@@ -171,7 +171,18 @@ describe('Xiaohongshu note detail', () => {
           actions: [
             { id: 'react', count: 13000, active: true, enabled: true },
             { id: 'bookmark', count: 18, active: false, enabled: true },
+            { id: 'reply', count: 42, enabled: true },
           ],
+        },
+      },
+      comments: {
+        targetId: `xiaohongshu_${NOTE_ID}`,
+        count: 42,
+        capabilities: {
+          preview: true,
+          all: true,
+          loadMore: true,
+          replies: true,
         },
       },
     });
@@ -230,7 +241,7 @@ describe('Xiaohongshu note detail', () => {
     )).toBeNull();
   });
 
-  it('publishes the active note and proxies likes and bookmarks for that note only', () => {
+  it('publishes the active note and proxies likes and bookmarks for that note only', async () => {
     const element = renderDetail();
     window.history.replaceState({}, '', `/explore/${NOTE_ID}`);
     const like = element.querySelector<HTMLElement>('.like-wrapper')!;
@@ -250,6 +261,10 @@ describe('Xiaohongshu note detail', () => {
     expect(collectClick).toHaveBeenCalledOnce();
     expect(adapter.triggerAction('xiaohongshu_other', 'react')).toBe(false);
     expect(triggerXiaohongshuDetailAction(element, 'share')).toBe(false);
+    await expect(adapter.requestComments({
+      kind: 'openAll',
+      targetId: 'xiaohongshu_other',
+    })).resolves.toEqual({ kind: 'failed', retryable: false });
     adapter.disconnect();
   });
 });
