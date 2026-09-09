@@ -41,6 +41,12 @@ export const PLATFORM_PRESENTATIONS: PlatformPresentation[] = [
     accent: '#1677ff',
   },
   {
+    id: 'weread',
+    scope: i18n.t('platform.weread.scope'),
+    access: i18n.t('platform.weread.access'),
+    accent: '#2fa7f5',
+  },
+  {
     id: 'hacker-news',
     scope: i18n.t('platform.hackerNews.scope'),
     access: i18n.t('platform.hackerNews.access'),

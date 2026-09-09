@@ -12,6 +12,7 @@ import { V2exAdapter } from './v2ex';
 import { V2exThreadAdapter } from './v2exThread';
 import { WeiboAdapter } from './weibo';
 import { WeiboDetailAdapter } from './weiboDetail';
+import { WereadAdapter } from './weread';
 import { XiaohongshuAdapter } from './xiaohongshu';
 import { XiaohongshuDetailAdapter } from './xiaohongshuDetail';
 import { ZhihuAdapter } from './zhihu';
@@ -106,6 +107,14 @@ describe('createAdapter', () => {
       adapter: expect.any(WeiboAdapter),
       source: { id: 'weibo', name: '微博' },
     });
+    expect(createAdapter(
+      new URL('https://weread.qq.com/web/category/rising'),
+      listeners(),
+    )).toMatchObject({
+      surface: 'feed',
+      adapter: expect.any(WereadAdapter),
+      source: { id: 'weread', name: '微信读书' },
+    });
   });
 
   it('selects supported article detail adapters', () => {
@@ -191,6 +200,11 @@ describe('createAdapter', () => {
     )).toBeNull();
     expect(createAdapter(new URL('https://www.zhihu.com/search?type=content'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://zhuanlan.zhihu.com/'), listeners())).toBeNull();
+    expect(createAdapter(new URL('https://weread.qq.com/web/reader/abc123'), listeners()))
+      .toBeNull();
+    expect(createAdapter(new URL('https://weread.qq.com/web/bookDetail/abc123'), listeners()))
+      .toBeNull();
+    expect(createAdapter(new URL('https://weread.qq.com/web/shelf'), listeners())).toBeNull();
     expect(createAdapter(new URL('https://news.ycombinator.com/item?id=43876543'), listeners())).toBeNull();
     expect(createAdapter(
       new URL('https://www.reddit.com/r/typescript/comments/abc123/topic/'),
@@ -222,6 +236,11 @@ describe('createAdapter', () => {
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/news'))).toBe(true);
     expect(isSupportedUrl(new URL('https://36kr.com/information/technology/'))).toBe(true);
     expect(isSupportedUrl(new URL('https://36kr.com/p/123456'))).toBe(true);
+    expect(isSupportedUrl(new URL('https://weread.qq.com/web/category/rising'))).toBe(true);
+    expect(isSupportedUrl(new URL(
+      'https://weread.qq.com/web/search/books?keyword=%E9%98%85%E8%AF%BB',
+    ))).toBe(true);
+    expect(isSupportedUrl(new URL('https://weread.qq.com/web/reader/abc123'))).toBe(false);
     expect(isSupportedUrl(new URL('https://news.ycombinator.com/item?id=43876543'))).toBe(false);
     expect(isSupportedUrl(new URL('https://www.reddit.com/'))).toBe(true);
     expect(isSupportedUrl(new URL('https://www.reddit.com/r/typescript/comments/abc123/topic/')))

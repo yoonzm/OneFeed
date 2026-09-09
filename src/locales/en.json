@@ -97,6 +97,11 @@
       "name": "Reddit",
       "scope": "Home, sorted feeds, and communities",
       "access": "Some content requires sign-in"
+    },
+    "weread": {
+      "name": "WeRead",
+      "scope": "Public rankings, categories, and book search",
+      "access": "Browse without signing in"
     }
   },
   "board": {
@@ -437,6 +442,8 @@
     "viewDetails": "View details",
     "hotList": "Hot List",
     "popularity": "Popularity",
+    "todayReading": "Reading today",
+    "recommendationScore": "Recommendation score",
     "zhihuUser": "Zhihu user",
     "xiaohongshuUser": "Xiaohongshu user",
     "v2exUser": "V2EX user",

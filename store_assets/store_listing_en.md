@@ -12,7 +12,7 @@
 
 OneFeed turns feeds from supported websites into a clean and consistent Focus Paper reading interface. It reduces page noise while keeping the original content, scrolling behavior, and essential interactions available.
 
-The current version supports feeds and selected detail pages from Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, and 36Kr.
+The current version supports feeds and selected detail pages from Weibo, X, Xiaohongshu, Reddit, Zhihu, WeRead, Hacker News, Linux DO, V2EX, and 36Kr. WeRead coverage is limited to public rankings, categories, and populated book-search results.
 
 Current features include:
 
@@ -28,7 +28,7 @@ Current features include:
 - English and Simplified Chinese interfaces that follow Chrome's display language;
 - page parsing and rendering performed locally in the browser.
 
-OneFeed is an independently developed third-party extension and is not affiliated with, authorized by, or endorsed by Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, 36Kr, or their affiliates.
+OneFeed is an independently developed third-party extension and is not affiliated with, authorized by, or endorsed by Weibo, X, Xiaohongshu, Reddit, Zhihu, WeRead, Hacker News, Linux DO, V2EX, 36Kr, or their affiliates.
 
 ## Single-purpose statement
 
@@ -42,7 +42,7 @@ Stores the enabled state, theme preferences, header website visibility and order
 
 ### Supported website access
 
-Access to `weibo.com`, `x.com`, `twitter.com`, `xiaohongshu.com`, `reddit.com`, `zhihu.com`, `news.ycombinator.com`, `linux.do`, `v2ex.com`, and `36kr.com` is used only to read supported pages opened by the user, create the unified reading interface, and delegate interactions explicitly triggered by the user. The extension does not run outside supported websites.
+Access to `weibo.com`, `x.com`, `twitter.com`, `xiaohongshu.com`, `reddit.com`, `zhihu.com`, `weread.qq.com`, `news.ycombinator.com`, `linux.do`, `v2ex.com`, and `36kr.com` is used only to read supported pages opened by the user, create the unified reading interface, and delegate interactions explicitly triggered by the user. WeRead access is limited to public book lists and search results; reader and personal-data pages remain untouched. The extension does not run outside supported websites.
 
 ## Data disclosure
 

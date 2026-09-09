@@ -10,13 +10,13 @@
 
 ## 详细说明
 
-OneFeed 面向多平台信息流，将受支持网站的内容转换为简洁、一致的 Focus Paper 阅读界面，帮助你减少页面噪音，把注意力留给内容本身。当前版本支持微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX 与 36氪信息流及受支持的详情页面。
+OneFeed 面向多平台信息流，将受支持网站的内容转换为简洁、一致的 Focus Paper 阅读界面，帮助你减少页面噪音，把注意力留给内容本身。当前版本支持微博、X、小红书、Reddit、知乎、微信读书、Hacker News、Linux DO、V2EX 与 36氪信息流及受支持的详情页面。
 
 当前版本提供：
 
 - 首次安装后展示欢迎页，可直接打开无需登录的 Hacker News 体验 OneFeed；
 - 点击浏览器工具栏图标打开 Launch Center，可查看最近使用的平台、打开受支持网站并统一控制启用状态与外观；
-- 重新排版微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX 与 36氪信息流，以及微博单条动态、小红书笔记、知乎问题/回答/专栏、Linux DO 话题、V2EX 主题和 36氪文章详情；
+- 重新排版微博、X、小红书、Reddit、知乎、微信读书、Hacker News、Linux DO、V2EX 与 36氪信息流，以及微博单条动态、小红书笔记、知乎问题/回答/专栏、Linux DO 话题、V2EX 主题和 36氪文章详情；微信读书仅覆盖公开榜单、分类及图书检索；
 - 在知乎回答详情中通过 OneFeed 弹窗统一阅读评论与回复，并支持继续加载；
 - 统一展示标题、作者、两行正文摘要、紧凑图片预览和互动数量；
 - 可按发布时间、点赞、评论或收藏对已加载内容排序，并按平台保存选择；
@@ -30,7 +30,7 @@ OneFeed 面向多平台信息流，将受支持网站的内容转换为简洁、
 - 可通过浏览器工具栏图标或页面悬浮开关随时暂停或重新开启；
 - 所有页面解析和渲染均在浏览器本地完成。
 
-OneFeed 是独立开发的第三方扩展，与微博、X、小红书、Reddit、知乎、Hacker News、Linux DO、V2EX、36氪及其关联方不存在隶属、授权或背书关系。
+OneFeed 是独立开发的第三方扩展，与微博、X、小红书、Reddit、知乎、微信读书、Hacker News、Linux DO、V2EX、36氪及其关联方不存在隶属、授权或背书关系。
 
 ## 单一用途说明
 
@@ -44,7 +44,7 @@ OneFeed 是独立开发的第三方扩展，与微博、X、小红书、Reddit�
 
 ### 受支持网站访问
 
-对 `weibo.com`、`x.com`、`twitter.com`、`xiaohongshu.com`、`reddit.com`、`zhihu.com`、`news.ycombinator.com`、`linux.do`、`v2ex.com` 和 `36kr.com` 的访问权限，仅用于读取用户当前打开的受支持信息流与详情内容，生成统一阅读界面，并代理用户主动触发的原页面互动。扩展不会在这些受支持网站之外运行。
+对 `weibo.com`、`x.com`、`twitter.com`、`xiaohongshu.com`、`reddit.com`、`zhihu.com`、`weread.qq.com`、`news.ycombinator.com`、`linux.do`、`v2ex.com` 和 `36kr.com` 的访问权限，仅用于读取用户当前打开的受支持信息流与详情内容，生成统一阅读界面，并代理用户主动触发的原页面互动。微信读书仅处理公开图书列表与检索结果，不读取阅读器正文或个人数据页面。扩展不会在这些受支持网站之外运行。
 
 ## 数据披露建议
 
@@ -59,7 +59,7 @@ OneFeed 是独立开发的第三方扩展，与微博、X、小红书、Reddit�
 ## 测试说明
 
 1. 首次安装后会自动打开 OneFeed 欢迎页，点击“打开 Hacker News 立即体验”可进入无需测试账号的公开信息流。
-2. 扩展会将 Hacker News、`https://www.v2ex.com/` 或 `https://36kr.com/information/web_news/` 的公开信息流显示为 Focus Paper 阅读界面；可在信息流顶部按页面提供的数据切换发布时间、点赞、评论或收藏排序；也可打开 `https://www.xiaohongshu.com/explore` 中的任意笔记，检查标题、正文、完整画廊或视频、互动统计以及喜欢和收藏代理。
+2. 扩展会将 Hacker News、`https://www.v2ex.com/`、`https://36kr.com/information/web_news/` 或 `https://weread.qq.com/web/category/rising` 的公开信息流显示为 Focus Paper 阅读界面；微信读书榜单可检查分类切换、书名、作者、简介、封面、今日阅读、推荐值与继续加载；也可打开 `https://www.xiaohongshu.com/explore` 中的任意笔记，检查标题、正文、完整画廊或视频、互动统计以及喜欢和收藏代理。
 3. 在 36氪信息流中打开任意文章，可检查文章标题、作者、发布时间、正文与图片的详情阅读界面，无需测试账号。
 4. 使用审核人员自己的知乎账号打开 `https://www.zhihu.com/hot`，可检查两行正文摘要、右侧圆角图片预览、热榜频道导航和问题详情页；在回答详情点击评论数，可检查 OneFeed 评论弹窗与评论继续加载，点击评论中的回复数可检查上层回复弹窗。
 5. 点击 Chrome 工具栏中的 OneFeed 图标，可打开 Launch Center、切换平台并暂停或重新开启统一信息流。

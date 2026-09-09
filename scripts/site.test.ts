@@ -54,7 +54,7 @@ describe.each(landingPages)('$file SEO structure', ({ file, canonical, language 
     const document = await loadDocument(file);
 
     expect(document.querySelectorAll('[data-demo-panel]')).toHaveLength(2);
-    expect(document.querySelectorAll('.platform-item')).toHaveLength(9);
+    expect(document.querySelectorAll('.platform-item')).toHaveLength(10);
     expect(document.querySelectorAll('.faq-list details')).toHaveLength(4);
   });
 });
