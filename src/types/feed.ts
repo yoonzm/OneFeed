@@ -218,6 +218,7 @@ export type FeedActionKind =
   | 'repost'
   | 'bookmark'
   | 'share'
+  | 'navigate'
   | 'open';
 
 /**

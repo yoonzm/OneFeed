@@ -13,6 +13,8 @@ import { v2exAdapterDefinition } from './v2ex';
 import { v2exThreadAdapterDefinition } from './v2exThread';
 import { weiboAdapterDefinition } from './weibo';
 import { weiboDetailAdapterDefinition } from './weiboDetail';
+import { wereadAdapterDefinition } from './weread';
+import { wereadDetailAdapterDefinition } from './wereadDetail';
 import { xiaohongshuAdapterDefinition } from './xiaohongshu';
 import { xiaohongshuDetailAdapterDefinition } from './xiaohongshuDetail';
 import { zhihuAdapterDefinition } from './zhihu';
@@ -25,6 +27,7 @@ const feedAdapterDefinitions: AdapterDefinition[] = [
   xiaohongshuAdapterDefinition,
   redditAdapterDefinition,
   zhihuAdapterDefinition,
+  wereadAdapterDefinition,
   hackerNewsAdapterDefinition,
   linuxDoAdapterDefinition,
   v2exAdapterDefinition,
@@ -33,6 +36,7 @@ const feedAdapterDefinitions: AdapterDefinition[] = [
 
 const detailAdapterDefinitions: DetailAdapterDefinition[] = [
   weiboDetailAdapterDefinition,
+  wereadDetailAdapterDefinition,
   xiaohongshuDetailAdapterDefinition,
   thirtySixKrDetailAdapterDefinition,
   zhihuThreadAdapterDefinition,

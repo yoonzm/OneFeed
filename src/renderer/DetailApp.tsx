@@ -29,6 +29,14 @@ export default function DetailApp({
 }: DetailAppProps) {
   const content = useDetailStore((state) => state.content);
   const { preferences, ready: displayReady } = useDisplayPreferences();
+  const articlePageKey = content?.kind === 'article' && content.pagination
+    ? `${content.pagination.currentPage}:${content.metadataLabels?.join('|') || ''}`
+    : undefined;
+
+  useEffect(() => {
+    if (articlePageKey === undefined) return;
+    scrollElement.scrollTo({ top: 0 });
+  }, [articlePageKey, scrollElement]);
 
   useEffect(() => {
     const handleScroll = () => {

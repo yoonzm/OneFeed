@@ -97,6 +97,11 @@
       "name": "Reddit",
       "scope": "Home, sorted feeds, and communities",
       "access": "Some content requires sign-in"
+    },
+    "weread": {
+      "name": "WeRead",
+      "scope": "Public discovery and paged reading",
+      "access": "Reader content follows source access"
     }
   },
   "board": {
@@ -394,7 +399,8 @@
     "allComments": "All current comments loaded",
     "allReplies": "All current replies loaded",
     "closeImagePreview": "Close comment image preview",
-    "image": "Comment image"
+    "image": "Comment image",
+    "emoji": "Emoji"
   },
   "block": {
     "previewImageInGallery": "Preview image $1 of $2",
@@ -436,7 +442,10 @@
     "viewDetails": "View details",
     "hotList": "Hot List",
     "popularity": "Popularity",
+    "todayReading": "Reading today",
+    "recommendationScore": "Recommendation score",
     "zhihuUser": "Zhihu user",
+    "xiaohongshuUser": "Xiaohongshu user",
     "v2exUser": "V2EX user",
     "linuxDoUser": "Linux DO user",
     "viewAllAnswers": "View all answers",

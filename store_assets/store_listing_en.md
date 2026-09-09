@@ -6,19 +6,19 @@
 - **Short description:** Rearrange supported website feeds into one focused, consistent reading interface that you can pause at any time.
 - **Recommended category:** Productivity
 - **Language:** English
-- **Version:** 0.1.18
+- **Version:** 0.1.19
 
 ## Detailed description
 
 OneFeed turns feeds from supported websites into a clean and consistent Focus Paper reading interface. It reduces page noise while keeping the original content, scrolling behavior, and essential interactions available.
 
-The current version supports feeds and selected detail pages from Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, and 36Kr.
+The current version supports feeds and selected detail pages from Weibo, X, Xiaohongshu, Reddit, Zhihu, WeRead, Hacker News, Linux DO, V2EX, and 36Kr. WeRead coverage includes public book discovery and a unified article view for the currently readable chapter, with Previous/Next controls backed by the source reader.
 
 Current features include:
 
 - a first-install welcome page with a public Hacker News page for immediate testing;
 - a launch center for recently used platforms, supported websites, global state, settings, and appearance;
-- unified feed, article, question, answer, topic, comment, and reply reading where supported, including individual Weibo posts and Xiaohongshu notes;
+- unified feed, article, question, answer, topic, comment, and reply reading where supported, including individual Weibo posts, Xiaohongshu notes, and currently readable WeRead chapters;
 - sorting loaded feed content by publication time, likes, comments, or bookmarks, with the choice saved per platform;
 - local read markers and display filters for read state, keywords, authors, platforms, and content types;
 - settings for header website visibility and order, plus feed and detail image display;
@@ -28,7 +28,7 @@ Current features include:
 - English and Simplified Chinese interfaces that follow Chrome's display language;
 - page parsing and rendering performed locally in the browser.
 
-OneFeed is an independently developed third-party extension and is not affiliated with, authorized by, or endorsed by Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, 36Kr, or their affiliates.
+OneFeed is an independently developed third-party extension and is not affiliated with, authorized by, or endorsed by Weibo, X, Xiaohongshu, Reddit, Zhihu, WeRead, Hacker News, Linux DO, V2EX, 36Kr, or their affiliates.
 
 ## Single-purpose statement
 
@@ -42,7 +42,7 @@ Stores the enabled state, theme preferences, header website visibility and order
 
 ### Supported website access
 
-Access to `weibo.com`, `x.com`, `twitter.com`, `xiaohongshu.com`, `reddit.com`, `zhihu.com`, `news.ycombinator.com`, `linux.do`, `v2ex.com`, and `36kr.com` is used only to read supported pages opened by the user, create the unified reading interface, and delegate interactions explicitly triggered by the user. The extension does not run outside supported websites.
+Access to `weibo.com`, `x.com`, `twitter.com`, `xiaohongshu.com`, `reddit.com`, `zhihu.com`, `weread.qq.com`, `news.ycombinator.com`, `linux.do`, `v2ex.com`, and `36kr.com` is used only to read supported pages opened by the user, create the unified reading interface, and delegate interactions explicitly triggered by the user. WeRead access also reads chapter text and catalog position already exposed to the current user and activates the source reader's existing chapter controls when the user selects Previous or Next. It does not call private reading APIs, bypass access restrictions, or take over personal shelves, notes, or reading-progress pages. The extension does not run outside supported websites.
 
 ## Data disclosure
 

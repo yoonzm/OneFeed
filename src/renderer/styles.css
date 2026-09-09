@@ -248,6 +248,36 @@ h2 a:hover { color: var(--blue); text-decoration: underline; }
 .thread-pagination span { color: var(--color-onefeed-subtle); }
 .thread-pagination strong { color: var(--muted); font-weight: 500; }
 
+.article-pagination {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  margin-top: 36px;
+  padding: 22px 0 8px;
+  border-top: 1px solid var(--line);
+}
+.article-pagination button {
+  min-height: 38px;
+  padding: 7px 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--blue);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+}
+.article-pagination button:first-child { justify-self: start; }
+.article-pagination button:last-child { justify-self: end; }
+.article-pagination button:hover:not(:disabled) { border-color: var(--blue); }
+.article-pagination button:disabled {
+  color: var(--color-onefeed-subtle);
+  cursor: default;
+  opacity: .65;
+}
+.article-pagination strong { color: var(--muted); font-size: 12px; font-weight: 500; }
+
 /* Feed、问题说明和回答预览显示两行；可原地展开的回复恢复完整块级排版。 */
 .content {
   display: -webkit-box;

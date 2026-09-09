@@ -21,6 +21,7 @@ export default defineContentScript({
     'https://news.ycombinator.com/*',
     'https://36kr.com/*',
     'https://*.36kr.com/*',
+    'https://weread.qq.com/*',
     'https://reddit.com/*',
     'https://www.reddit.com/*',
   ],

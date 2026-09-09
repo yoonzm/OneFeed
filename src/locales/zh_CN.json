@@ -97,6 +97,11 @@
       "name": "Reddit",
       "scope": "首页、排序页与社区信息流",
       "access": "部分内容需登录"
+    },
+    "weread": {
+      "name": "微信读书",
+      "scope": "公开图书发现与分页阅读",
+      "access": "阅读器内容取决于原站权限"
     }
   },
   "board": {
@@ -394,7 +399,8 @@
     "allComments": "已加载当前全部评论",
     "allReplies": "已加载当前全部回复",
     "closeImagePreview": "关闭评论图片预览",
-    "image": "评论图片"
+    "image": "评论图片",
+    "emoji": "表情"
   },
   "block": {
     "previewImageInGallery": "预览图片 $1，共 $2 张",
@@ -436,7 +442,10 @@
     "viewDetails": "查看详情",
     "hotList": "热榜",
     "popularity": "热度",
+    "todayReading": "今日阅读",
+    "recommendationScore": "推荐值",
     "zhihuUser": "知乎用户",
+    "xiaohongshuUser": "小红书用户",
     "v2exUser": "V2EX 用户",
     "linuxDoUser": "Linux DO 用户",
     "viewAllAnswers": "查看全部回答",

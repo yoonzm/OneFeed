@@ -32,7 +32,7 @@ export const V2EX_PLATFORM = {
   name: 'V2EX',
   homeUrl: 'https://www.v2ex.com/',
   status: 'supported',
-  navOrder: 8,
+  navOrder: 9,
   hosts: ['v2ex.com'],
 } as const satisfies PlatformDefinition;
 
@@ -41,7 +41,7 @@ export const LINUX_DO_PLATFORM = {
   name: 'Linux DO',
   homeUrl: 'https://linux.do/',
   status: 'supported',
-  navOrder: 7,
+  navOrder: 8,
   hosts: ['linux.do'],
 } as const satisfies PlatformDefinition;
 
@@ -68,7 +68,7 @@ export const HACKER_NEWS_PLATFORM = {
   name: 'Hacker News',
   homeUrl: 'https://news.ycombinator.com/',
   status: 'supported',
-  navOrder: 6,
+  navOrder: 7,
   hosts: ['news.ycombinator.com'],
 } as const satisfies PlatformDefinition;
 
@@ -77,7 +77,7 @@ export const THIRTY_SIX_KR_PLATFORM = {
   name: '36Kr',
   homeUrl: 'https://36kr.com/information/web_news/',
   status: 'supported',
-  navOrder: 9,
+  navOrder: 10,
   hosts: ['36kr.com'],
 } as const satisfies PlatformDefinition;
 
@@ -90,6 +90,15 @@ export const REDDIT_PLATFORM = {
   hosts: ['reddit.com', 'redd.it'],
 } as const satisfies PlatformDefinition;
 
+export const WEREAD_PLATFORM = {
+  id: 'weread',
+  name: '微信读书',
+  homeUrl: 'https://weread.qq.com/web/category/rising',
+  status: 'supported',
+  navOrder: 6,
+  hosts: ['weread.qq.com'],
+} as const satisfies PlatformDefinition;
+
 /** 页面导航和适配器共享此目录；品牌顺序按公开日活规模降序维护。 */
 export const PLATFORM_CATALOG = [
   WEIBO_PLATFORM,
@@ -97,6 +106,7 @@ export const PLATFORM_CATALOG = [
   XIAOHONGSHU_PLATFORM,
   REDDIT_PLATFORM,
   ZHIHU_PLATFORM,
+  WEREAD_PLATFORM,
   HACKER_NEWS_PLATFORM,
   LINUX_DO_PLATFORM,
   V2EX_PLATFORM,
@@ -111,6 +121,7 @@ const PLATFORM_NAME_KEYS = {
   xiaohongshu: 'platform.xiaohongshu.name',
   reddit: 'platform.reddit.name',
   zhihu: 'platform.zhihu.name',
+  weread: 'platform.weread.name',
   'hacker-news': 'platform.hackerNews.name',
   'linux-do': 'platform.linuxDo.name',
   v2ex: 'platform.v2ex.name',

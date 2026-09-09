@@ -26,6 +26,7 @@ export function DetailArticle({
 }: DetailArticleProps) {
   const [preview, setPreview] = useState<FeedImage>();
   const commentsRef = useRef<CommentSectionHandle>(null);
+  const pagination = content.pagination;
   const primaryTime = content.updatedAt ?? content.publishedAt;
   const timeTitle = [
     content.publishedAt !== undefined
@@ -125,6 +126,28 @@ export function DetailArticle({
           />
         ))}
       </div>
+
+      {pagination && (
+        <nav className="article-pagination" aria-label={i18n.t('common.pagination')}>
+          <button
+            type="button"
+            disabled={!pagination.previous?.enabled}
+            onClick={() => pagination.previous && handleAction(pagination.previous)}
+          >
+            {i18n.t('common.previousPage')}
+          </button>
+          <strong>
+            {pagination.currentPage} / {pagination.totalPages}
+          </strong>
+          <button
+            type="button"
+            disabled={!pagination.next?.enabled}
+            onClick={() => pagination.next && handleAction(pagination.next)}
+          >
+            {i18n.t('common.nextPage')}
+          </button>
+        </nav>
+      )}
 
       {content.actionSlots?.footer && (
         <ActionBar

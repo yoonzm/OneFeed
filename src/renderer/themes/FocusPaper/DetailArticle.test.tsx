@@ -191,4 +191,38 @@ describe('DetailArticle', () => {
     expect(markup).not.toContain('detail.jpg');
     expect(markup).toContain('avatar.jpg');
   });
+
+  it('renders adapter-backed article pagination below the body', () => {
+    const markup = renderToStaticMarkup(
+      <DetailArticle
+        content={{
+          ...content,
+          pagination: {
+            currentPage: 2,
+            totalPages: 3,
+            previous: {
+              id: 'previous-page',
+              kind: 'navigate',
+              label: '上一页',
+              enabled: true,
+            },
+          },
+        }}
+        onAction={vi.fn()}
+      />,
+    );
+    const container = document.createElement('div');
+    container.innerHTML = markup;
+    const pagination = container.querySelector('.article-pagination');
+    const [previousButton, nextButton] = Array.from(
+      pagination?.querySelectorAll<HTMLButtonElement>('button') || [],
+    );
+
+    expect(pagination?.querySelector('strong')?.textContent).toBe('2 / 3');
+    expect(previousButton?.textContent).toBe('上一页');
+    expect(previousButton?.disabled).toBe(false);
+    expect(nextButton?.textContent).toBe('下一页');
+    expect(nextButton?.disabled).toBe(true);
+    expect(markup.indexOf('detail-body')).toBeLessThan(markup.indexOf('article-pagination'));
+  });
 });

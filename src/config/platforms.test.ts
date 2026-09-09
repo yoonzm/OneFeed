@@ -13,13 +13,14 @@ describe('platform catalog', () => {
       '小红书',
       'Reddit',
       '知乎',
+      '微信读书',
       'Hacker News',
       'Linux DO',
       'V2EX',
       '36Kr',
     ]);
     expect(getSupportedPlatforms().map((platform) => platform.navOrder)).toEqual([
-      1, 2, 3, 4, 5, 6, 7, 8, 9,
+      1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
     ]);
   });
 
@@ -40,6 +41,7 @@ describe('platform catalog', () => {
     expect(getPlatformForUrl('https://www.xiaohongshu.com/explore')?.id).toBe('xiaohongshu');
     expect(getPlatformForUrl('https://news.ycombinator.com/newest')?.id).toBe('hacker-news');
     expect(getPlatformForUrl('https://36kr.com/information/web_news/')?.id).toBe('36kr');
+    expect(getPlatformForUrl('https://weread.qq.com/web/category/rising')?.id).toBe('weread');
     expect(getPlatformForUrl('https://www.reddit.com/r/typescript/')?.id).toBe('reddit');
     expect(getPlatformForUrl('https://www.bilibili.com/')).toBeUndefined();
     expect(getPlatformForUrl('https://www.youtube.com/')).toBeUndefined();

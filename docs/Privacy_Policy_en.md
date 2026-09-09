@@ -1,8 +1,8 @@
 # OneFeed Privacy Policy
 
-Effective date: September 3, 2026
+Effective date: September 9, 2026
 
-OneFeed is a browser extension that rearranges feeds from supported websites into a unified reading interface. This policy explains how version `0.1.18` processes data. The current version supports Weibo, X, Xiaohongshu, Reddit, Zhihu, Hacker News, Linux DO, V2EX, and 36Kr. This policy and the relevant permission disclosures will be updated when support for additional websites is released.
+OneFeed is a browser extension that rearranges feeds from supported websites into a unified reading interface. This policy explains how version `0.1.19` processes data. The current version supports Weibo, X, Xiaohongshu, Reddit, Zhihu, WeRead, Hacker News, Linux DO, V2EX, and 36Kr. This policy and the relevant permission disclosures will be updated when support for additional websites is released.
 
 ## Data processed
 
@@ -38,13 +38,14 @@ OneFeed does not maintain a cloud user database. The enabled state, theme prefer
 - **storage:** Saves the enabled state, theme preferences, header website and image preferences, per-platform feed sorting choices, recently used platforms, display-filter rules, and opened-item identifiers locally.
 - **Weibo site access:** Reads and rearranges supported Weibo trending feeds, individual post pages, and content-search results opened by the user.
 - **X site access:** Reads and rearranges the supported X home timeline and its feed channels opened by the user.
-- **Xiaohongshu site access:** Reads and rearranges supported Xiaohongshu Explore feeds, content channels, and note pages opened by the user.
+- **Xiaohongshu site access:** Reads and rearranges supported Xiaohongshu Explore feeds, content channels, note pages, comments, and replies opened by the user.
 - **Reddit site access:** Reads and rearranges supported Reddit home, sorted, and community feeds opened by the user.
 - **Zhihu site access:** Reads and rearranges supported Zhihu feeds, questions, answers, answer comments and replies, and article pages opened by the user.
 - **Hacker News site access:** Reads and rearranges public news, Ask, Show, and Jobs lists opened by the user, and loads public pagination locally.
 - **Linux DO site access:** Reads and rearranges supported Linux DO topic lists and topic reply pages opened by the user.
 - **V2EX site access:** Reads and rearranges supported V2EX topic lists and topic reply pages opened by the user.
 - **36Kr site access:** Reads and rearranges supported 36Kr feeds and article pages opened by the user.
+- **WeRead site access:** Reads and rearranges public book rankings, categories, populated keyword or author search results, and chapter text and catalog position already exposed to the current user on reader pages. It activates the source reader's existing chapter controls only when the user selects Previous or Next in OneFeed. The extension does not call private reading APIs, bypass payment or access restrictions, or take over personal shelves, notes, or reading-progress pages.
 
 The extension does not run outside these supported websites.
 
