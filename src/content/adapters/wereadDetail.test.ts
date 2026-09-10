@@ -73,7 +73,7 @@ describe('WeRead detail adapter', () => {
       kind: 'article',
       role: 'article',
       title: '示例图书',
-      author: { name: '示例作者', avatar: '' },
+      author: false,
       metadataLabels: ['第二章'],
       pagination: {
         currentPage: 2,
@@ -83,6 +83,10 @@ describe('WeRead detail adapter', () => {
       },
     });
     expect(detail?.body).toEqual([{
+      type: 'richText',
+      html: '<h2>第二章</h2>',
+      plainText: '第二章',
+    }, {
       type: 'richText',
       html: '<h2>小标题</h2><p>正文第一段。</p><p>正文第二段。</p>',
       plainText: '小标题 正文第一段。 正文第二段。',
@@ -94,10 +98,23 @@ describe('WeRead detail adapter', () => {
       ?.setAttribute('content', '第二章 <img src=x onerror=alert(1)>。');
 
     const detail = parseWereadDetail(document, readerUrl);
-    const block = detail?.body[0];
+    const block = detail?.body[1];
     expect(block?.type).toBe('richText');
     expect(block?.type === 'richText' ? block.html : '').toContain('&lt;img');
     expect(block?.type === 'richText' ? block.html : '').not.toContain('<img');
+  });
+
+  it('keeps an existing chapter heading without adding a duplicate', () => {
+    const preRender = document.createElement('div');
+    preRender.className = 'preRenderContent';
+    preRender.innerHTML = '<h1>第二章</h1><p>正文。</p>';
+    document.body.appendChild(preRender);
+
+    expect(parseWereadDetail(document, readerUrl)?.body).toEqual([{
+      type: 'richText',
+      html: '<h2>第二章</h2><p>正文。</p>',
+      plainText: '第二章\n正文。',
+    }]);
   });
 
   it('waits until the description belongs to the current chapter', () => {
@@ -125,6 +142,10 @@ describe('WeRead detail adapter', () => {
     const detail = parseWereadDetail(document, readerUrl);
 
     expect(detail?.body).toEqual([{
+      type: 'richText',
+      html: '<h2>第二章</h2>',
+      plainText: '第二章',
+    }, {
       type: 'richText',
       html: '<h2>版权信息</h2><p>书名：活着</p><p>作者：余华</p>',
       plainText: '版权信息\n书名：活着\n作者：余华',

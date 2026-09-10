@@ -57,6 +57,18 @@ const content: ArticleDetail = {
 };
 
 describe('DetailArticle', () => {
+  it('omits the author row when requested while retaining body and footer actions', () => {
+    const markup = renderToStaticMarkup(
+      <DetailArticle content={{ ...content, author: false }} onAction={vi.fn()} />,
+    );
+    expect(markup).not.toContain('author-row');
+    expect(markup).not.toContain('avatar-fallback');
+    expect(markup).not.toContain('林一');
+    expect(markup).not.toContain('<time ');
+    expect(markup).toContain('超过列表摘要长度的完整正文。');
+    expect(markup).toContain('分享');
+  });
+
   it('keeps unbreakable detail content from widening the media column', () => {
     expect(readerStyles).toContain(
       '.detail-body { grid-template-columns: minmax(0, 1fr); }',

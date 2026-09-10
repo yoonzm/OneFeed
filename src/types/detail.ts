@@ -60,8 +60,8 @@ export interface ArticleDetail {
   kind: 'article';
   /** 正文是短动态、独立文章还是隶属于问题的回答。 */
   role: 'post' | 'article' | 'answer';
-  /** 正文作者快照。 */
-  author: FeedAuthor;
+  /** 正文作者快照；false 表示不展示整个作者栏（含时间、附加信息及操作）。 */
+  author: FeedAuthor | false;
   /** 原文首次发布时间，保留 Adapter 可可靠解析的时间表示。 */
   publishedAt?: string | number;
   /** 原文最近更新时间。 */
