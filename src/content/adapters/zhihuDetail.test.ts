@@ -32,7 +32,7 @@ describe('Zhihu answer detail', () => {
     const root = findZhihuDetailRoot(document, url);
     const detail = root ? parseZhihuDetail(root, url) : null;
 
-    expect(detail?.author.name).toBe('嘿嘿 Mo');
+    expect(detail?.author).toMatchObject({ name: '嘿嘿 Mo' });
   });
 
   it('selects the answer from the URL instead of the first answer on the page', () => {

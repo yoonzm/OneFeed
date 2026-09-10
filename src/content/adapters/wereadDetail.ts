@@ -184,6 +184,19 @@ function findChapterTitle(root: ParentNode): string {
     titlePartFromEnd(root, 2);
 }
 
+function withChapterHeading(block: FeedBlock, chapterTitle: string): FeedBlock[] {
+  const container = document.createElement('div');
+  if (block.type === 'richText') container.innerHTML = block.html;
+  // 章节标题可能已包含在捕获的正文中；隐藏署名栏后，仅在缺失时补上标题。
+  const hasHeading = Array.from(container.querySelectorAll('h1, h2, h3, h4, h5, h6'))
+    .some((heading) => normalizedText(heading) === chapterTitle);
+  if (hasHeading) return [block];
+
+  const heading = document.createElement('h2');
+  heading.textContent = chapterTitle;
+  return [{ type: 'richText', html: heading.outerHTML, plainText: chapterTitle }, block];
+}
+
 function isEnabledButton(button: HTMLButtonElement | null): button is HTMLButtonElement {
   return Boolean(
     button &&
@@ -252,13 +265,9 @@ function parseWereadDetailContent(
     kind: 'article',
     role: 'article',
     title: bookTitle,
-    author: {
-      name: normalizedText(root.querySelector('.readerCatalog_bookInfo_author')) ||
-        titlePartFromEnd(root, 1),
-      avatar: '',
-    },
+    author: false,
     metadataLabels: [chapterTitle],
-    body: [bodyBlock],
+    body: withChapterHeading(bodyBlock, chapterTitle),
     pagination: {
       currentPage,
       totalPages,

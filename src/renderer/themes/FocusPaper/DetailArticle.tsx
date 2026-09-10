@@ -17,7 +17,7 @@ interface DetailArticleProps {
   onCommentRequest?: (command: CommentCommand) => Promise<CommentRequestResult>;
 }
 
-/** 单篇内容视图：保留作者元信息，并始终完整渲染所有标准 Block。 */
+/** 单篇内容视图：按适配器声明展示作者元信息，并始终完整渲染所有标准 Block。 */
 export function DetailArticle({
   content,
   hideImages = false,
@@ -85,35 +85,37 @@ export function DetailArticle({
         </div>
       )}
 
-      <div className="author-row">
-        {content.author.avatar ? (
-          <img className="avatar" src={content.author.avatar} alt="" />
-        ) : (
-          <span className="avatar avatar-fallback" aria-hidden="true">
-            {content.author.name.trim().slice(0, 1)}
-          </span>
-        )}
-        <div>
-          <strong>{content.author.name}</strong>
-          {(primaryTime !== undefined || Boolean(content.metadataLabels?.length)) && (
-            <span>
-              {primaryTime !== undefined && (
-                <time title={timeTitle}>{formatDateTime(primaryTime)}</time>
-              )}
-              {primaryTime !== undefined && Boolean(content.metadataLabels?.length) && ' · '}
-              {content.metadataLabels?.join(' · ')}
+      {content.author !== false && (
+        <div className="author-row">
+          {content.author.avatar ? (
+            <img className="avatar" src={content.author.avatar} alt="" />
+          ) : (
+            <span className="avatar avatar-fallback" aria-hidden="true">
+              {content.author.name.trim().slice(0, 1)}
             </span>
           )}
+          <div>
+            <strong>{content.author.name}</strong>
+            {(primaryTime !== undefined || Boolean(content.metadataLabels?.length)) && (
+              <span>
+                {primaryTime !== undefined && (
+                  <time title={timeTitle}>{formatDateTime(primaryTime)}</time>
+                )}
+                {primaryTime !== undefined && Boolean(content.metadataLabels?.length) && ' · '}
+                {content.metadataLabels?.join(' · ')}
+              </span>
+            )}
+          </div>
+          {content.actionSlots?.author && (
+            <ActionBar
+              originalUrl={content.originalUrl}
+              metrics={content.actionSlots.author.metrics}
+              actions={content.actionSlots.author.actions}
+              onAction={handleAction}
+            />
+          )}
         </div>
-        {content.actionSlots?.author && (
-          <ActionBar
-            originalUrl={content.originalUrl}
-            metrics={content.actionSlots.author.metrics}
-            actions={content.actionSlots.author.actions}
-            onAction={handleAction}
-          />
-        )}
-      </div>
+      )}
 
       {/* 详情正文不复用 Feed Card 的预览折叠规则。 */}
       <div className="detail-body block-stack">
